@@ -1,0 +1,177 @@
+/* ── Drawer (menu overlay) ───────────────────────── */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: stretch;
+}
+
+.menu-overlay__backdrop {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+  appearance: none;
+}
+.app-shell.theme-light .menu-overlay__backdrop {
+  background: rgba(15, 31, 54, 0.3);
+}
+
+.menu-panel {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: min(20rem, 85vw);
+  height: 100%;
+  background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--glass-border);
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.3);
+  animation: menu-drawer-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes menu-drawer-in {
+  from { transform: translateX(-100%); opacity: 0.92; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.menu-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.menu-panel__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.menu-panel__close {
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  padding: 0 0.5rem;
+  font-size: 1rem;
+  border-radius: 999px;
+}
+
+.menu-panel__search {
+  padding: 0.65rem 0.85rem 0.35rem;
+  flex-shrink: 0;
+}
+.menu-search-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.875rem;
+}
+.menu-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+.menu-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.menu-section {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--text-main) 10%, transparent);
+}
+.menu-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.menu-section-title {
+  padding: 0 0.15rem 0.05rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.menu-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: var(--text-main);
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  min-height: 2.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  box-shadow: none;
+  letter-spacing: 0;
+}
+.menu-link:hover,
+.menu-link:focus-visible {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.menu-link--active {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 42%, transparent);
+  font-weight: 600;
+}
+.app-shell.theme-light .menu-link {
+  background: rgba(15, 31, 54, 0.03);
+}
+.app-shell.theme-light .menu-link:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.menu-panel__foot {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.menu-privacy-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 0;
+}
+

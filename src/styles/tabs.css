@@ -1,0 +1,33 @@
+/* ── Section tabs ────────────────────────────────── */
+.section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0 0 0.85rem;
+}
+.section-tab {
+  border: 1px solid var(--border-soft);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.38rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  box-shadow: none;
+}
+.section-tab:hover {
+  color: var(--text-main);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.section-tab--active {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+  color: var(--text-main);
+  font-weight: 600;
+}
+

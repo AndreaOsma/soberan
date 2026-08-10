@@ -1,0 +1,281 @@
+/* Presupuesto — mobile-first polish (≤720px, matches bottom nav breakpoint) */
+@media (max-width: 720px) {
+  .period-view-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .period-view-bar__action {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .period-view-toggle {
+    width: 100%;
+    display: flex;
+  }
+
+  .period-view-toggle__btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  /* Summary card */
+  .budget-summary-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .budget-summary-card__meta {
+    text-align: left;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
+    font-size: 0.8rem;
+  }
+
+  .budget-summary-card__meta > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .budget-summary-card__hero .button-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Banners */
+  .budget-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .budget-banner .inline-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .budget-banner .inline-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Group headers */
+  .budget-group-header-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .budget-group-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .budget-group-header__summary {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    padding-left: 1.15rem;
+  }
+
+  .budget-group-header__actions {
+    width: 100%;
+  }
+
+  .budget-group-header__actions > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Budget entry rows */
+  .list.budget-list > li {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.85rem 0.9rem;
+  }
+
+  .list.budget-list > li > span:first-child {
+    min-width: 0;
+    line-height: 1.35;
+  }
+
+  .list.budget-list > li > span:first-child small {
+    display: block;
+    margin-left: 0 !important;
+    margin-top: 0.2rem;
+  }
+
+  .list.budget-list .inline-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .list.budget-list .inline-actions > .muted {
+    width: 100%;
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .budget-amount-btn,
+  .budget-amount-input {
+    min-height: 2.5rem;
+    min-width: 5.5rem;
+  }
+
+  /* Annual view — card per month instead of horizontal scroll */
+  .budget-annual__head-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .budget-annual__period {
+    justify-content: center;
+  }
+
+  .budget-annual__totals {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.65rem;
+  }
+
+  .budget-annual__totals > div,
+  .budget-annual__totals-breakdown {
+    padding: 0.35rem 0.45rem;
+  }
+
+  .budget-annual-table__scroll {
+    overflow-x: visible;
+  }
+
+  .budget-annual-table__head {
+    display: none;
+  }
+
+  .budget-annual-table__block {
+    margin-bottom: 0.55rem;
+  }
+
+  .budget-annual-table__row {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.65rem;
+    background: color-mix(in srgb, var(--surface) 72%, transparent);
+  }
+
+  .budget-annual-table__block--open .budget-annual-table__row {
+    border-radius: 0.65rem 0.65rem 0 0;
+    border-bottom: none;
+  }
+
+  .budget-annual-table__col--mes {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .budget-annual-table__month {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+
+  .budget-annual-table__month-btn {
+    font-size: 0.95rem;
+  }
+
+  .budget-annual-table__bar {
+    display: none;
+  }
+
+  .budget-annual-table__edit {
+    margin-left: 0;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.4rem;
+  }
+
+  .budget-annual-table__row > .budget-annual-table__col--num {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-soft) 65%, transparent);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .budget-annual-table__row > .budget-annual-table__col--num:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .budget-annual-table__row > .budget-annual-table__col--num::before {
+    flex: 1;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: normal;
+  }
+
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(2)::before { content: "Ingresos"; }
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(3)::before { content: "Fondos"; }
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(4)::before { content: "Gastos planificados"; }
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(5)::before { content: "Suscripciones"; }
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(6)::before { content: "Deudas"; }
+  .budget-annual-table__row > .budget-annual-table__col--num:nth-child(7)::before { content: "Ahorro neto"; }
+
+  .budget-annual-table__detail {
+    grid-template-columns: 1fr;
+    border-radius: 0 0 0.65rem 0.65rem;
+  }
+
+  .budget-annual-table__detail-item {
+    grid-template-columns: 1fr auto;
+  }
+
+  .budget-annual-table__detail-item-dots {
+    display: none;
+  }
+
+  .budget-annual-table__toggle-all {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .budget-summary-card__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-annual__totals {
+    grid-template-columns: 1fr;
+  }
+}

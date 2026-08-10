@@ -1,0 +1,23 @@
+[Unit]
+Description=Soberan dedicated sync server (native clients push/pull)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=soberan
+Group=soberan
+WorkingDirectory=/opt/soberan
+EnvironmentFile=-/etc/soberan/sync-server.env
+Environment=SOBERAN_SYNC_ENV_FILE=/etc/soberan/sync-server.env
+ExecStart=/opt/soberan/deploy/scripts/run-sync-server.sh
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/soberan/sync-server
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,260 @@
+/* ════════════════════════════════════════════════════
+   MOBILE LAYOUT — vistas densas (≤720 / ≤480)
+   ════════════════════════════════════════════════════ */
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.list-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.list-filters > input,
+.list-filters > select {
+  min-width: 0;
+}
+
+.kpi-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .cal-grid--compact .cal-day {
+    min-height: 1.6rem;
+    aspect-ratio: auto;
+    padding: 0.1rem;
+  }
+
+  .budget-annual-table {
+    --annual-cols: minmax(4.25rem, 0.85fr) repeat(6, minmax(3.15rem, 1fr));
+  }
+
+  .budget-annual-table__head,
+  .budget-annual-table__row {
+    min-width: 26rem;
+    gap: 0.25rem;
+  }
+
+  .budget-annual-table__head {
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+  }
+
+  .budget-annual__totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .budget-gauge {
+    min-width: min(100%, 10rem);
+  }
+
+  .content-toolbar__period {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .content-toolbar__period select,
+  .content-toolbar__period .period-select,
+  .content-toolbar__period .period-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .section-tabs {
+    scroll-padding-inline: 0.75rem;
+    gap: 0.3rem;
+  }
+
+  .section-tab {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .inicio-status-popover {
+    min-width: 0;
+    width: min(280px, calc(100vw - 1.5rem));
+  }
+
+  .csv-export-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+
+  .modal-actions button {
+    min-width: min(100%, 8rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .cashflow-week {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .cashflow-week-label,
+  .cashflow-week-amount {
+    min-width: 0;
+  }
+
+  .cashflow-week-label {
+    flex: 1 1 auto;
+  }
+
+  .cashflow-week-amount {
+    margin-left: auto;
+  }
+
+  .cashflow-week-bar {
+    flex: 1 1 100%;
+    order: 3;
+  }
+
+  .sankey-bar-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.25rem 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  .sankey-bar-row > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .inicio-proj-table__head,
+  .inicio-proj-table__row {
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0.25rem;
+  }
+
+  .inicio-proj-table__head span:nth-child(n+3),
+  .inicio-proj-table__row span:nth-child(n+3) {
+    display: none;
+  }
+
+  .inicio-proj-table--with-cash .inicio-proj-table__head,
+  .inicio-proj-table--with-cash .inicio-proj-table__row {
+    grid-template-columns: 1fr 1.1fr;
+  }
+
+  .budget-gauge {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .budget-gauges-panel__grid {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .budget-summary-card__value {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+
+  .budget-group-header-wrap {
+    flex-wrap: wrap;
+  }
+
+  .budget-group-header {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .budget-group-header__summary {
+    max-width: 100%;
+  }
+
+  .inv-item__main {
+    flex-wrap: wrap;
+  }
+
+  .inv-item__nums {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .inv-cartera-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .evol-row {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .evol-row__label,
+  .evol-row__val {
+    min-width: 0;
+  }
+
+  .evol-row__label {
+    flex: 1 1 auto;
+  }
+
+  .evol-row__val {
+    margin-left: auto;
+  }
+
+  .evol-row__bar-wrap {
+    flex: 1 1 100%;
+    order: 3;
+  }
+
+  .list-filters > input,
+  .list-filters > select,
+  .list-filters > button {
+    flex: 1 1 100%;
+  }
+
+  .period-label {
+    min-width: 0;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cal-config-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .debt-scenario-meta {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+  }
+
+  .alerts-popover {
+    right: 0;
+    left: auto;
+    width: min(320px, calc(100vw - 1rem));
+    max-width: calc(100vw - 1rem);
+  }
+}
+

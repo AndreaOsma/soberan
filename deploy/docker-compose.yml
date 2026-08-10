@@ -1,0 +1,41 @@
+# Self-hosted stack: single all-in-one image (SPA + API + SQLite).
+# From this directory:
+#
+#   cp .env.example .env   # optional: SOBERAN_HTTP_PORT, SOBERAN_API_KEY, …
+#   docker compose up -d --build
+#
+# Open http://127.0.0.1:${SOBERAN_HTTP_PORT:-8080}/
+
+services:
+  soberan:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ${SOBERAN_IMAGE:-soberan:local}
+    ports:
+      - "${SOBERAN_HTTP_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: sqlite:////data/soberan.db
+      SOBERAN_STATIC_DIR: /app/static
+      PORT: "8080"
+      SOBERAN_API_KEY: ${SOBERAN_API_KEY:-}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - soberan_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/', timeout=3).getcode()==200 else 1)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+
+volumes:
+  soberan_data:
