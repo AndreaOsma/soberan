@@ -4,9 +4,21 @@ Gestor financiero personal en español: presupuesto, patrimonio, deudas, calenda
 
 - **Backend:** FastAPI (Python 3.11) + SQLAlchemy + Alembic  
 - **Frontend:** Vite + React + TypeScript  
-- **Sin login en la app:** self-host detrás de tu proxy/SSO si quieres; en Windows todo es local en tu PC.
+- **Sin login en la app:** self-host detrás de tu proxy/SSO si quieres; en Windows/Android todo es local en tu dispositivo.
 - **Código y releases:** [github.com/AndreaOsma/soberan](https://github.com/AndreaOsma/soberan)
 - **Docker Hub:** [andreaosma/soberan](https://hub.docker.com/r/andreaosma/soberan)
+
+---
+
+## 📥 Descarga rápida
+
+| | Plataforma | |
+|:---:|---|---|
+| 🪟 | **Windows** | [**Descargar instalador**](https://github.com/AndreaOsma/soberan/releases/latest) — `SoberanSetup-x.y.z.exe` |
+| 🤖 | **Android** | [**Descargar APK**](https://github.com/AndreaOsma/soberan/releases/latest) — `Soberan-x.y.z.apk` |
+| 🐳 | **Docker / self-host** | `docker run --rm -p 8080:8080 -v soberan_data:/data andreaosma/soberan:latest` |
+
+Detalle de cada camino (datos, actualizaciones, requisitos) más abajo ↓
 
 ---
 
@@ -14,13 +26,15 @@ Gestor financiero personal en español: presupuesto, patrimonio, deudas, calenda
 
 | Camino | Para quién | Datos |
 |--------|------------|--------|
-| [Windows (instalador)](#descargar-windows) | Uso diario sin Docker | SQLite en `%LOCALAPPDATA%\Soberan\` |
-| [Docker / self-host](#self-hosted-docker) | Servidor / self-host | SQLite en volumen Docker |
-| [Desarrollo](#desarrollo) | Cambiar código | SQLite local |
+| [🪟 Windows (instalador)](#descargar-windows) | Uso diario sin Docker | SQLite en `%LOCALAPPDATA%\Soberan\` |
+| [🤖 Android (APK)](#descargar-android) | Uso diario en el móvil | SQLite local en el dispositivo |
+| [🐳 Docker / self-host](#self-hosted-docker) | Servidor / self-host | SQLite en volumen Docker |
+| [🛠️ Desarrollo](#desarrollo) | Cambiar código | SQLite local |
 
 ---
 
-## Descargar (Windows)
+<a id="descargar-windows"></a>
+## 🪟 Descargar (Windows)
 
 Instalador: **[Releases → última versión](https://github.com/AndreaOsma/soberan/releases/latest)** (tag `v*`, p. ej. `v0.2.0`)
 
@@ -34,7 +48,21 @@ Guía completa (backup, Ollama, rutas): **[docs/desktop-windows.md](docs/desktop
 
 ---
 
-## Self-hosted (Docker)
+<a id="descargar-android"></a>
+## 🤖 Descargar (Android)
+
+APK: **[Releases → última versión](https://github.com/AndreaOsma/soberan/releases/latest)** (tag `v*`, p. ej. `v0.2.0`)
+
+1. Descarga `Soberan-x.y.z.apk` desde el móvil (o pásalo por cable/Drive).
+2. Ábrelo — Android pedirá permiso para instalar desde este origen la primera vez (**Ajustes → Instalar apps desconocidas**, actívalo solo para el navegador/gestor de archivos que uses).
+3. Instala y abre **Soberan**. Datos guardados localmente en el dispositivo.
+
+No requiere Google Play ni cuenta — es instalación directa (sideload) del mismo APK firmado que genera cada release.
+
+---
+
+<a id="self-hosted-docker"></a>
+## 🐳 Self-hosted (Docker)
 
 Imagen en Docker Hub: **[andreaosma/soberan](https://hub.docker.com/r/andreaosma/soberan)** (SPA + API en un solo contenedor, puerto **8080**).
 
@@ -57,7 +85,7 @@ Detalle: **[docs/DOCKER.md](docs/DOCKER.md)**. Producción / iCal / Ollama: **[d
 
 ### Variables de entorno
 
-Compose **usa de verdad** (desde `deploy/.env`):
+Variables que Compose lee de `deploy/.env`:
 
 | Variable | Rol |
 |----------|-----|
@@ -71,7 +99,8 @@ Ollama (chat): configurable en **Ajustes → Asistente**, o con `OLLAMA_BASE_URL
 
 ---
 
-## Desarrollo
+<a id="desarrollo"></a>
+## 🛠️ Desarrollo
 
 ### Frontend (hot reload)
 

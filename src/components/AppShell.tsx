@@ -291,6 +291,16 @@ export function AppShell({
           <small>
             v{APP_VERSION} • Built with Vite
           </small>
+          <small>
+            <a
+              href="https://buymeacoffee.com/andreaosma"
+              className="site-footer__link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ☕ Invítame a un café
+            </a>
+          </small>
         </footer>
       </section>
 
