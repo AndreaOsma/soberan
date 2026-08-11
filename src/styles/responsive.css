@@ -1,0 +1,637 @@
+/* ── Mobile improvements ────────────────────────── */
+@media (max-width: 768px) {
+  .inicio-kpis {
+    flex-wrap: wrap;
+    gap: 0.75rem 0;
+  }
+  .inicio-kpi--sep { display: none; }
+  .inicio-kpi {
+    flex: 1 1 calc(50% - 0.75rem);
+    min-width: 0;
+  }
+  .inicio-kpi__value {
+    font-size: clamp(0.95rem, 4.5vw, 1.25rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .inicio-panels {
+    flex-direction: column;
+  }
+  .inicio-shortcuts {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .inicio-shortcut {
+    padding: 0.75rem;
+  }
+  .inv-summary__kpis {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .inv-summary__sep { display: none; }
+  .sankey-bar-row { grid-template-columns: 6rem 1fr auto; }
+  .sankey-bar-val { min-width: 4rem; }
+}
+
+
+/* ── 768 px: tablet / large phone ───────────────── */
+@media (max-width: 768px) {
+  /* Bottom-sheet modals */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal-panel,
+  .modal-content {
+    max-width: 100% !important;
+    width: 100%;
+    border-radius: 1.5rem 1.5rem 0 0;
+    border-bottom: none;
+    max-height: 88dvh;
+    padding: 1.25rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    animation: slideUpSheet 0.28s ease-out;
+  }
+  @keyframes slideUpSheet {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Collapse two-col grids inside modals & forms */
+  .modal-panel .grid.two-col,
+  .modal-content .grid.two-col {
+    grid-template-columns: 1fr;
+  }
+  /* Two-col elsewhere still collapses via earlier rule */
+
+  /* Touch-friendly buttons */
+  button, .button-secondary {
+    min-height: 2.5rem;
+  }
+  .inline-actions button,
+  .inline-actions .button-secondary {
+    min-height: 2.2rem;
+    min-width: 2.2rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  /* modal-actions: stretch buttons side-by-side */
+  .modal-actions button {
+    flex: 1;
+  }
+
+  /* Topbar: hide brand — page title is enough */
+  .topbar-brand {
+    display: none;
+  }
+
+  /* Period controls: compact */
+  .period-label {
+    min-width: 90px;
+    font-size: 0.82rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* List items: label takes remaining space, actions wrap if needed */
+  .list li > span:first-child,
+  .list li > div:first-child {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Inline-actions: allow wrap and stay right-aligned */
+  .inline-actions {
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+  }
+
+  /* Card padding tighter */
+  .card {
+    padding: 0.9rem 0.85rem;
+  }
+
+  /* Tables: scroll only when needed; avoid forcing wide empty tables */
+  .table-wrap,
+  .table-responsive,
+  .debt-schedule-table-wrap,
+  .budget-annual-table__scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Section tabs: horizontal scroll instead of wrap */
+  .section-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.65rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+  }
+  .section-tabs::-webkit-scrollbar { display: none; }
+
+  /* Two-col grids inside content that use auto-fit: tighten min */
+  .two-col {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+
+  /* Content grid: tighter gap */
+  .grid {
+    gap: 0.85rem;
+  }
+
+  /* List items: wrap so budget/action rows don't crush */
+  .list li,
+  .goals-list li {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+}
+
+/* ── 480 px: small phone ─────────────────────────── */
+@media (max-width: 480px) {
+  :root {
+    --ui-font: 15px;
+  }
+
+  .content {
+    padding: 0.65rem 0.6rem;
+    gap: 0.75rem;
+  }
+
+  /* Topbar: very compact */
+  .topbar {
+    padding: 0.4rem 0.6rem;
+  }
+  .topbar-center {
+    max-width: 36vw;
+  }
+  .topbar-title {
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-end {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    max-width: 52vw;
+  }
+
+  /* Toolbar: stack vertically */
+  .content-toolbar {
+    padding: 0.5rem 0.65rem;
+    gap: 0.4rem;
+  }
+  .content-toolbar__period {
+    gap: 0.25rem;
+  }
+  .content-toolbar__period button,
+  .content-toolbar__period select {
+    font-size: 0.8rem;
+  }
+
+  /* Modal: full viewport height on very small screens */
+  .modal-panel,
+  .modal-content {
+    max-height: 93dvh;
+    padding: 1rem 0.85rem 1.75rem;
+  }
+  .modal-title {
+    font-size: 0.95rem;
+  }
+
+  /* KPI grid: min 2 cols even small */
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  }
+
+  /* Smart-links grid: 1 col */
+  .smart-links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Budget 50/30/20 gauges: 1 col */
+  /* (inline styles use flex+wrap — already wraps) */
+
+  /* List items: wrap earlier so budget rows don't crush */
+  .list li,
+  .goals-list li {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  /* Buttons: larger tap targets */
+  button, .button-secondary {
+    min-height: 2.6rem;
+    font-size: 0.875rem;
+  }
+  .danger {
+    min-height: 2.2rem;
+  }
+  .topbar-icon-btn { min-height: unset; }
+
+  /* Chat widget: full-width panel */
+  .chat-panel {
+    right: 0;
+    left: 0;
+    width: 100%;
+    bottom: 0;
+    border-radius: 1rem 1rem 0 0;
+    height: min(480px, 65dvh);
+  }
+  .chat-fab {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  /* Sankey bar: tighter */
+  .sankey-bar-row {
+    grid-template-columns: 5.5rem 1fr auto;
+    font-size: 0.78rem;
+  }
+
+  /* Month-row cards: already single col at 640px */
+}
+
+button:focus-visible,
+.section-tab:focus-visible,
+.density-toggle__trigger:focus-visible,
+.density-toggle__option:focus-visible,
+.appearance-toggle__btn:focus-visible,
+.appearance-toggle__trigger:focus-visible,
+.modal-close:focus-visible,
+.topbar-icon-btn:focus-visible,
+.toast-close:focus-visible,
+.toast-action:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.density-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 40;
+}
+.density-toggle__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.4rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.9;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: none;
+}
+.density-toggle__trigger:hover,
+.density-toggle.is-open .density-toggle__trigger,
+.density-toggle:focus-within .density-toggle__trigger {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  transform: none;
+  filter: none;
+}
+.density-toggle__trigger-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.density-toggle__trigger-label {
+  letter-spacing: 0.01em;
+}
+.density-toggle__menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 11.5rem;
+  padding: 0.35rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.85rem;
+  background: var(--glass-panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 28px color-mix(in srgb, #000 14%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-0.35rem) scale(0.96);
+  transform-origin: top right;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+}
+.density-toggle__menu::before {
+  content: "";
+  position: absolute;
+  top: -0.45rem;
+  left: 0;
+  right: 0;
+  height: 0.45rem;
+}
+.density-toggle:hover .density-toggle__menu,
+.density-toggle:focus-within .density-toggle__menu,
+.density-toggle.is-open .density-toggle__menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.density-toggle__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.15s ease;
+}
+.density-toggle__option:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.density-toggle__option.is-active {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.density-toggle__option-icon {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  margin-top: 0.05rem;
+}
+.density-toggle__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.density-toggle__option-label {
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.density-toggle__option-hint {
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
+.density-minimal .card {
+  padding: 0.875rem 1rem;
+}
+
+.density-minimal .list li {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.density-minimal .debt-schedule-table th,
+.density-minimal .debt-schedule-table td {
+  padding: 0.3rem 0.4rem;
+}
+
+.density-minimal .budget-list li {
+  gap: 0.35rem;
+}
+
+.density-detailed {
+  --ui-font: 16px;
+}
+
+.density-detailed .card {
+  padding: 1.65rem;
+}
+
+.density-detailed .list li,
+.density-detailed .budget-list li {
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.density-detailed .section-tab {
+  font-size: 0.88rem;
+  padding: 0.42rem 0.9rem;
+}
+
+@media (min-width: 1200px) {
+  .budget-annual__totals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .budget-annual-table__detail {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+}
+
+.warn-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--text-main);
+  font-size: 0.875rem;
+}
+
+.menu-panel__search {
+  padding: 0 0.75rem 0.5rem;
+}
+
+.loading-pulse {
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg, rgba(148,163,184,0.12)) 25%, rgba(148,163,184,0.22) 50%, var(--glass-bg, rgba(148,163,184,0.12)) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+  height: 5.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-row {
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.view-skeleton {
+  padding: 0.25rem 0 1rem;
+}
+
+.site-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--glass-border, rgba(148, 163, 184, 0.25));
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: var(--text-muted, #64748b);
+  font-size: 0.78rem;
+}
+
+.site-footer__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.site-footer__link:hover {
+  color: var(--text-main);
+  text-decoration-color: currentColor;
+}
+
+.onboarding-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.onboarding-card {
+  width: min(640px, 100%);
+  padding: 1.75rem;
+}
+
+.onboarding-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.onboarding-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.72rem;
+}
+
+.onboarding-step {
+  opacity: 0.45;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--glass-bg, rgba(148, 163, 184, 0.12));
+}
+
+.onboarding-step.is-active {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.onboarding-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.onboarding-field--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.onboarding-ollama-test {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.onboarding-form {
+  margin-top: 0.75rem;
+}
+
+.onboarding-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.onboarding-actions--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.onboarding-checklist {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.onboarding-welcome-lights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.onboarding-welcome-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--dot-color) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dot-color) 30%, transparent);
+}
+
+.onboarding-welcome-light__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--dot-color);
+}
+
+.onboarding-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+

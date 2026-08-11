@@ -1,0 +1,40 @@
+/* ── Login screen ─────────────────────────────────── */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 60% 30%, #1e3a8a22, transparent),
+              radial-gradient(circle at 20% 80%, #6366f122, transparent),
+              var(--bg, #f8fafc);
+}
+
+.login-card {
+  background: var(--glass-bg, rgba(255,255,255,0.6));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.4));
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+
+.login-card form {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+

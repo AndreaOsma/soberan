@@ -1,0 +1,112 @@
+/* ── Toast notifications ──────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+body.chat-open .toast-container {
+  bottom: calc(1.5rem + 4.5rem);
+}
+
+@media (max-width: 640px) {
+  body.chat-open .toast-container {
+    bottom: calc(1.5rem + 50vh);
+  }
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 260px;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.15);
+  animation: toast-in 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.toast-success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #065f46;
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #7f1d1d;
+}
+
+.theme-dark .toast-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.theme-dark .toast-error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.toast-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.6;
+  font-size: 1rem;
+  padding: 0;
+  color: inherit;
+}
+
+.toast-close:hover { opacity: 1; }
+
+.toast-info {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #3730a3;
+}
+
+.theme-dark .toast-info {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-action {
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.toast-action:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+

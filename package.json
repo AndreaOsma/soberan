@@ -1,0 +1,38 @@
+{
+  "name": "soberan",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.app.json && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 8501",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:icons": "bash deploy/scripts/generate-android-icons.sh",
+    "android:emulator": "bash deploy/scripts/build-android-emulator.sh",
+    "android:open": "npx cap open android",
+    "android:sync:remote": "CAP_REMOTE_URL=${CAP_REMOTE_URL:-https://soberan.andreaosma.com/} npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.8"
+  }
+}

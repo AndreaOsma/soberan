@@ -1,0 +1,197 @@
+.cal-year {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.cal-year-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.cal-year-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--glass-bg) 88%, transparent);
+}
+.cal-year-summary span {
+  font-size: 0.72rem;
+}
+.cal-year-summary strong {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.cal-year-month {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.65rem 0.7rem 0.55rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.cal-year-month:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--glass-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 8%, transparent);
+  transform: translateY(-1px);
+}
+.cal-year-month:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  outline-offset: 2px;
+}
+.cal-year-month--current {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--glass-border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.cal-year-month__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.cal-year-month__name {
+  font-size: 0.92rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.cal-year-month__figures {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-left: auto;
+  min-width: 0;
+}
+.cal-year-month__outflow,
+.cal-year-month__net {
+  font-size: 0.78rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cal-year-month__outflow {
+  opacity: 0.95;
+}
+.cal-year-mini {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.12rem;
+}
+.cal-year-mini__wd {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0.45;
+  padding-bottom: 0.1rem;
+  text-transform: uppercase;
+}
+.cal-year-mini__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.08rem;
+  min-height: 1.55rem;
+  padding: 0.12rem 0.05rem 0.08rem;
+  border-radius: 0.35rem;
+}
+.cal-year-mini__cell--empty {
+  min-height: 0;
+  padding: 0;
+}
+.cal-year-mini__cell--busy {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.cal-year-mini__cell--today {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.cal-year-mini__num {
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+.cal-year-mini__cell--busy .cal-year-mini__num {
+  opacity: 1;
+}
+.cal-year-mini__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 0.28rem;
+}
+.cal-year-mini__dot {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+}
+.cal-year-mini__dot--ingreso { background: var(--status-ok); }
+.cal-year-mini__dot--suscripcion { background: var(--status-sub); }
+.cal-year-mini__dot--deuda { background: var(--status-warn); }
+.cal-year-mini__dot--gasto { background: var(--status-crit); }
+
+@media (max-width: 900px) {
+  .cal-year-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .cal-year-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cal-year-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+  .cal-year-month {
+    padding: 0.55rem 0.5rem 0.45rem;
+  }
+  .cal-year-month__name {
+    font-size: 0.82rem;
+  }
+  .cal-year-month__outflow,
+  .cal-year-month__net {
+    font-size: 0.7rem;
+  }
+  .cal-year-month__figures {
+    gap: 0.3rem;
+  }
+}
+@media (max-width: 420px) {
+  .cal-year-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cal-grid--compact { gap: 0.15rem; }
+.cal-grid--compact .cal-weekday { font-size: 0.62rem; padding: 0.1rem; }
+.cal-day--compact { min-height: 42px !important; padding: 0.15rem 0.1rem !important; }
+.cal-day--compact .cal-day-num { font-size: 0.62rem; }
+.cal-day--compact .cal-event-chip { font-size: 0.58rem; padding: 0.08rem 0.15rem; }
+.cal-day--compact .cal-event-chip__amount { display: none; }
+

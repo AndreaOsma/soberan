@@ -1,0 +1,7 @@
+# Ghost findings from third-party / PEP 770 SBOMs inside the python:*-slim / pip
+# layers. Trivy reports them under a bare "Python" target even though:
+# - setuptools METADATA in the image is >=83 (CVE-2025-47273 fixed in 78.1.1+)
+# - msgpack is not installed as an application dependency
+# Keep until base images stop shipping stale SBOM pins, or Trivy stops double-counting them.
+CVE-2025-47273
+GHSA-6v7p-g79w-8964
