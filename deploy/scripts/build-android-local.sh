@@ -26,11 +26,16 @@ rsync -a --delete \
   --exclude node_modules \
   "$ROOT/" "$STAGING/"
 
-# build-android-ci.sh es compartido entre apps (dev/lib/native-packaging), no vive en este
-# repo — se copia al staging para que quede disponible dentro del volumen Docker.
+# dev/lib/native-packaging es compartido entre apps, no vive en este repo — se copia entero
+# al staging (no solo build-android-ci.sh: si mobile/chaquopy-app.gradle existe, también
+# necesita los wheels nativos vendorizados ahí, ver el propio build-android-ci.sh).
 mkdir -p "$STAGING/deploy/scripts"
-cp "${HOMELAB:?export HOMELAB=/ruta/al/checkout de Homelab}/dev/lib/native-packaging/build-android-ci.sh" \
-  "$STAGING/deploy/scripts/build-android-ci.sh"
+NATIVE_PACKAGING="${HOMELAB:?export HOMELAB=/ruta/al/checkout de Homelab}/dev/lib/native-packaging"
+cp "$NATIVE_PACKAGING/build-android-ci.sh" "$STAGING/deploy/scripts/build-android-ci.sh"
+if [[ -f "$ROOT/mobile/chaquopy-app.gradle" ]]; then
+  mkdir -p "$STAGING/mobile/native-packaging"
+  cp "$NATIVE_PACKAGING"/*.whl "$STAGING/mobile/native-packaging/" 2>/dev/null || true
+fi
 
 docker volume create "$WS_VOL" >/dev/null
 docker volume create "$GRADLE_VOL" >/dev/null
@@ -44,7 +49,7 @@ if ! docker run --rm --platform linux/amd64 -v "$WS_VOL":/project "$IMAGE" test 
     "$IMAGE" bash -lc 'mkdir -p /project && tar -xf - -C /project'
 else
   echo "==> Updating changed web assets in workspace..."
-  COPYFILE_DISABLE=1 tar -cC "$STAGING" dist capacitor.config.ts package.json package-lock.json deploy 2>/dev/null | docker run --rm -i --platform linux/amd64 \
+  COPYFILE_DISABLE=1 tar -cC "$STAGING" dist capacitor.config.ts package.json package-lock.json deploy mobile 2>/dev/null | docker run --rm -i --platform linux/amd64 \
     -v "$WS_VOL":/project \
     "$IMAGE" bash -lc 'tar -xf - -C /project'
 fi

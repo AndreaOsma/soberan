@@ -25,6 +25,10 @@ backend/build/
 backend/.venv-desktop/
 packaging/out/
 android/
+# Staged/copied at build time by build-android-ci.sh from dev/lib/native-packaging/
+# (homelab monorepo) — not this repo's source of truth, see mobile/chaquopy-app.gradle.
+mobile/wheels/
+mobile/native-packaging/
 .vite/
 dist/
 *.db

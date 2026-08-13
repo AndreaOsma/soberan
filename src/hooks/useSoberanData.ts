@@ -191,23 +191,12 @@ export function useSoberanData({
     year,
   ]);
 
-  const hasExistingAppData =
-    accounts.length > 0 ||
-    transactions.length > 0 ||
-    recurringEntries.length > 0 ||
-    debts.length > 0 ||
-    debtInstallments.length > 0 ||
-    goals.length > 0 ||
-    investments.length > 0 ||
-    properties.length > 0 ||
-    workHistory.length > 0 ||
-    cards.length > 0 ||
-    moneyOwed.length > 0 ||
-    wishlist.length > 0;
-
   const onboardingDone = isOnboardingMarkedDone(settings);
-  const onboardingRequired =
-    bootstrapped && coreDataLoaded && !error && !onboardingDone && !hasExistingAppData;
+  // onboarding_done (backend setting or local flag) is the only source of truth — it used to
+  // also skip onboarding whenever any data already existed, which meant a fresh install that
+  // happened to have leftover/seeded data (e.g. on-device SQLite surviving a reinstall) landed
+  // straight on Inicio without the wizard ever running, instead of at onboarding like it should.
+  const onboardingRequired = bootstrapped && coreDataLoaded && !error && !onboardingDone;
 
   const loadSettings = useCallback(async () => {
     const keys = [
@@ -337,6 +326,8 @@ export function useSoberanData({
     setTransactions(txData);
   }, []);
 
+  const lastLoadOk = useRef(false);
+
   const loadAll = useCallback(
     async (opts?: { silent?: boolean }) => {
       const keepScroll = Boolean(opts?.silent);
@@ -355,6 +346,7 @@ export function useSoberanData({
           setError(first instanceof Error ? first.message : "No se pudo cargar la aplicación.");
         }
       } finally {
+        lastLoadOk.current = coreOk;
         setCoreDataLoaded(coreOk);
         setBootstrapped(true);
         if (!opts?.silent) setLoading(false);
@@ -400,7 +392,23 @@ export function useSoberanData({
   useEffect(() => {
     if (!initialLoadDone.current) {
       initialLoadDone.current = true;
-      void loadAll();
+      void (async () => {
+        // The embedded on-device backend (Android/Chaquopy) can take several seconds to
+        // finish starting — native asset extraction + Alembic migrations run before uvicorn
+        // ever binds its port — so the very first load can legitimately race ahead of it
+        // being ready. Retry silently for a while instead of surfacing a permanent "Failed
+        // to fetch" that also blocks onboarding from ever showing (it requires
+        // coreDataLoaded with no error).
+        const MAX_ATTEMPTS = 10;
+        const RETRY_DELAY_MS = 1500;
+        setLoading(true);
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+          await loadAll({ silent: true });
+          if (lastLoadOk.current || attempt === MAX_ATTEMPTS) break;
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        }
+        setLoading(false);
+      })();
       return;
     }
     setMonthRefreshing(true);
@@ -427,15 +435,8 @@ export function useSoberanData({
     if (readOnboardingDoneLocal()) {
       setSettings((prev) => ({ ...prev, onboarding_done: "true" }));
       void api.setSetting("onboarding_done", "true").catch(() => {});
-      return;
     }
-
-    if (!hasExistingAppData) return;
-
-    persistOnboardingDoneLocal();
-    setSettings((prev) => ({ ...prev, onboarding_done: "true" }));
-    void api.setSetting("onboarding_done", "true").catch(() => {});
-  }, [bootstrapped, hasExistingAppData, settings.onboarding_done]);
+  }, [bootstrapped, settings.onboarding_done]);
 
   // Soft-refresh bank accounts after GoCardless import (off critical path)
   useEffect(() => {
@@ -591,7 +592,6 @@ export function useSoberanData({
     monthlyTransactions,
     activeSalary,
     totals,
-    hasExistingAppData,
     onboardingDone,
     onboardingRequired,
     loadAll,

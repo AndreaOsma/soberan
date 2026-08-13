@@ -299,7 +299,7 @@ export function WorkHistoryPanel({
                       }
                     }, existing ? "Partida actualizada." : "Partida añadida al presupuesto.", "No se pudo sincronizar la nómina.");
                   }}>
-                  Sync al presupuesto
+                  Sincronizar con presupuesto
                 </button>
               </div>
             </article>

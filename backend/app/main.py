@@ -230,7 +230,7 @@ cors_origins = os.getenv(
     "CORS_ALLOW_ORIGINS",
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8501,http://127.0.0.1:8501,http://localhost:8080,http://127.0.0.1:8080",
 )
-if is_desktop_mode():
+if is_desktop_mode() and "CORS_ALLOW_ORIGINS" not in os.environ:
     port = os.getenv("SOBERAN_PORT", str(DESKTOP_PORT))
     host = os.getenv("SOBERAN_HOST", DESKTOP_HOST)
     cors_origins = f"http://{host}:{port},http://127.0.0.1:{port}"

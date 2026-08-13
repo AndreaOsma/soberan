@@ -1,0 +1,20 @@
+# Android bundle (Chaquopy, embedded on-device) — SQLite only (no PostgreSQL driver).
+fastapi==0.140.1
+starlette==1.3.1
+uvicorn==0.34.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+python-dotenv==1.0.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-multipart==0.0.30
+# requirements.txt pins 2.2.3; Chaquopy's own package index has no prebuilt Android wheel
+# for it (would need a from-source meson/Cython cross-compile) but does for 2.1.3
+# (cp311/api24/arm64-v8a) — see dev/lib/native-packaging/build-chaquopy-rust-wheel.sh.
+pandas==2.1.3
+icalendar==6.1.0
+requests==2.32.3
+pypdf==6.14.2
+beautifulsoup4==4.12.3
+platformdirs==4.3.6
+httpx==0.28.1

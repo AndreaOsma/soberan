@@ -26,7 +26,7 @@ export function DataToolsView({ settings, tableCounts, addToast, loadAll, saveSe
   );
   const [selectedImportTable, setSelectedImportTable] = useState<CsvTableId>("transactions");
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [restoreText, setRestoreText] = useState("");
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
   const { busy, notifyAfter } = useNotify({ addToast, loadAll });
 
   const importable = CSV_TABLES.filter((t) => t.importable);
@@ -69,19 +69,19 @@ export function DataToolsView({ settings, tableCounts, addToast, loadAll, saveSe
           </button>
         </div>
         <label style={{ marginTop: "1rem" }}>
-          Restaurar desde JSON
-          <textarea
-            rows={6}
-            value={restoreText}
-            onChange={(e) => setRestoreText(e.target.value)}
-            placeholder="Pega aquí el JSON exportado."
+          Restaurar desde archivo
+          <input
+            type="file"
+            accept=".json,application/json"
+            onChange={(e) => setRestoreFile(e.target.files?.[0] ?? null)}
           />
         </label>
         <button
           type="button"
-          disabled={busy || !restoreText.trim()}
+          disabled={busy || !restoreFile}
           onClick={() => void notifyAfter(async () => {
-            const parsed = JSON.parse(restoreText) as { settings?: Record<string, string> };
+            if (!restoreFile) throw new Error("Selecciona un archivo de backup primero.");
+            const parsed = JSON.parse(await restoreFile.text()) as { settings?: Record<string, string> };
             const settingsPayload = parsed.settings || {};
             for (const [key, value] of Object.entries(settingsPayload)) {
               await api.setSetting(key, String(value));

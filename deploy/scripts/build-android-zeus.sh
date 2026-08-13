@@ -36,10 +36,17 @@ rsync -az --delete \
   --exclude packaging/out \
   "$ROOT/" "${REMOTE_HOST}:${REMOTE_DIR}/"
 
-# build-android-ci.sh es compartido entre apps (dev/lib/native-packaging), no vive en este
-# repo — se copia al remoto para que quede disponible dentro del árbol sincronizado.
-scp -q "${HOMELAB:?export HOMELAB=/ruta/al/checkout de Homelab}/dev/lib/native-packaging/build-android-ci.sh" \
-  "${REMOTE_HOST}:${REMOTE_DIR}/deploy/scripts/build-android-ci.sh"
+# dev/lib/native-packaging es compartido entre apps, no vive en este repo — se copia entero
+# al remoto (no solo build-android-ci.sh: si mobile/chaquopy-app.gradle existe, también
+# necesita los wheels nativos vendorizados ahí, ver el propio build-android-ci.sh).
+NATIVE_PACKAGING="${HOMELAB:?export HOMELAB=/ruta/al/checkout de Homelab}/dev/lib/native-packaging"
+scp -q "$NATIVE_PACKAGING/build-android-ci.sh" "${REMOTE_HOST}:${REMOTE_DIR}/deploy/scripts/build-android-ci.sh"
+if [[ -f "$ROOT/mobile/chaquopy-app.gradle" ]]; then
+  ssh "$REMOTE_HOST" "mkdir -p '$REMOTE_DIR/mobile/native-packaging'"
+  if compgen -G "$NATIVE_PACKAGING"/*.whl >/dev/null 2>&1; then
+    scp -q "$NATIVE_PACKAGING"/*.whl "${REMOTE_HOST}:${REMOTE_DIR}/mobile/native-packaging/"
+  fi
+fi
 
 echo "==> Building APK on zeus (native amd64)"
 ssh "$REMOTE_HOST" bash -s <<EOF
@@ -56,7 +63,7 @@ if ! docker run --rm -v "$WS_VOL":/project "$IMAGE" test -d /project/android; th
     "$IMAGE" bash -lc 'mkdir -p /project && tar -xf - -C /project'
 else
   echo "Updating web assets in workspace..."
-  tar -cC "$REMOTE_DIR" dist assets deploy/android-launcher-res deploy/android-debug-res capacitor.config.ts package.json package-lock.json deploy | docker run --rm -i \
+  tar -cC "$REMOTE_DIR" dist assets deploy/android-launcher-res deploy/android-debug-res capacitor.config.ts package.json package-lock.json deploy mobile | docker run --rm -i \
     -v "$WS_VOL":/project \
     "$IMAGE" bash -lc 'tar -xf - -C /project'
 fi

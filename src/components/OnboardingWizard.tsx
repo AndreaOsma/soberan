@@ -191,7 +191,7 @@ export function OnboardingWizard({
               </span>
             </div>
             <p className="muted" style={{ fontSize: "0.78rem", marginTop: "0.4rem" }}>
-              Así de simple se ve tu estado financiero en Inicio: software libre de presupuesto personal.
+              Así de simple se ve tu estado financiero en Inicio.
             </p>
             <div className="onboarding-actions">
               <button type="button" onClick={() => setStep(1)}>Continuar</button>
@@ -217,7 +217,7 @@ export function OnboardingWizard({
           <>
             <h1>Tu primera cuenta</h1>
             <p className="muted">
-              Saldo actual de la cuenta. Inicio y los totales usan ese valor como punto de partida.
+              Indica el saldo actual de la cuenta: Inicio y los totales lo usan como punto de partida.
             </p>
             <div className="grid two-col onboarding-form">
               <label className="onboarding-field">
@@ -261,13 +261,13 @@ export function OnboardingWizard({
           <>
             <h1>Primer mes</h1>
             <p className="muted">
-              Para tener números reales en Presupuesto e Inicio: nómina, importación CSV, o la plantilla de partidas.
-              Después vienen perfil, apariencia y el chat (opcional).
+              Para ver números reales en Presupuesto e Inicio, elige una de estas tres vías. Después quedan el
+              perfil, la apariencia y el chat, que son opcionales.
             </p>
             <ul className="onboarding-checklist muted">
-              <li>Laboral: añade tu nómina y pulsa "Sync al presupuesto" para que cuente en Presupuesto</li>
-              <li>Gestión de datos: CSV (p. ej. ING o MyInvestor)</li>
-              <li>Presupuesto: plantilla 50/30/20 o copiar un mes anterior</li>
+              <li>Laboral: añade tu nómina y pulsa "Sincronizar con presupuesto" para que cuente en Presupuesto.</li>
+              <li>Gestión de datos: importa un CSV de tu banco (por ejemplo, ING o MyInvestor).</li>
+              <li>Presupuesto: usa la plantilla 50/30/20 o copia un mes anterior.</li>
             </ul>
             <div className="onboarding-actions onboarding-actions--stack">
               <button type="button" onClick={() => goToPrefs("laboral")}>
@@ -293,7 +293,17 @@ export function OnboardingWizard({
               Datos que usa Inicio para el fondo de emergencia y el objetivo de ahorro. Se pueden cambiar en Configuración.
             </p>
             <label className="onboarding-field">
-              Fecha de nacimiento
+              <span className="onboarding-field-label">
+                Fecha de nacimiento
+                <button
+                  type="button"
+                  className="onboarding-field-hint"
+                  title="Se usa para calcular tu jubilación estimada."
+                  aria-label="Para qué se usa la fecha de nacimiento"
+                >
+                  ?
+                </button>
+              </span>
               <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             </label>
             <label className="onboarding-field">
@@ -353,7 +363,8 @@ export function OnboardingWizard({
           <>
             <h1>Asistente (opcional)</h1>
             <p className="muted" style={{ marginTop: 0 }}>
-              Opcional: chat local vía Ollama. Desactivado = no aparece el botón flotante; el resto de la app no cambia.
+              Chat local vía Ollama, totalmente opcional. Si lo desactivas, no aparece el botón flotante y el resto
+              de la app sigue igual.
             </p>
             <label className="onboarding-field onboarding-field--row">
               <input
@@ -376,7 +387,8 @@ export function OnboardingWizard({
               />
             </label>
             <p className="muted" style={{ fontSize: "0.78rem", margin: "-0.5rem 0 0" }}>
-              Local típico: <code>http://127.0.0.1:11434</code>. Vacío = default del servidor.
+              Lo habitual en local es <code>http://127.0.0.1:11434</code>. Si lo dejas vacío, se usa el valor por
+              defecto del servidor.
             </p>
             <label className="onboarding-field">
               Modelo
@@ -389,7 +401,7 @@ export function OnboardingWizard({
               />
             </label>
             <p className="muted" style={{ fontSize: "0.78rem", margin: "-0.5rem 0 0" }}>
-              Vacío = <code>llama3:8b</code> (o el que tenga el servidor).
+              Si lo dejas vacío, se usa <code>llama3:8b</code> (o el modelo que tenga configurado el servidor).
             </p>
             <div className="onboarding-ollama-test">
               <button
