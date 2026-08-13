@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  Play Store feature graphic source (1024x500, PNG 24-bit sin alfa).
+  Para regenerar el PNG: abrir este archivo con Playwright/Chromium a
+  viewport 1024x500, deviceScaleFactor 1, y capturar screenshot con
+  omitBackground:false (así no lleva canal alfa, tal como exige Play Console).
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1024px;
+    height: 500px;
+    overflow: hidden;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  }
+  body {
+    position: relative;
+    background:
+      radial-gradient(circle at 82% 12%, rgba(96,165,250,0.32), transparent 55%),
+      radial-gradient(circle at 12% 105%, rgba(37,99,235,0.28), transparent 50%),
+      linear-gradient(135deg, #0c1a30 0%, #12274a 55%, #1c3760 100%);
+  }
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .content {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 46px;
+    padding: 0 96px;
+  }
+  .icon-wrap {
+    flex-shrink: 0;
+    padding: 10px;
+    border-radius: 58px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.02));
+    box-shadow: 0 28px 60px rgba(0,0,0,0.5);
+  }
+  .icon {
+    display: block;
+    width: 196px;
+    height: 196px;
+    border-radius: 46px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .brand {
+    font-size: 72px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .tagline {
+    font-size: 25px;
+    font-weight: 500;
+    color: #bed0ec;
+    max-width: 500px;
+    line-height: 1.4;
+  }
+  .lights {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .light {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px 8px 13px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.16);
+    font-size: 16px;
+    font-weight: 600;
+    color: #eaf1ff;
+    white-space: nowrap;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .dot.ok { background: #10b981; box-shadow: 0 0 10px #10b98188; }
+  .dot.warn { background: #f59e0b; box-shadow: 0 0 10px #f59e0b88; }
+  .dot.crit { background: #ef4444; box-shadow: 0 0 10px #ef444488; }
+</style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <div class="content">
+    <div class="icon-wrap"><img class="icon" src="../icon.png" /></div>
+    <div class="text">
+      <div class="brand">Soberan</div>
+      <div class="tagline">Presupuesto y patrimonio claros de un vistazo — sin hojas de cálculo.</div>
+      <div class="lights">
+        <span class="light"><span class="dot ok"></span>Vas bien</span>
+        <span class="light"><span class="dot warn"></span>Cuidado</span>
+        <span class="light"><span class="dot crit"></span>Hay que actuar</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

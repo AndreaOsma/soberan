@@ -1,0 +1,6 @@
+{
+  "shots": [
+    { "menu": "Resumen Ejecutivo", "label": "01-inicio", "waitMs": 1500 },
+    { "menu": "Presupuesto", "label": "02-presupuesto", "waitMs": 1500 }
+  ]
+}

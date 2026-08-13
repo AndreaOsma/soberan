@@ -43,4 +43,23 @@ android {
             }
         }
     }
+
+    buildTypes {
+        release {
+            // Safe with Capacitor + Chaquopy: both ship their own consumer ProGuard rules
+            // (node_modules/@capacitor/android/capacitor/proguard-rules.pro,
+            // Chaquopy's own generated android/app/build/python/proguard-rules.pro —
+            // auto-merged by AGP, nothing to wire up by hand). Verified end-to-end on a
+            // real emulator after enabling this, not just that it compiles — see the
+            // build-android-ci.sh commit this landed with.
+            minifyEnabled true
+            shrinkResources true
+            // Native debug symbols (Chaquopy's libpython/libchaquopy_java .so files) —
+            // without this, a native crash on a real device shows an unsymbolicated,
+            // undebuggable stack trace in Play Console/Android Vitals.
+            ndk {
+                debugSymbolLevel "SYMBOL_TABLE"
+            }
+        }
+    }
 }
