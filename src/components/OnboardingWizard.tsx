@@ -11,7 +11,6 @@ import { toDateOnly } from "../utils/format";
 
 type Props = {
   onComplete: (settingsPatch: Record<string, string>) => void;
-  onNavigateToData: () => void;
   onNavigateToLaboral: () => void;
   onCancel?: () => void;
   initialSettings?: Record<string, string>;
@@ -35,11 +34,10 @@ const EMERGENCY_PROFILES = [
   { value: "autonomo", label: "Autónomo/freelance — 12 meses" },
 ] as const;
 
-type AfterFinish = "laboral" | "data" | null;
+type AfterFinish = "laboral" | null;
 
 export function OnboardingWizard({
   onComplete,
-  onNavigateToData,
   onNavigateToLaboral,
   onCancel,
   initialSettings,
@@ -111,7 +109,6 @@ export function OnboardingWizard({
 
       onComplete(patch);
       if (afterFinish === "laboral") onNavigateToLaboral();
-      else if (afterFinish === "data") onNavigateToData();
     });
   }
 
@@ -172,6 +169,9 @@ export function OnboardingWizard({
         {step === 0 && (
           <>
             <h1>Bienvenido a Soberan</h1>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Presupuesto, patrimonio y deudas en un solo sitio. Tus datos, siempre tuyos.
+            </p>
             <p className="muted">
               En unos minutos vas a tener claro si tu mes va bien o mal, de un vistazo — sin fórmulas ni hojas de
               cálculo. Solo hace falta un par de datos: tu cuenta y lo básico de este mes.
@@ -261,23 +261,19 @@ export function OnboardingWizard({
           <>
             <h1>Primer mes</h1>
             <p className="muted">
-              Para ver números reales en Presupuesto e Inicio, elige una de estas tres vías. Después quedan el
+              Para ver números reales en Presupuesto e Inicio, elige una de estas dos vías. Después quedan el
               perfil, la apariencia y el chat, que son opcionales.
             </p>
             <ul className="onboarding-checklist muted">
               <li>Laboral: añade tu nómina y pulsa "Sincronizar con presupuesto" para que cuente en Presupuesto.</li>
-              <li>Gestión de datos: importa un CSV de tu banco (por ejemplo, ING o MyInvestor).</li>
-              <li>Presupuesto: usa la plantilla 50/30/20 o copia un mes anterior.</li>
+              <li>Presupuesto: usa la plantilla 50/30/20 o copia un mes anterior, para no partir de cero.</li>
             </ul>
             <div className="onboarding-actions onboarding-actions--stack">
               <button type="button" onClick={() => goToPrefs("laboral")}>
                 Configurar nómina (Laboral)
               </button>
-              <button type="button" className="button-secondary" onClick={() => goToPrefs("data")}>
-                Ir a importación CSV
-              </button>
               <button type="button" className="button-secondary" onClick={() => goToPrefs(null)}>
-                Continuar con preferencias
+                Saltar por ahora
               </button>
               <button type="button" className="button-secondary" onClick={() => setStep(2)}>
                 Atrás
@@ -307,7 +303,17 @@ export function OnboardingWizard({
               <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             </label>
             <label className="onboarding-field">
-              Estabilidad de ingresos (fondo de emergencia)
+              <span className="onboarding-field-label">
+                Estabilidad de ingresos (fondo de emergencia)
+                <button
+                  type="button"
+                  className="onboarding-field-hint"
+                  title="Cuanto menos estables sean tus ingresos, más meses de gastos te recomendamos tener ahorrados como colchón. Se usa para el aviso de fondo de emergencia en Inicio."
+                  aria-label="Para qué se usa la estabilidad de ingresos"
+                >
+                  ?
+                </button>
+              </span>
               <select value={emergencyProfile} onChange={(e) => setEmergencyProfile(e.target.value)}>
                 {EMERGENCY_PROFILES.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>

@@ -52,6 +52,13 @@ RUN pip install --no-cache-dir --upgrade pip "setuptools>=83" "wheel>=0.46.2" \
 
 COPY backend/ .
 
+# El bundle de la app de escritorio (desktop/static/index.html) no pinta nada en el
+# contenedor de API pura — si se cuela, resolve_static_dir() lo detecta y main.py
+# activa modo "sirvo una SPA" (ApiPrefixMiddleware + fallback a index.html en rutas
+# no encontradas), devolviendo HTML 200 en vez de 404/JSON para cualquier ruta que
+# no matchee exacto. Fuera de aquí; el target allinone monta su propio static aparte.
+RUN rm -rf desktop
+
 RUN chmod +x startup.sh
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

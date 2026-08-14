@@ -701,7 +701,6 @@ export default function App() {
             void loadAll({ silent: true });
             setManualOnboarding(false);
           }}
-          onNavigateToData={() => { setManualOnboarding(false); setCurrentMenu("Configuración"); }}
           onNavigateToLaboral={() => { setManualOnboarding(false); setCurrentMenu("Historial Laboral"); }}
         />
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
