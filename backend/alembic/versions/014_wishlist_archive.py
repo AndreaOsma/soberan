@@ -15,12 +15,18 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("wishlist_items") as batch_op:
-        batch_op.add_column(sa.Column("archivado", sa.Boolean(), nullable=False, server_default=sa.false()))
-        batch_op.add_column(sa.Column("recurring_entry_id", sa.Integer(), nullable=True))
-        batch_op.add_column(sa.Column("monto_real", sa.Float(), nullable=True))
-        batch_op.add_column(sa.Column("fecha_compra", sa.DateTime(), nullable=True))
-        batch_op.add_column(sa.Column("transaction_id", sa.Integer(), nullable=True))
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py's comment for
+    # the full explanation. Same CircularDependencyError here, against wishlist_items'
+    # two FKs (recurring_entry_id -> recurring_entries.id, transaction_id ->
+    # transactions.id): "Circular dependency detected. ('fecha_compra',
+    # 'recurring_entry_id', 'archivado', 'monto_real', 'transaction_id')". None of these
+    # columns need batch mode's table-recreate emulation — plain adds, no renames/type
+    # changes — so there's nothing to lose by skipping it.
+    op.add_column("wishlist_items", sa.Column("archivado", sa.Boolean(), nullable=False, server_default=sa.false()))
+    op.add_column("wishlist_items", sa.Column("recurring_entry_id", sa.Integer(), nullable=True))
+    op.add_column("wishlist_items", sa.Column("monto_real", sa.Float(), nullable=True))
+    op.add_column("wishlist_items", sa.Column("fecha_compra", sa.DateTime(), nullable=True))
+    op.add_column("wishlist_items", sa.Column("transaction_id", sa.Integer(), nullable=True))
 
     op.execute(
         """
@@ -32,9 +38,8 @@ def upgrade():
 
 
 def downgrade():
-    with op.batch_alter_table("wishlist_items") as batch_op:
-        batch_op.drop_column("transaction_id")
-        batch_op.drop_column("fecha_compra")
-        batch_op.drop_column("monto_real")
-        batch_op.drop_column("recurring_entry_id")
-        batch_op.drop_column("archivado")
+    op.drop_column("wishlist_items", "transaction_id")
+    op.drop_column("wishlist_items", "fecha_compra")
+    op.drop_column("wishlist_items", "monto_real")
+    op.drop_column("wishlist_items", "recurring_entry_id")
+    op.drop_column("wishlist_items", "archivado")

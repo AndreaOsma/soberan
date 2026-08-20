@@ -8,15 +8,18 @@ import { METHOD_SECTIONS } from "../content/methodGuide";
 import { AccentColorPicker } from "./AccentColorPicker";
 import { buildThemeFromAccent, resolveAccentFromSettings } from "../utils/accentTheme";
 import { toDateOnly } from "../utils/format";
+import { SyncOnboardingStep } from "../../../../lib/native-sync/frontend/SyncOnboardingStep";
 
 type Props = {
   onComplete: (settingsPatch: Record<string, string>) => void;
   onNavigateToLaboral: () => void;
   onCancel?: () => void;
   initialSettings?: Record<string, string>;
+  /** Client build (Windows/macOS/Android/iOS) — false on Docker, gates the "Sincronización" step. */
+  nativeSyncMode?: boolean;
 };
 
-const STEPS = [
+const BASE_STEPS = [
   "Bienvenida",
   "Cómo funciona",
   "Cuenta",
@@ -41,8 +44,10 @@ export function OnboardingWizard({
   onNavigateToLaboral,
   onCancel,
   initialSettings,
+  nativeSyncMode,
 }: Props) {
   const s = initialSettings ?? {};
+  const STEPS = nativeSyncMode ? [...BASE_STEPS, "Sincronización"] : BASE_STEPS;
   const [step, setStep] = useState(0);
   const [methodGuideOpen, setMethodGuideOpen] = useState(false);
   const [afterFinish, setAfterFinish] = useState<AfterFinish>(null);
@@ -81,29 +86,41 @@ export function OnboardingWizard({
     setStep(4);
   }
 
-  async function finish() {
+  async function finish(extra: Record<string, string> = {}, opts?: { skipDefaults?: boolean }) {
     await run(async () => {
-      const patch: Record<string, string> = {
-        onboarding_done: "true",
-        theme_accent: accent,
-        emergency_income_profile: emergencyProfile,
-        target_savings_pct: String(targetSavingsPct),
-        ui_font_px: String(fontPx),
-        chat_enabled: chatEnabled ? "1" : "0",
-        ollama_base_url: ollamaUrl.trim(),
-        ollama_model: ollamaModel.trim(),
-      };
-      if (birthDate) patch.birth_date = birthDate;
+      // skipDefaults: set by the sync step after a real connect+pull — the pulled data
+      // may already include the user's actual theme/profile/appearance settings, so
+      // overwriting them with this wizard's own local placeholder defaults would silently
+      // clobber what just came down.
+      const patch: Record<string, string> = opts?.skipDefaults
+        ? { onboarding_done: "true", ...extra }
+        : {
+            onboarding_done: "true",
+            theme_accent: accent,
+            emergency_income_profile: emergencyProfile,
+            target_savings_pct: String(targetSavingsPct),
+            ui_font_px: String(fontPx),
+            chat_enabled: chatEnabled ? "1" : "0",
+            ollama_base_url: ollamaUrl.trim(),
+            ollama_model: ollamaModel.trim(),
+            ...extra,
+          };
+      if (!opts?.skipDefaults && birthDate) patch.birth_date = birthDate;
 
       await Promise.all([
-        ...(birthDate ? [api.setSetting("birth_date", birthDate)] : []),
-        api.setSetting("theme_accent", accent),
-        api.setSetting("emergency_income_profile", emergencyProfile),
-        api.setSetting("target_savings_pct", String(targetSavingsPct)),
-        api.setSetting("ui_font_px", String(fontPx)),
-        api.setSetting("chat_enabled", chatEnabled ? "1" : "0"),
-        api.setSetting("ollama_base_url", ollamaUrl.trim()),
-        api.setSetting("ollama_model", ollamaModel.trim()),
+        ...Object.entries(extra).map(([key, value]) => api.setSetting(key, value)),
+        ...(opts?.skipDefaults
+          ? []
+          : [
+              ...(birthDate ? [api.setSetting("birth_date", birthDate)] : []),
+              api.setSetting("theme_accent", accent),
+              api.setSetting("emergency_income_profile", emergencyProfile),
+              api.setSetting("target_savings_pct", String(targetSavingsPct)),
+              api.setSetting("ui_font_px", String(fontPx)),
+              api.setSetting("chat_enabled", chatEnabled ? "1" : "0"),
+              api.setSetting("ollama_base_url", ollamaUrl.trim()),
+              api.setSetting("ollama_model", ollamaModel.trim()),
+            ]),
         api.setSetting("onboarding_done", "true"),
       ]);
 
@@ -163,6 +180,27 @@ export function OnboardingWizard({
             </button>
           )}
         </div>
+
+        {nativeSyncMode && step !== BASE_STEPS.length && (
+          <p className="muted" style={{ fontSize: "0.8rem", margin: "-0.3rem 0 0.6rem" }}>
+            ¿Ya tienes tus datos en la nube o en tu servidor?{" "}
+            <button
+              type="button"
+              style={{
+                font: "inherit",
+                color: "var(--primary)",
+                textDecoration: "underline",
+                padding: 0,
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+              }}
+              onClick={() => setStep(BASE_STEPS.length)}
+            >
+              Sincronizar y saltar el resto
+            </button>
+          </p>
+        )}
 
         <ModalFormError error={error} />
 
@@ -436,10 +474,33 @@ export function OnboardingWizard({
             </div>
             <div className="onboarding-actions">
               <button type="button" className="button-secondary" onClick={() => setStep(5)}>Atrás</button>
-              <button type="button" disabled={saving} onClick={() => void finish()}>
-                {saving ? "Guardando…" : "Empezar"}
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => (nativeSyncMode ? setStep(BASE_STEPS.length) : void finish())}
+              >
+                {nativeSyncMode ? "Continuar" : saving ? "Guardando…" : "Empezar"}
               </button>
             </div>
+          </>
+        )}
+
+        {step === BASE_STEPS.length && nativeSyncMode && (
+          <>
+            <h1>Sincronización (opcional)</h1>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Tus datos están solo en este dispositivo. Puedes conectar tu propia nube o tu propio servidor para
+              tenerlos también en otro sitio — o saltarte esto y seguir en local, se puede activar luego en
+              Configuración.
+            </p>
+            <SyncOnboardingStep
+              api={api}
+              nativeSyncMode={nativeSyncMode}
+              saveSetting={async (key, value) => { await api.setSetting(key, value); }}
+              onBack={() => setStep(6)}
+              onSkip={() => void finish()}
+              onDone={(patch, opts) => void finish(patch, opts)}
+            />
           </>
         )}
       </section>

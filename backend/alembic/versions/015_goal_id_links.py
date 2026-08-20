@@ -15,16 +15,13 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("debts") as batch_op:
-        batch_op.add_column(sa.Column("goal_id", sa.Integer(), nullable=True))
-
-    with op.batch_alter_table("recurring_entries") as batch_op:
-        batch_op.add_column(sa.Column("goal_id", sa.Integer(), nullable=True))
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py for the full
+    # explanation (CircularDependencyError from batch mode's table-recreate/reorder path,
+    # confirmed on a real on-device DB; plain adds don't need that path at all).
+    op.add_column("debts", sa.Column("goal_id", sa.Integer(), nullable=True))
+    op.add_column("recurring_entries", sa.Column("goal_id", sa.Integer(), nullable=True))
 
 
 def downgrade():
-    with op.batch_alter_table("recurring_entries") as batch_op:
-        batch_op.drop_column("goal_id")
-
-    with op.batch_alter_table("debts") as batch_op:
-        batch_op.drop_column("goal_id")
+    op.drop_column("recurring_entries", "goal_id")
+    op.drop_column("debts", "goal_id")

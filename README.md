@@ -4,7 +4,7 @@ Gestor financiero personal en español: presupuesto, patrimonio, deudas, calenda
 
 - **Backend:** FastAPI (Python 3.11) + SQLAlchemy + Alembic  
 - **Frontend:** Vite + React + TypeScript  
-- **Sin login en la app:** self-host detrás de tu proxy/SSO si quieres; en Windows/Android todo es local en tu dispositivo.
+- **Sin login en la app:** self-host detrás de tu proxy/SSO si quieres; en Windows/macOS/Android todo es local en tu dispositivo.
 - **Código y releases:** [github.com/AndreaOsma/soberan](https://github.com/AndreaOsma/soberan)
 - **Docker Hub:** [andreaosma/soberan](https://hub.docker.com/r/andreaosma/soberan)
 
@@ -15,6 +15,7 @@ Gestor financiero personal en español: presupuesto, patrimonio, deudas, calenda
 | | Plataforma | |
 |:---:|---|---|
 | 🪟 | **Windows** | [**Descargar instalador**](https://github.com/AndreaOsma/soberan/releases/latest) — `SoberanSetup-x.y.z.exe` |
+| 🍎 | **macOS** | [**Descargar instalador**](https://github.com/AndreaOsma/soberan/releases/latest) — `Soberan-x.y.z.dmg` (Apple Silicon) |
 | 🤖 | **Android** | [**Descargar APK**](https://github.com/AndreaOsma/soberan/releases/latest) — `Soberan-x.y.z.apk` |
 | 🐳 | **Docker / self-host** | `docker run --rm -p 8080:8080 -v soberan_data:/data andreaosma/soberan:latest` |
 
@@ -27,6 +28,7 @@ Detalle de cada camino (datos, actualizaciones, requisitos) más abajo ↓
 | Camino | Para quién | Datos |
 |--------|------------|--------|
 | [🪟 Windows (instalador)](#descargar-windows) | Uso diario sin Docker | SQLite en `%LOCALAPPDATA%\Soberan\` |
+| [🍎 macOS (instalador)](#descargar-macos) | Uso diario sin Docker | SQLite en `~/Library/Application Support/Soberan/` |
 | [🤖 Android (APK)](#descargar-android) | Uso diario en el móvil | SQLite local en el dispositivo |
 | [🐳 Docker / self-host](#self-hosted-docker) | Servidor / self-host | SQLite en volumen Docker |
 | [🛠️ Desarrollo](#desarrollo) | Cambiar código | SQLite local |
@@ -45,6 +47,23 @@ Instalador: **[Releases → última versión](https://github.com/AndreaOsma/sobe
 La app comprueba actualizaciones en **GitHub Releases** al iniciar (Ajustes → Windows), contra el último release publicado.
 
 Guía completa (backup, Ollama, rutas): **[docs/desktop-windows.md](docs/desktop-windows.md)**
+
+---
+
+<a id="descargar-macos"></a>
+## 🍎 Descargar (macOS)
+
+Instalador: **[Releases → última versión](https://github.com/AndreaOsma/soberan/releases/latest)** (tag `v*`, p. ej. `v0.2.0`), Apple Silicon (arm64)
+
+1. Descarga `Soberan-x.y.z.dmg`.
+2. Abre el `.dmg` y arrastra **Soberan** a Aplicaciones.
+3. Primer arranque: macOS avisa de "desarrollador no identificado" (sin firma de Apple) — clic derecho → Abrir, o `xattr -cr /Applications/Soberan.app`.
+4. Abre **Soberan** → navegador en `http://127.0.0.1:17890`.
+5. Datos en `~/Library/Application Support/Soberan/data/` — no hace falta internet para el día a día.
+
+La app comprueba actualizaciones en **GitHub Releases** al iniciar, contra el último release publicado.
+
+Guía completa (backup, Ollama, rutas, Gatekeeper): **[docs/desktop-macos.md](docs/desktop-macos.md)**
 
 ---
 
@@ -163,6 +182,14 @@ Sirve estáticos + API en modo `SOBERAN_DESKTOP=1` (puerto **17890**).
 
 El instalador se construye y se publica en [Releases](https://github.com/AndreaOsma/soberan/releases) como parte de `git-publish` (PyInstaller + Inno vía Docker) al publicar una versión — no hay CI aparte para esto.
 
+### Build del instalador macOS (opcional)
+
+```bash
+../../lib/native-packaging/build-desktop-mac-ci.sh 0.1.0
+```
+
+A diferencia del `.exe`, esto no puede cruzarse por Docker (PyInstaller solo genera un `.app` de macOS si corre en un Mac real), así que `git-publish` solo lo construye cuando se ejecuta desde un Mac.
+
 ---
 
 ## Primera vez en la app
@@ -226,6 +253,7 @@ Chat: opcional vía Ollama; si está offline o desactivado, el resto de la app s
 
 - **[docs/DOCKER.md](docs/DOCKER.md)** — self-host Docker (una imagen, SQLite)  
 - **[docs/desktop-windows.md](docs/desktop-windows.md)** — instalación Windows, datos, backup, actualizaciones, Ollama  
+- **[docs/desktop-macos.md](docs/desktop-macos.md)** — instalación macOS, datos, backup, actualizaciones, Gatekeeper  
 - **[docs/operations.md](docs/operations.md)** — iCal, backup/restore, Ollama, integraciones, PWA, API agente  
 
 ---

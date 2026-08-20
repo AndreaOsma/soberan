@@ -15,18 +15,15 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("transactions") as batch_op:
-        batch_op.add_column(sa.Column("es_interna", sa.Boolean(), nullable=False, server_default=sa.false()))
-        batch_op.add_column(sa.Column("transfer_pair_id", sa.Integer(), nullable=True))
-        batch_op.add_column(sa.Column("es_pending", sa.Boolean(), nullable=False, server_default=sa.false()))
-    with op.batch_alter_table("accounts") as batch_op:
-        batch_op.add_column(sa.Column("last_sync_error", sa.String(), nullable=True))
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py.
+    op.add_column("transactions", sa.Column("es_interna", sa.Boolean(), nullable=False, server_default=sa.false()))
+    op.add_column("transactions", sa.Column("transfer_pair_id", sa.Integer(), nullable=True))
+    op.add_column("transactions", sa.Column("es_pending", sa.Boolean(), nullable=False, server_default=sa.false()))
+    op.add_column("accounts", sa.Column("last_sync_error", sa.String(), nullable=True))
 
 
 def downgrade():
-    with op.batch_alter_table("accounts") as batch_op:
-        batch_op.drop_column("last_sync_error")
-    with op.batch_alter_table("transactions") as batch_op:
-        batch_op.drop_column("es_pending")
-        batch_op.drop_column("transfer_pair_id")
-        batch_op.drop_column("es_interna")
+    op.drop_column("accounts", "last_sync_error")
+    op.drop_column("transactions", "es_pending")
+    op.drop_column("transactions", "transfer_pair_id")
+    op.drop_column("transactions", "es_interna")

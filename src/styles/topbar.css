@@ -1,18 +1,38 @@
 /* ── Topbar ──────────────────────────────────────── */
 .topbar {
-  position: sticky;
+  /* `fixed`, not `sticky`: a sticky element is pinned to its scroll CONTAINER, so
+     WKWebView's elastic rubber-band bounce at the scroll edges drags it along for the
+     ride — that's the "header moves/wobbles while scrolling" bug. `fixed` pins to the
+     viewport instead, which the bounce can't touch by construction (overscroll-behavior
+     alone wasn't enough — this removes the whole bug class, not just the common case).
+     `.content`'s padding-top (content.css) compensates for the space this no longer
+     occupies in normal flow. */
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  min-height: 3.2rem;
   z-index: 80;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 1rem;
+  padding: calc(0.6rem + env(safe-area-inset-top, 0px)) 1rem 0.6rem;
   background: var(--surface);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--glass-border);
   box-shadow: var(--shadow-soft);
+  /* Forces its own GPU compositing layer, isolated from the scrolling document below it.
+     `position: fixed` alone still visibly lagged/dragged during an active scroll gesture
+     on a real device (reported after the fixed/sticky switch above, previously assumed
+     to be the whole fix) — a live-blurred backdrop-filter recomputed every scroll frame
+     is expensive enough to fall behind the compositor without this, reading as "the
+     header moves". translateZ(0) is a no-op transform that exists purely to trigger
+     layer promotion. */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
 .topbar-start {

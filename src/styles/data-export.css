@@ -27,14 +27,14 @@
   gap: 0.5rem;
 }
 .csv-export-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: 0.15rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   padding: 0.5rem 0.65rem;
   border-radius: 0.45rem;
   border: 1px solid var(--border-soft);
   background: var(--glass-bg, transparent);
+  cursor: pointer;
 }
 .csv-export-item.is-selected {
   border-color: color-mix(in srgb, var(--primary, #2563eb) 35%, var(--border-soft));
@@ -44,19 +44,9 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
-  cursor: pointer;
-  grid-column: 1;
 }
 .csv-export-item__meta {
-  grid-column: 1;
   font-size: 0.72rem;
   padding-left: 1.35rem;
-}
-.csv-export-item__btn {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
-  font-size: 0.75rem !important;
-  padding: 0.25rem 0.5rem !important;
 }
 

@@ -35,7 +35,12 @@ export const FloatingSidebar: React.FC<FloatingSidebarProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && focusSearch) {
+    // Autofocusing the search input on a narrow/touch viewport pops the on-screen
+    // keyboard immediately on open, which WKWebView/Chrome resize the visual viewport
+    // around — the exact "screen moves when I open the menu" jump. Desktop-width opens
+    // (mouse-driven, no keyboard to pop) keep the instant-search convenience.
+    const isTouchViewport = document.documentElement.classList.contains("touch-viewport");
+    if (isOpen && focusSearch && !isTouchViewport) {
       searchRef.current?.focus();
     }
   }, [isOpen, focusSearch]);

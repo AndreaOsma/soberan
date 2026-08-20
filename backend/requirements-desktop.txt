@@ -1,4 +1,10 @@
-# Desktop Windows bundle — SQLite only (no PostgreSQL driver).
+# Desktop bundle (Windows + macOS) — SQLite only (no PostgreSQL driver).
+# backports.tarfile: PyInstaller's pkg_resources runtime hook pulls in setuptools'
+# vendored jaraco.context, which imports backports.tarfile on Python < 3.12 (tarfile
+# got data_filter natively in 3.12). Without it the frozen app crashes on every launch
+# with "No module named 'backports'" — found by actually running the packaged macOS
+# .app (Python 3.11), not just building it. Harmless if the Windows build's Python is
+# already >= 3.12 — this branch just never triggers there.
 fastapi==0.140.1
 starlette==1.3.1
 uvicorn==0.34.0
@@ -8,11 +14,15 @@ python-dotenv==1.0.1
 pydantic==2.10.3
 pydantic-settings==2.6.1
 python-multipart==0.0.30
-pandas==2.2.3
 icalendar==6.1.0
 requests==2.32.3
 pypdf==6.14.2
 beautifulsoup4==4.12.3
 platformdirs==4.3.6
 httpx==0.28.1
+backports.tarfile==1.2.0
 pyinstaller==6.11.1
+# Native window instead of opening the system browser — desktop_launcher.py. Pulls in
+# PyObjC (Cocoa/WebKit) on macOS automatically; on Windows it uses the system's
+# WebView2 runtime instead, no extra PyObjC-style dependency needed there.
+pywebview==6.2.1

@@ -75,10 +75,22 @@ export function parseApiJsonBody<T>(raw: string, status: number): T {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-    ...init
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+      ...init
+    });
+  } catch {
+    // fetch() itself rejects on network-level failures (connection refused, DNS, TLS...)
+    // — before there's even an HTTP response to parse. The browser's own message for this
+    // ("Load failed" on Safari/WebKit, "Failed to fetch" on Chrome) is raw English and
+    // reads like a real bug to a Spanish-speaking end user. The single most common real
+    // cause here: the embedded on-device backend (iOS/Android) hasn't finished starting
+    // yet — a transient condition callers already retry around (useSoberanData's initial
+    // retry loop) — so this should read as "still connecting", not "broken".
+    throw new Error("No se pudo conectar con el servidor. Reintentando…");
+  }
 
   const raw = await response.text();
 
@@ -513,6 +525,11 @@ export const api = {
       google_connected?: boolean;
       custom_server_configured?: boolean;
       custom_url?: string;
+      // Only present when connected to a private server with the proxy-with-offline-
+      // cache design (dev/lib/native-sync/backend/sync_proxy_middleware.py) — reflects
+      // the cached reachability flag and the local write queue awaiting replay.
+      custom_server_reachable?: boolean;
+      pending_ops?: number;
     }>("/sync/status"),
   startGoogleDeviceAuth: () =>
     request<{ status: string; verification_url?: string; user_code?: string; expires_in?: number }>(

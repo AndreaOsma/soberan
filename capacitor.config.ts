@@ -10,12 +10,26 @@ const emulatorMode = process.env.SOBERAN_ANDROID_EMULATOR === "1";
 // that's mixed content, blocked by default without this.
 const apiIsCleartext = (process.env.VITE_API_BASE_URL || "").startsWith("http://");
 
+// WKWebView/Android's native WebView both default to a black background before any CSS
+// has painted — a well-documented Capacitor gotcha, not something either OS does for a
+// normal browser tab. Without this, every cold start (and every slow one, since Soberan's
+// embedded backend can take a few seconds) shows solid black instead of the app's own
+// light background (:root's `background: #f8fafc` in base.css) until React mounts.
+const backgroundColor = "#f8fafc";
+
 const config: CapacitorConfig = {
   appId,
   appName,
   webDir: "dist",
+  backgroundColor,
   android: {
     allowMixedContent: remoteUrl.startsWith("http://") || emulatorMode || apiIsCleartext,
+    backgroundColor,
+  },
+  ios: {
+    contentInset: "automatic",
+    useSwiftPackageManager: true,
+    backgroundColor,
   },
   server: remoteUrl
     ? {

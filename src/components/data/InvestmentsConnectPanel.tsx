@@ -23,7 +23,6 @@ type Props = {
   formatEUR: (v: number) => string;
   addToast: (msg: string, type: "success" | "error" | "info") => void;
   loadAll: (opts?: { silent?: boolean }) => Promise<void>;
-  saveSetting: (key: string, val: string, notify?: boolean) => Promise<void>;
 };
 
 function isMyInvestorAccount(account: Account): boolean {
@@ -39,20 +38,14 @@ export function InvestmentsConnectPanel({
   formatEUR,
   addToast,
   loadAll,
-  saveSetting,
 }: Props) {
   const [bankOpen, setBankOpen] = useState(false);
-  const [krakenKey, setKrakenKey] = useState(settings.kraken_api_key || "");
-  const [krakenSecret, setKrakenSecret] = useState(settings.kraken_api_secret || "");
-  const [savingKraken, setSavingKraken] = useState(false);
   const [syncingKraken, setSyncingKraken] = useState(false);
   const [syncingMyInvestor, setSyncingMyInvestor] = useState(false);
   const [importingPdf, setImportingPdf] = useState(false);
-  const [editingKraken, setEditingKraken] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
-  const krakenConfigured = Boolean((settings.kraken_api_key || krakenKey).trim() && (settings.kraken_api_secret || krakenSecret).trim());
-  const showKrakenForm = !krakenConfigured || editingKraken;
+  const krakenConfigured = Boolean((settings.kraken_api_key || "").trim() && (settings.kraken_api_secret || "").trim());
   const krakenLive = krakenBalances.length > 0;
   const krakenTotal = krakenBalances.reduce((sum, row) => sum + (row.eur_value ?? 0), 0);
 
@@ -66,21 +59,6 @@ export function InvestmentsConnectPanel({
   );
   const myInvestorStale = myInvestorAccounts.some((account) => isBankSyncStale(account.last_sync_at));
   const lastPdfImport = settings.myinvestor_last_import_at;
-
-  async function saveKrakenKeys() {
-    setSavingKraken(true);
-    try {
-      await saveSetting("kraken_api_key", krakenKey.trim(), false);
-      await saveSetting("kraken_api_secret", krakenSecret.trim(), false);
-      setEditingKraken(false);
-      addToast("Credenciales Kraken guardadas.", "success");
-      await syncKrakenNow();
-    } catch {
-      addToast("No se pudieron guardar las credenciales Kraken.", "error");
-    } finally {
-      setSavingKraken(false);
-    }
-  }
 
   async function syncKrakenNow() {
     setSyncingKraken(true);
@@ -156,56 +134,16 @@ export function InvestmentsConnectPanel({
               )}
             </div>
 
-            {showKrakenForm ? (
-              <div className="grid one-col" style={{ gap: "0.5rem" }}>
-                <label style={{ fontSize: "0.82rem" }}>
-                  API Key
-                  <input
-                    type="password"
-                    autoComplete="off"
-                    value={krakenKey}
-                    onChange={(e) => setKrakenKey(e.target.value)}
-                    placeholder="Clave API Kraken (solo lectura)"
-                  />
-                </label>
-                <label style={{ fontSize: "0.82rem" }}>
-                  API Secret
-                  <input
-                    type="password"
-                    autoComplete="off"
-                    value={krakenSecret}
-                    onChange={(e) => setKrakenSecret(e.target.value)}
-                    placeholder="Secret"
-                  />
-                </label>
-                <div className="inline-actions">
-                  <button type="button" disabled={savingKraken || !krakenKey.trim() || !krakenSecret.trim()} onClick={() => void saveKrakenKeys()}>
-                    {savingKraken ? "Conectando…" : "Conectar Kraken"}
-                  </button>
-                  {editingKraken && (
-                    <button type="button" className="button-secondary" onClick={() => setEditingKraken(false)}>
-                      Cancelar
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
+            {krakenConfigured ? (
               <div className="inline-actions" style={{ flexWrap: "wrap" }}>
                 <button type="button" className="button-secondary" disabled={syncingKraken} onClick={() => void syncKrakenNow()}>
                   {syncingKraken ? "Sincronizando…" : "Sync ahora"}
                 </button>
-                <button
-                  type="button"
-                  className="button-secondary"
-                  onClick={() => {
-                    setKrakenKey(settings.kraken_api_key || "");
-                    setKrakenSecret(settings.kraken_api_secret || "");
-                    setEditingKraken(true);
-                  }}
-                >
-                  Cambiar claves
-                </button>
               </div>
+            ) : (
+              <p className="muted" style={{ fontSize: "0.8rem", margin: 0 }}>
+                Configura tu API Key/Secret de Kraken en Configuración → Integraciones.
+              </p>
             )}
           </section>
 

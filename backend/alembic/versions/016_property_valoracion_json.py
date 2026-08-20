@@ -15,10 +15,9 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("properties") as batch_op:
-        batch_op.add_column(sa.Column("valoracion_json", sa.Text(), nullable=True))
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py.
+    op.add_column("properties", sa.Column("valoracion_json", sa.Text(), nullable=True))
 
 
 def downgrade():
-    with op.batch_alter_table("properties") as batch_op:
-        batch_op.drop_column("valoracion_json")
+    op.drop_column("properties", "valoracion_json")

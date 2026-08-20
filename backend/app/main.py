@@ -66,26 +66,29 @@ def _alembic_schema_drift_error(exc: BaseException) -> bool:
     )
 
 
+# Hardcoded to the latest alembic/versions/*.py revision id, checked below BEFORE
+# importing any Alembic machinery. Embedded iOS/Android can't write .pyc into a signed
+# read-only app bundle (write_bytecode=0, see PythonRunner.m), so ScriptDirectory.from_
+# config() re-parsing and re-compiling all ~25 migration files from source — on every
+# single cold start, not just the one right after an update — was a major, measured
+# contributor to a 15-20s startup. The overwhelming common case (already at head) now
+# skips that entire import/parse chain via one cheap raw-SQL SELECT instead; anything
+# that doesn't match falls through to the full Alembic path unchanged below, including a
+# stale constant after adding a migration and forgetting to bump this — staleness only
+# costs performance, never correctness.
+_KNOWN_HEAD_REVISION = "025_proxy_response_cache"
+
+
 def run_alembic_upgrade() -> None:
     """Run Alembic upgrade head after create_all (handles schema evolution in production)."""
     db_url = os.getenv("DATABASE_URL", "")
     if not db_url or db_url.startswith("sqlite:///:memory:"):
         return
     try:
-        from alembic import command as alembic_command
-        from alembic.config import Config as AlembicConfig
-        from alembic.runtime.migration import MigrationContext
-        from alembic.script import ScriptDirectory
         from sqlalchemy import create_engine, text as sa_text
 
-        alembic_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        cfg = AlembicConfig(os.path.join(alembic_dir, "alembic.ini"))
-        cfg.set_main_option("sqlalchemy.url", db_url)
-        cfg.set_main_option("script_location", os.path.join(alembic_dir, "alembic"))
-        script = ScriptDirectory.from_config(cfg)
-        head = script.get_current_head()
-
         _eng = create_engine(db_url, poolclass=None)
+        fresh_schema = False
         try:
             with _eng.connect() as _c:
                 table_exists = bool(_c.execute(sa_text(
@@ -102,6 +105,9 @@ def run_alembic_upgrade() -> None:
                     table_exists,
                     current_rev,
                 )
+                if table_exists and current_rev == _KNOWN_HEAD_REVISION:
+                    logger.info("Alembic: already at known head — skipped full migration scan")
+                    return
                 if not table_exists:
                     _c.execute(sa_text(
                         "CREATE TABLE alembic_version "
@@ -109,11 +115,41 @@ def run_alembic_upgrade() -> None:
                         "CONSTRAINT alembic_version_pkc PRIMARY KEY)"
                     ))
                     _c.commit()
+                    fresh_schema = True
                 elif not current_rev:
                     # Tables from create_all without a stamp: do not force 001 (blocks real upgrades).
                     logger.info("Alembic: empty alembic_version — upgrade will run from base")
         finally:
             _eng.dispose()
+
+        from alembic import command as alembic_command
+        from alembic.config import Config as AlembicConfig
+        from alembic.runtime.migration import MigrationContext
+        from alembic.script import ScriptDirectory
+
+        alembic_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cfg = AlembicConfig(os.path.join(alembic_dir, "alembic.ini"))
+        cfg.set_main_option("sqlalchemy.url", db_url)
+        cfg.set_main_option("script_location", os.path.join(alembic_dir, "alembic"))
+        script = ScriptDirectory.from_config(cfg)
+        head = script.get_current_head()
+
+        if fresh_schema:
+            # create_all() (just above, in main.py) already built the complete current
+            # schema straight from the ORM models — walking the full migration history
+            # from base against a schema that's already current isn't just wasted work,
+            # it's actively counterproductive: nearly every table-creating migration
+            # collides with what create_all() already made, gets caught by the
+            # drift-recovery loop below as an "already exists" error, and gets re-stamped
+            # one revision at a time — ~10+ rounds of attempt/fail/catch/stamp instead of
+            # one. That churn is the dominant cost of a fresh install's backend startup
+            # (measured locally, and matches an on-device iOS log that got killed mid-chain
+            # before uvicorn ever started listening — see AGENTS.md, "iOS embebido").
+            # Stamping straight to head is the standard Alembic pattern for this exact
+            # create_all-then-alembic hybrid — there is no real DDL left to run.
+            alembic_command.stamp(cfg, "head")
+            logger.info("Alembic: fresh schema from create_all — stamped straight to head")
+            return
 
         max_drift_steps = 40
         for _ in range(max_drift_steps):
@@ -243,10 +279,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from .routers.sync_routes import DeviceApiAuthMiddleware  # noqa: E402
+
+# Proxy-with-offline-cache: only on native clients (desktop/mobile) — a self-hosted
+# Docker server has no "upstream" of its own. Starlette's add_middleware() makes the
+# LAST-added middleware the outermost (it runs first on the way in), so this has to be
+# added *before* ApiPrefixMiddleware below in order to run *after* it — this middleware's
+# blocked-prefix checks and forwarding assume the already-un-prefixed local path, the
+# same shape the local routers themselves receive.
+if is_desktop_mode():
+    from .routers.sync_routes import SyncProxyMiddleware, start_sync_reachability_task
+    app.add_middleware(SyncProxyMiddleware)
+
+    @app.on_event("startup")
+    async def _start_sync_reachability() -> None:
+        start_sync_reachability_task()
+
 _static_dir = resolve_static_dir()
 # Desktop and all-in-one Docker serve the SPA from the same process; strip /api like nginx.
 if is_desktop_mode() or _static_dir is not None:
     app.add_middleware(ApiPrefixMiddleware)
+
+# Device-api bypass: the other side of the proxy, this app acting as the server being
+# connected to. Registered unconditionally (see create_device_api_middleware's
+# docstring for why that's safe) and added last/outermost — a "/device/..." request
+# must be seen and stripped by this middleware before anything else touches the path.
+app.add_middleware(DeviceApiAuthMiddleware)
 
 include_routers(app)
 

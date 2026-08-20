@@ -134,33 +134,28 @@ export function DataToolsView({ settings, tableCounts, addToast, loadAll, saveSe
                 const count = tableCounts[table.id];
                 const checked = selectedExport.has(table.id);
                 return (
-                  <div key={table.id} className={`csv-export-item${checked ? " is-selected" : ""}`}>
-                    <label className="csv-export-item__check">
+                  <label
+                    key={table.id}
+                    className={`csv-export-item${checked ? " is-selected" : ""}`}
+                  >
+                    <span className="csv-export-item__check">
                       <input
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggleExport(table.id)}
                       />
                       <span>{table.label}</span>
-                    </label>
+                    </span>
                     <span className="csv-export-item__meta muted">
                       {count != null ? `${count.toLocaleString("es")} filas` : "—"}
                     </span>
-                    <button
-                      type="button"
-                      className="button-secondary csv-export-item__btn"
-                      disabled={busy}
-                      onClick={() => void notifyAfter(async () => {
-                        const blob = await api.exportCsv(table.id);
-                        triggerBlobDownload(blob, csvExportFilename(table.slug));
-                      }, `${table.label} exportado.`, `No se pudo exportar ${table.label}.`)}
-                    >
-                      CSV
-                    </button>
-                  </div>
+                  </label>
                 );
               })}
             </div>
+            <p className="muted" style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}>
+              Marca las tablas que quieras y usa "Exportar selección" arriba — no hace falta un botón por tabla.
+            </p>
 
             <hr style={{ margin: "1.25rem 0", border: "none", borderTop: "1px solid var(--border-soft)" }} />
 

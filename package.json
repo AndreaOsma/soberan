@@ -1,7 +1,7 @@
 {
   "name": "soberan",
   "private": true,
-  "version": "1.1.3",
+  "version": "1.1.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,7 @@
     "test": "vitest run",
     "android:sync": "npm run build && npx cap sync android",
     "android:icons": "bash deploy/scripts/generate-android-icons.sh",
-    "android:emulator": "bash deploy/scripts/build-android-emulator.sh",
+    "android:emulator": "bash deploy/scripts/build4-android-emulator.sh",
     "android:open": "npx cap open android",
     "android:sync:remote": "CAP_REMOTE_URL=${CAP_REMOTE_URL:-https://soberan.andreaosma.com/} npx cap sync android"
   },
@@ -19,6 +19,10 @@
     "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/status-bar": "^8.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

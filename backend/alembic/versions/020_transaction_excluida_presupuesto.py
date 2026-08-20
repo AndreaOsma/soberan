@@ -15,12 +15,12 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("transactions") as batch_op:
-        batch_op.add_column(
-            sa.Column("excluida_presupuesto", sa.Boolean(), nullable=False, server_default=sa.false())
-        )
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py.
+    op.add_column(
+        "transactions",
+        sa.Column("excluida_presupuesto", sa.Boolean(), nullable=False, server_default=sa.false()),
+    )
 
 
 def downgrade():
-    with op.batch_alter_table("transactions") as batch_op:
-        batch_op.drop_column("excluida_presupuesto")
+    op.drop_column("transactions", "excluida_presupuesto")

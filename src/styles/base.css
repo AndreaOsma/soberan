@@ -36,6 +36,14 @@
   --color-negative: var(--status-crit);
 }
 
+/* Consistent brand font across every OS (Docker/desktop-browser access) vs. actually
+   looking native on each OS are opposite goals — the native app (html.native-shell, set by
+   useNativeShellClass()) opts into the latter: real San Francisco on iOS, real Roboto on
+   Android, instead of Inter standing out as "not quite the OS font" on either. */
+:root.native-shell {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, Roboto, "Segoe UI", sans-serif;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -52,6 +60,48 @@
   box-sizing: border-box;
 }
 
+/* Removes the blue/gray flash Safari/WebKit paints on tap by default — mobile-nav.css
+   already did this locally for its own elements, this extends it to every interactive
+   control app-wide (buttons/links get a real :active style instead, see below). Native
+   apps don't have this artifact at all, so it's one of the more obvious "this is a
+   website" tells when it's missing. */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a,
+[role="button"] {
+  -webkit-touch-callout: none;
+}
+
+button:not(:disabled):active,
+a:active,
+[role="button"]:active {
+  opacity: 0.7;
+}
+
+html,
+body {
+  /* The document itself never scrolls — .content (content.css) does, independently.
+     Two CSS-only attempts at keeping .topbar/.site-footer visually still during a
+     scroll gesture (position: fixed, then GPU-layer promotion via translateZ(0)) both
+     turned out insufficient on a real device: WKWebView can still visibly lag a
+     viewport-fixed element behind the *document's own* momentum scroll, a known quirk
+     distinct from the rubber-band-bounce case overscroll-behavior handles below. Moving
+     the actual scrolling onto a nested overflow container sidesteps the quirk entirely
+     — fixed-position elements outside that container are never in the same paint/scroll
+     cycle to begin with, by construction rather than by fighting WebKit's timing. */
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior-y: none;
+}
+
 body {
   margin: 0;
   font-size: var(--ui-font);
@@ -59,14 +109,16 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   color: var(--text-main);
-  min-height: 100vh;
 }
 
 .app-shell {
   width: 100%;
   max-width: none;
   margin: 0;
-  min-height: 100vh;
+  /* Fixed to the (now non-scrolling, see html/body above) viewport height, not
+     min-height: 100vh growing with content — .content is the one element inside that's
+     allowed to overflow, and it does so in its own independent scroll box. */
+  height: 100dvh;
   padding: 0;
   background: linear-gradient(165deg, #eef4ff 0%, #f6fbff 60%, #e7f0ff 100%);
   background-attachment: fixed;

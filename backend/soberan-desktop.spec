@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for Soberan Windows desktop (folder bundle)."""
+"""PyInstaller spec for Soberan desktop (Windows folder bundle / macOS .app bundle)."""
 import os
+import sys
 from pathlib import Path
 
 backend = Path(SPECPATH)
@@ -80,3 +81,15 @@ coll = COLLECT(
     upx_exclude=[],
     name="Soberan",
 )
+
+# Only meaningful on macOS — wraps COLLECT's output into Soberan.app so it can be
+# dropped into a .dmg. Guarded explicitly (rather than relying on PyInstaller's own
+# platform check) so this spec keeps building the Windows folder bundle unchanged
+# when run under Wine (build-desktop-ci.sh, sys.platform there is "win32").
+if sys.platform == "darwin":
+    app = BUNDLE(
+        coll,
+        name="Soberan.app",
+        icon=None,
+        bundle_identifier="com.andreaosma.soberan",
+    )

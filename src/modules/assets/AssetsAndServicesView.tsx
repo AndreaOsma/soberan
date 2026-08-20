@@ -19,12 +19,11 @@ export type AssetsAndServicesViewProps = {
   addToast: (msg: string, type: "success" | "error" | "info") => void;
   loadAll: (opts?: { silent?: boolean }) => Promise<void>;
   deleteWithUndo: (label: string, onCommit: () => Promise<void>) => void;
-  saveSetting: (key: string, val: string, notify?: boolean) => Promise<void>;
 };
 
 export function AssetsAndServicesView({
   currentMenu, accounts, investments, properties, moneyOwed, cards, krakenBalances,
-  settings, formatEUR, addToast, loadAll, deleteWithUndo, saveSetting,
+  settings, formatEUR, addToast, loadAll, deleteWithUndo,
 }: AssetsAndServicesViewProps) {
   if (currentMenu === "Inversiones") {
     return (
@@ -37,7 +36,6 @@ export function AssetsAndServicesView({
         addToast={addToast}
         loadAll={loadAll}
         deleteWithUndo={deleteWithUndo}
-        saveSetting={saveSetting}
       />
     );
   }

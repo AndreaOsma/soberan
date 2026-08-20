@@ -1,0 +1,29 @@
+# iOS bundle (embedded CPython via Python.xcframework) — SQLite only (no PostgreSQL driver).
+# No PyInstaller (not part of the iOS embedding model at all) and no backports.tarfile pin
+# (that's only needed on Python < 3.12; Python-Apple-support ships 3.13).
+#
+# pydantic-core needs a prebuilt iOS wheel that doesn't exist on PyPI yet — see
+# dev/lib/native-packaging/build-ios-ci.sh, which expects it pre-built from source (Rust
+# cross-compiles to iOS cleanly, unlike numpy/pandas — see the feasibility spike this is
+# built on) in $SOBERAN_IOS_WHEELS_DIR. Pinned to exactly what pydantic 2.10.3 needs
+# (2.27.1) — building a mismatched version makes pip reject the local wheel and fall back
+# to a from-source build that fails without the same PYO3_CROSS_* env vars build-ios-ci.sh
+# doesn't export for this step. No numpy/pandas here: the backend doesn't need them once
+# csv_io.py/sync_bundle.py moved to stdlib csv (see that commit) — nothing in requirements-
+# ios.txt has a C/Rust extension without a compatible iOS wheel.
+fastapi==0.140.1
+starlette==1.3.1
+uvicorn==0.34.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+python-dotenv==1.0.1
+pydantic==2.10.3
+pydantic-core==2.27.1
+pydantic-settings==2.6.1
+python-multipart==0.0.30
+icalendar==6.1.0
+requests==2.32.3
+pypdf==6.14.2
+beautifulsoup4==4.12.3
+platformdirs==4.3.6
+httpx==0.28.1

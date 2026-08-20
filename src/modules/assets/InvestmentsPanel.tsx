@@ -19,12 +19,11 @@ export type InvestmentsPanelProps = {
   addToast: (msg: string, type: "success" | "error" | "info") => void;
   loadAll: (opts?: { silent?: boolean }) => Promise<void>;
   deleteWithUndo: (label: string, onCommit: () => Promise<void>) => void;
-  saveSetting: (key: string, val: string, notify?: boolean) => Promise<void>;
 };
 
 export function InvestmentsPanel({
   accounts, investments, settings, krakenBalances,
-  formatEUR, addToast, loadAll, deleteWithUndo, saveSetting,
+  formatEUR, addToast, loadAll, deleteWithUndo,
 }: InvestmentsPanelProps) {
   const [cryptoExpanded, setCryptoExpanded] = useState(false);
   const [showInvestmentForm, setShowInvestmentForm] = useState(false);
@@ -64,7 +63,6 @@ export function InvestmentsPanel({
           formatEUR={formatEUR}
           addToast={addToast}
           loadAll={loadAll}
-          saveSetting={saveSetting}
         />
         {investments.length > 0 && (
           <article className="card inv-summary">

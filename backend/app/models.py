@@ -1,5 +1,5 @@
 """SQLAlchemy ORM models for Soberan (accounts, transactions, goals, debts, payroll, etc.)."""
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Boolean
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Boolean, Text
 from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
@@ -291,3 +291,35 @@ class BankRequisition(Base):
     reference = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+
+class PendingSyncOp(Base):
+    """A local write that couldn't reach the connected private sync server yet.
+
+    Replayed in order once the server is reachable again, then followed by a full
+    import_bundle_replace pull rather than per-row merging (single-user app, so
+    "server wins on reconnect" is correct and avoids conflict resolution entirely).
+    """
+    __tablename__ = "pending_sync_ops"
+
+    id = Column(Integer, primary_key=True, index=True)
+    method = Column(String, nullable=False)
+    path = Column(String, nullable=False)
+    body = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ProxyResponseCache(Base):
+    """Last successful response body for a live-proxied GET (see SyncProxyMiddleware /
+    sync_proxy_middleware.py), keyed by path+query. Cold start otherwise has nothing to
+    show until the first proxied fetch resolves — every screen opened empty, then
+    silently repopulated once the network round-trip landed. Serving this cache instead
+    of the (permanently empty, in proxy mode) local tables while a fresh fetch is still
+    in flight means there's always *something* on screen, even if briefly stale.
+    """
+    __tablename__ = "proxy_response_cache"
+
+    id = Column(Integer, primary_key=True, index=True)
+    cache_key = Column(String, nullable=False, unique=True, index=True)
+    body = Column(Text, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

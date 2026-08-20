@@ -1,5 +1,14 @@
 /* ── Content area ────────────────────────────────── */
 .content {
+  /* The actual scroll container — html/body (base.css) lock document-level scroll
+     entirely so .topbar/.site-footer/.mobile-tab-bar (all position: fixed) are never in
+     the same scroll/paint cycle as whatever's moving, sidestepping a WKWebView quirk
+     where a viewport-fixed element can still visibly lag behind the *document's own*
+     momentum scroll on a real device — plain position: fixed and GPU-layer promotion
+     (translateZ(0)) both proved insufficient on their own. */
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -18,6 +27,25 @@
   .content {
     padding: 1.5rem 2.5rem;
   }
+}
+
+/* Compensates for .topbar switching from `sticky` to `fixed` (topbar.css) — a fixed
+   element leaves no space in normal flow, so without this .content would render *under*
+   it. Declared last (after the width breakpoints above) so it consistently overrides just
+   padding-top at every width instead of duplicating this calc() in three places. Must
+   track .topbar's actual rendered height: min-height 3.2rem + env(safe-area-inset-top) —
+   see the comment there for why that's the full height, not an approximation. */
+.content {
+  padding-top: calc(3.2rem + env(safe-area-inset-top, 0px) + 1.25rem);
+}
+
+/* Same pairing as the topbar compensation above, for .site-footer (responsive.css) now
+   also `fixed` — reserves room so content doesn't render *under* it. 4rem covers the
+   footer's tallest (2-line-wrap) case at the widths this rule applies to (≥721px, no
+   .mobile-tab-bar below it); mobile-nav.css overrides this again to also clear the tab
+   bar stacked underneath the footer there. */
+.content {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
 
 .content-toolbar {

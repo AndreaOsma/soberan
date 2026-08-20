@@ -22,9 +22,15 @@ backend/desktop/static/*
 backend/desktop/VERSION
 backend/dist/
 backend/build/
+# Staged copy of dev/lib/native-sync/backend/native_sync_router.py — only build
+# scripts/CI put this here (needed for Docker's build context, which can't reach
+# dev/lib directly); never hand-edit or commit it, it's the shared library.
+backend/native_sync_router.py
 backend/.venv-desktop/
+backend/.venv-desktop-mac/
 packaging/out/
 android/
+ios/
 # Staged/copied at build time by build-android-ci.sh from dev/lib/native-packaging/
 # (homelab monorepo) — not this repo's source of truth, see mobile/chaquopy-app.gradle.
 mobile/wheels/

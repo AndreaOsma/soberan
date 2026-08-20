@@ -46,6 +46,54 @@ export function isOnboardingMarkedDone(settings: Record<string, string>): boolea
   return settings.onboarding_done === "true" || readOnboardingDoneLocal();
 }
 
+// Client-side (WebView) mirror of the last successful fetch for every core/month
+// dataset + settings, hydrated synchronously into useState's lazy initializer below —
+// the very first render already has the last-known data instead of empty arrays that
+// silently fill in a beat later once the network round-trip (even a local one, to the
+// embedded backend) resolves. loadAll()/loadMonthData()/loadSettings() write through to
+// this on every successful fetch, so it's never more than one load cycle stale.
+const CACHE_PREFIX = "soberan-cache-v1:";
+
+function readCache<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key);
+    return raw !== null ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeCache(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+  } catch {
+    // Quota exceeded or localStorage unavailable (private mode) — caching is a nice-to-
+    // have for instant paint, never required for correctness, so this is silently skipped.
+  }
+}
+
+// Written once loadCoreData() has ever succeeded — checked synchronously (not via an
+// effect) to seed `loading`'s initial value below. Populating accounts/transactions/etc.
+// from cache alone wasn't enough: AppShell renders <ViewSkeleton> in place of real
+// content for as long as `loading` is true, and that used to start true unconditionally,
+// hiding the already-hydrated cached data behind a skeleton until the real network round
+// trip finished anyway — the exact "still slow to load" a second app open shouldn't be.
+function hasCachedSnapshot(): boolean {
+  try {
+    return localStorage.getItem(CACHE_PREFIX + "hasSnapshot") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markCachedSnapshot(): void {
+  try {
+    localStorage.setItem(CACHE_PREFIX + "hasSnapshot", "1");
+  } catch {
+    // best-effort, see writeCache
+  }
+}
+
 type AddToast = (
   message: string,
   type: "success" | "error" | "info",
@@ -65,39 +113,48 @@ export function useSoberanData({
   allocateToastId,
   pushToast,
 }: Options) {
-  const [loading, setLoading] = useState(true);
+  // Starts false when a previous successful load already left a cached snapshot — that
+  // data is already hydrated into accounts/transactions/etc.'s useState below, so there's
+  // real content to paint immediately instead of hiding it behind <ViewSkeleton> for the
+  // duration of a fresh network round trip. loadAll() still runs in the background either
+  // way to refresh it; only the *first-ever* load (nothing cached yet) blocks on it.
+  const [loading, setLoading] = useState(() => !hasCachedSnapshot());
   const [bootstrapped, setBootstrapped] = useState(false);
   const [coreDataLoaded, setCoreDataLoaded] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const settingsLoadedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [monthRefreshing, setMonthRefreshing] = useState(false);
   const initialLoadDone = useRef(false);
   const bankAutoSyncDone = useRef(false);
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [debts, setDebts] = useState<Debt[]>([]);
-  const [debtInstallments, setDebtInstallments] = useState<DebtInstallment[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [workHistory, setWorkHistory] = useState<WorkHistory[]>([]);
-  const [cards, setCards] = useState<Card[]>([]);
-  const [moneyOwed, setMoneyOwed] = useState<MoneyOwed[]>([]);
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [recurringEntries, setRecurringEntries] = useState<RecurringEntry[]>([]);
-  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget[]>([]);
-  const [salaryBreakdowns, setSalaryBreakdowns] = useState<SalaryBreakdown[]>([]);
-  const [alerts, setAlerts] = useState<AlertItem[]>([]);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [patrimonioEvolution, setPatrimonioEvolution] = useState<Array<{ fecha: string; acumulado: number }>>([]);
+  const [accounts, setAccounts] = useState<Account[]>(() => readCache("accounts", []));
+  const [transactions, setTransactions] = useState<Transaction[]>(() => readCache("transactions", []));
+  const [goals, setGoals] = useState<Goal[]>(() => readCache("goals", []));
+  const [debts, setDebts] = useState<Debt[]>(() => readCache("debts", []));
+  const [debtInstallments, setDebtInstallments] = useState<DebtInstallment[]>(() => readCache("debtInstallments", []));
+  const [properties, setProperties] = useState<Property[]>(() => readCache("properties", []));
+  const [investments, setInvestments] = useState<Investment[]>(() => readCache("investments", []));
+  const [workHistory, setWorkHistory] = useState<WorkHistory[]>(() => readCache("workHistory", []));
+  const [cards, setCards] = useState<Card[]>(() => readCache("cards", []));
+  const [moneyOwed, setMoneyOwed] = useState<MoneyOwed[]>(() => readCache("moneyOwed", []));
+  const [wishlist, setWishlist] = useState<WishlistItem[]>(() => readCache("wishlist", []));
+  const [recurringEntries, setRecurringEntries] = useState<RecurringEntry[]>(() => readCache("recurringEntries", []));
+  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget[]>(() => readCache("monthlyBudgets", []));
+  const [salaryBreakdowns, setSalaryBreakdowns] = useState<SalaryBreakdown[]>(() => readCache("salaryBreakdowns", []));
+  const [alerts, setAlerts] = useState<AlertItem[]>(() => readCache("alerts", []));
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => readCache("calendarEvents", []));
+  const [patrimonioEvolution, setPatrimonioEvolution] = useState<Array<{ fecha: string; acumulado: number }>>(() =>
+    readCache("patrimonioEvolution", []),
+  );
   const [krakenBalances, setKrakenBalances] = useState<
     Array<{ asset: string; amount: number; eur_value: number | null; eur_price: number | null; type: string }>
   >([]);
 
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [settings, setSettings] = useState<Record<string, string>>(() => readCache("settings", {}));
 
   function deleteWithUndo(label: string, onCommit: () => Promise<void>, onCancel?: () => void) {
     const id = allocateToastId();
@@ -196,7 +253,15 @@ export function useSoberanData({
   // also skip onboarding whenever any data already existed, which meant a fresh install that
   // happened to have leftover/seeded data (e.g. on-device SQLite surviving a reinstall) landed
   // straight on Inicio without the wizard ever running, instead of at onboarding like it should.
-  const onboardingRequired = bootstrapped && coreDataLoaded && !error && !onboardingDone;
+  //
+  // Gated on settingsLoaded alone, not bootstrapped/coreDataLoaded: on a genuinely fresh
+  // install there's nothing in accounts/transactions/etc. to wait for, but the initial
+  // mount effect used to fetch all of that (and everything else Inicio needs) *before*
+  // even knowing onboarding_done, since settings used to be hydrated only after loadAll()
+  // finished — the app visibly attempted to load Inicio first, every single first launch,
+  // before flipping to onboarding a beat later. The initial mount effect below now fetches
+  // settings in parallel with the rest from the very first attempt.
+  const onboardingRequired = settingsLoaded && !error && !onboardingDone;
 
   const loadSettings = useCallback(async () => {
     const keys = [
@@ -251,6 +316,7 @@ export function useSoberanData({
       next[key] = bulk[key] ?? "";
     }
     setSettings(next);
+    writeCache("settings", next);
   }, [month, year]);
 
   const loadCoreData = useCallback(async () => {
@@ -297,6 +363,21 @@ export function useSoberanData({
     setRecurringEntries(recurringData);
     setWishlist(wishlistData);
     setAlerts(alertsData);
+
+    writeCache("accounts", accountsData);
+    writeCache("transactions", txData);
+    writeCache("goals", goalsData);
+    writeCache("debts", debtsData);
+    writeCache("debtInstallments", debtInstallmentsData);
+    writeCache("properties", propsData);
+    writeCache("investments", invData);
+    writeCache("workHistory", workData);
+    writeCache("cards", cardsData);
+    writeCache("moneyOwed", owedData);
+    writeCache("recurringEntries", recurringData);
+    writeCache("wishlist", wishlistData);
+    writeCache("alerts", alertsData);
+    markCachedSnapshot();
   }, []);
 
   const loadMonthData = useCallback(async () => {
@@ -310,13 +391,21 @@ export function useSoberanData({
     setPatrimonioEvolution(evolutionData);
     setMonthlyBudgets(monthlyBudgetsData);
     setSalaryBreakdowns(salaryData);
+
+    writeCache("calendarEvents", eventsData);
+    writeCache("patrimonioEvolution", evolutionData);
+    writeCache("monthlyBudgets", monthlyBudgetsData);
+    writeCache("salaryBreakdowns", salaryData);
   }, [month, year]);
 
   const hydrateSettings = useCallback(async () => {
     try {
       await loadSettings();
+      settingsLoadedRef.current = true;
+      setSettingsLoaded(true);
     } catch {
-      // La app puede seguir sin ajustes opcionales.
+      // La app puede seguir sin ajustes opcionales — the initial-mount retry loop calls
+      // this again on the next attempt, same as loadAll() for core data.
     }
   }, [loadSettings]);
 
@@ -330,8 +419,13 @@ export function useSoberanData({
 
   const loadAll = useCallback(
     async (opts?: { silent?: boolean }) => {
+      // .content, not window/document — the app shell locks document-level scroll
+      // entirely (base.css) so .content can scroll independently, keeping WKWebView's
+      // fixed-position elements (.topbar/.site-footer/.mobile-tab-bar) fully isolated
+      // from the scroll gesture instead of visibly lagging behind it.
+      const scrollEl = document.querySelector<HTMLElement>(".content");
       const keepScroll = Boolean(opts?.silent);
-      const scrollY = keepScroll ? window.scrollY : 0;
+      const scrollTop = keepScroll ? (scrollEl?.scrollTop ?? 0) : 0;
       if (!opts?.silent) setLoading(true);
       setError(null);
       let coreOk = false;
@@ -352,7 +446,7 @@ export function useSoberanData({
         if (!opts?.silent) setLoading(false);
         if (keepScroll) {
           requestAnimationFrame(() => {
-            window.scrollTo({ top: scrollY, behavior: "auto" });
+            scrollEl?.scrollTo({ top: scrollTop, behavior: "auto" });
           });
         }
         // Settings after first paint — do not block splash
@@ -393,21 +487,32 @@ export function useSoberanData({
     if (!initialLoadDone.current) {
       initialLoadDone.current = true;
       void (async () => {
-        // The embedded on-device backend (Android/Chaquopy) can take several seconds to
-        // finish starting — native asset extraction + Alembic migrations run before uvicorn
-        // ever binds its port — so the very first load can legitimately race ahead of it
-        // being ready. Retry silently for a while instead of surfacing a permanent "Failed
-        // to fetch" that also blocks onboarding from ever showing (it requires
-        // coreDataLoaded with no error).
-        const MAX_ATTEMPTS = 10;
-        const RETRY_DELAY_MS = 1500;
+        // The embedded on-device backend (iOS/Android) can take several seconds to finish
+        // starting — native asset extraction + Alembic migrations run before uvicorn ever
+        // binds its port — so the very first load can legitimately race ahead of it being
+        // ready. Two phases: a quick burst covers the common case fast, then — instead of
+        // giving up and leaving a dead-end error banner on screen forever — a slower
+        // background retry keeps going indefinitely, so the app self-heals whenever the
+        // backend does come up instead of requiring the user to force-quit and reopen.
+        const BURST_ATTEMPTS = 10;
+        const BURST_DELAY_MS = 1500;
+        const BACKGROUND_DELAY_MS = 3000;
         setLoading(true);
-        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-          await loadAll({ silent: true });
-          if (lastLoadOk.current || attempt === MAX_ATTEMPTS) break;
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        // Settings (onboarding_done in particular) fetched in parallel with core/month
+        // data from the very first attempt, not after — onboardingRequired only needs
+        // settingsLoaded now, so a fresh install can flip to onboarding as soon as this
+        // resolves instead of waiting on loadAll() too (Inicio's own data is irrelevant
+        // when the answer is "show onboarding instead").
+        for (let attempt = 1; attempt <= BURST_ATTEMPTS; attempt++) {
+          await Promise.all([loadAll({ silent: true }), hydrateSettings()]);
+          if ((lastLoadOk.current && settingsLoadedRef.current) || attempt === BURST_ATTEMPTS) break;
+          await new Promise((resolve) => setTimeout(resolve, BURST_DELAY_MS));
         }
         setLoading(false);
+        while (!lastLoadOk.current || !settingsLoadedRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, BACKGROUND_DELAY_MS));
+          await Promise.all([loadAll({ silent: true }), hydrateSettings()]);
+        }
       })();
       return;
     }

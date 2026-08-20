@@ -24,6 +24,20 @@
     padding-bottom: calc(3.85rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /* .mobile-tab-bar (below) is already the fixed, always-visible bottom chrome on this
+     breakpoint — stacking the copyright/version footer (responsive.css) above it too
+     would permanently eat screen space for legal text on a finance app's mobile view.
+     .app-shell's padding-bottom above already reserves exactly the tab bar's height;
+     .content's own padding-bottom (content.css) is reset back down since there's no
+     fixed footer here to clear. */
+  .site-footer {
+    display: none;
+  }
+
+  .content {
+    padding-bottom: 1.25rem;
+  }
+
   .topbar {
     padding-top: max(0.45rem, env(safe-area-inset-top, 0px));
     padding-bottom: 0.45rem;
@@ -234,6 +248,10 @@
     backdrop-filter: blur(18px) saturate(1.15);
     -webkit-backdrop-filter: blur(18px) saturate(1.15);
     box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.12);
+    /* Same GPU-layer-promotion fix as .topbar (topbar.css) — see the comment there. */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
   }
 
   .theme-dark .mobile-tab-bar {

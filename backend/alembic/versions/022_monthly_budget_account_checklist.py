@@ -14,16 +14,16 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("monthly_budgets") as batch_op:
-        batch_op.add_column(sa.Column("cuenta_gestion_id", sa.Integer(), nullable=True))
-        batch_op.add_column(
-            sa.Column("movido_a_cuenta", sa.Boolean(), nullable=False, server_default=sa.false())
-        )
-        batch_op.add_column(sa.Column("movido_checked_at", sa.DateTime(), nullable=True))
+    # Plain add_column, not batch_alter_table — see 013_debt_archivada.py.
+    op.add_column("monthly_budgets", sa.Column("cuenta_gestion_id", sa.Integer(), nullable=True))
+    op.add_column(
+        "monthly_budgets",
+        sa.Column("movido_a_cuenta", sa.Boolean(), nullable=False, server_default=sa.false()),
+    )
+    op.add_column("monthly_budgets", sa.Column("movido_checked_at", sa.DateTime(), nullable=True))
 
 
 def downgrade():
-    with op.batch_alter_table("monthly_budgets") as batch_op:
-        batch_op.drop_column("movido_checked_at")
-        batch_op.drop_column("movido_a_cuenta")
-        batch_op.drop_column("cuenta_gestion_id")
+    op.drop_column("monthly_budgets", "movido_checked_at")
+    op.drop_column("monthly_budgets", "movido_a_cuenta")
+    op.drop_column("monthly_budgets", "cuenta_gestion_id")

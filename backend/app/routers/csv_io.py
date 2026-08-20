@@ -1,18 +1,19 @@
 """CSV export/import routes."""
 from __future__ import annotations
 
+import csv
 import io
 import zipfile
 from datetime import datetime
 from typing import Any, Dict
 
-import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
+from ..csv_coerce import coerce_field
 
 router = APIRouter()
 
@@ -46,9 +47,12 @@ def _csv_bytes_for_table(db: Session, table: str) -> bytes:
     if not model:
         raise HTTPException(status_code=400, detail="Tabla no válida para exportación")
     rows = db.query(model).all()
-    df = pd.DataFrame([{c.name: getattr(q, c.name) for c in q.__table__.columns} for q in rows])
+    columns = [c.name for c in model.__table__.columns]
     stream = io.StringIO()
-    df.to_csv(stream, index=False)
+    writer = csv.DictWriter(stream, fieldnames=columns)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({name: getattr(row, name) for name in columns})
     return ("\ufeff" + stream.getvalue()).encode("utf-8")
 
 
@@ -87,17 +91,18 @@ def export_csv(table: str, db: Session = Depends(get_db)):
 async def import_csv(table: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
     if table not in CSV_TABLE_MODELS:
         raise HTTPException(status_code=400, detail="Tabla no válida para importación")
-    m_map = CSV_TABLE_MODELS
-    df = pd.read_csv(io.BytesIO(await file.read()))
-    for _, row in df.iterrows():
-        rd = row.to_dict()
-        if 'id' in rd: del rd['id']
-        for c in ['date', 'fecha_inicio', 'fecha_fin']:
-            if c in rd and pd.notnull(rd[c]):
-                try:
-                    rd[c] = pd.to_datetime(rd[c])
-                except (ValueError, TypeError):
-                    pass
-        db_i = m_map[table](**{k: v for k, v in rd.items() if pd.notnull(v)})
-        db.add(db_i)
-    db.commit(); return {"status": "ok"}
+    model = CSV_TABLE_MODELS[table]
+    columns = {c.name: c for c in model.__table__.columns}
+    raw = (await file.read()).decode("utf-8-sig")
+    for row in csv.DictReader(io.StringIO(raw)):
+        row.pop("id", None)
+        fields = {}
+        for name, value in row.items():
+            if name not in columns:
+                continue
+            coerced = coerce_field(columns[name], value)
+            if coerced is not None:
+                fields[name] = coerced
+        db.add(model(**fields))
+    db.commit()
+    return {"status": "ok"}

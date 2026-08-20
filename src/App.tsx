@@ -13,6 +13,13 @@ import { SettingsView } from "./modules/general/SettingsView";
 import { PaymentsCalendarView } from "./modules/planning/PaymentsCalendarView";
 import { MonthlyCloseView } from "./modules/planning/MonthlyCloseView";
 import { api } from "./services/api";
+import {
+  useSyncStatusBarTheme,
+  useGlobalHapticTaps,
+  useNativeKeyboardBehavior,
+  useDisablePinchZoomNative,
+  useNativeShellClass,
+} from "../../../lib/native-feel/frontend/useNativeFeel";
 import { formatEUR } from "./utils/format";
 import { monthlyDebtObligation, nextDebtPayment, recurringExpenseNames } from "./utils/debtInstallments";
 import { buildNetWorthProjections } from "./utils/budgetTotals";
@@ -36,6 +43,7 @@ import { useAppToasts } from "./hooks/useAppToasts";
 import { useChat } from "./hooks/useChat";
 import { useDesktopUpdates } from "./hooks/useDesktopUpdates";
 import { persistOnboardingDoneLocal, useSoberanData } from "./hooks/useSoberanData";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 export default function App() {
   const [currentMenu, setCurrentMenuState] = useState<MenuKey>(() => {
@@ -93,6 +101,59 @@ export default function App() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Edge swipe to open the menu on real touch devices (iOS/Android builds): starting the
+  // gesture only within a thin strip along the right edge (mirroring how the OS itself
+  // reserves its own edge-swipe gestures) keeps this from hijacking ordinary horizontal
+  // interactions elsewhere in the app — month navigation, scrollable tables, chart
+  // panning — which all live away from that edge. A ref (not state) tracks the in-progress
+  // gesture so touchmove doesn't re-render on every frame.
+  useEffect(() => {
+    const EDGE_WIDTH = 24;
+    const OPEN_THRESHOLD = 60;
+    const MAX_VERTICAL_DRIFT = 50;
+    const gesture = { active: false, startX: 0, startY: 0, opened: false };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (isSidebarOpen || e.touches.length !== 1) return;
+      const touch = e.touches[0]!;
+      if (touch.clientX < window.innerWidth - EDGE_WIDTH) return;
+      gesture.active = true;
+      gesture.opened = false;
+      gesture.startX = touch.clientX;
+      gesture.startY = touch.clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!gesture.active || gesture.opened || e.touches.length !== 1) return;
+      const touch = e.touches[0]!;
+      const dx = touch.clientX - gesture.startX;
+      const dy = Math.abs(touch.clientY - gesture.startY);
+      if (dy > MAX_VERTICAL_DRIFT) {
+        gesture.active = false;
+        return;
+      }
+      if (dx <= -OPEN_THRESHOLD) {
+        gesture.opened = true;
+        setIsSidebarOpen(true);
+      }
+    };
+
+    const onTouchEnd = () => {
+      gesture.active = false;
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [isSidebarOpen]);
+
   const formatEURPrivate = useCallback((v: number) => (privacyMode ? "•••• €" : formatEUR(v)), [privacyMode]);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
@@ -108,6 +169,14 @@ export default function App() {
     () => (localStorage.getItem("soberan-ui-density") as "minimal" | "detailed") || "minimal",
   );
   const [systemDark, setSystemDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
+  // Same formula AppShell uses for effectiveDark (line ~679) — needed here too, earlier,
+  // so the status bar can be kept in sync even during onboarding/loading screens that
+  // return before AppShell ever renders.
+  useSyncStatusBarTheme(dayNightMode === "night" ? true : dayNightMode === "day" ? false : systemDark);
+  useGlobalHapticTaps();
+  useNativeKeyboardBehavior();
+  useDisablePinchZoomNative();
+  useNativeShellClass();
   const [alertsPopoverOpen, setAlertsPopoverOpen] = useState(false);
   const [methodGuideOpen, setMethodGuideOpen] = useState(false);
   const [manualOnboarding, setManualOnboarding] = useState(false);
@@ -176,20 +245,43 @@ export default function App() {
   const chatEnabled = settings.chat_enabled !== "0";
   const chat = useChat({ chatEnabled, desktopMode });
 
+  // App-wide tap haptic: a per-component wiring pass across every <button> in the app
+  // would be enormous and easy to miss spots in — one delegated click listener at the
+  // document root, matching any button-like element, covers all of them at once and
+  // stays correct as new buttons get added elsewhere. desktopMode is excluded (no
+  // vibration motor); @capacitor/haptics no-ops safely on plain web too, but skipping it
+  // there avoids the listener doing pointless work outside a native shell.
   useEffect(() => {
-    if (!nativeShellMode || settings.sync_auto_enabled !== "1") return;
+    const isNativePlatform = Boolean(
+      (globalThis as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.(),
+    );
+    if (!isNativePlatform) return;
+
+    const onClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement | null)?.closest('button, [role="button"], a.button-like');
+      if (!target || target.hasAttribute("disabled")) return;
+      void Haptics.impact({ style: ImpactStyle.Light });
+    };
+
+    document.addEventListener("click", onClick, { capture: true });
+    return () => document.removeEventListener("click", onClick, { capture: true });
+  }, []);
+
+  useEffect(() => {
+    // custom_server no longer needs a periodic backup push: with the proxy-with-
+    // offline-cache middleware, every request already goes live to the connected
+    // server (or gets queued + replayed on reconnect) at the request layer itself —
+    // see dev/lib/native-sync/backend/sync_proxy_middleware.py. This interval stays
+    // for google_drive, which is still a plain backup/restore model.
     const provider = settings.sync_provider || "google_drive";
+    if (!nativeShellMode || settings.sync_auto_enabled !== "1" || provider === "custom_server") return;
     const minutes = Number(settings.sync_auto_minutes || "15");
     const intervalMs = Math.max(2, Number.isFinite(minutes) ? minutes : 15) * 60_000;
     let cancelled = false;
 
     const runAutoSync = async () => {
       try {
-        if (provider === "custom_server") {
-          await api.syncCustomPush();
-        } else {
-          await api.syncGooglePush();
-        }
+        await api.syncGooglePush();
         if (!cancelled) {
           await saveSetting("sync_last_push_at", new Date().toISOString(), false);
         }
@@ -566,7 +658,6 @@ export default function App() {
         addToast={addToast}
         loadAll={loadAll}
         deleteWithUndo={deleteWithUndo}
-        saveSetting={saveSetting}
       />
     );
   }
@@ -694,6 +785,7 @@ export default function App() {
       <>
         <OnboardingWizard
           initialSettings={settings}
+          nativeSyncMode={nativeShellMode}
           onCancel={manualOnboarding ? () => setManualOnboarding(false) : undefined}
           onComplete={(patch) => {
             persistOnboardingDoneLocal();

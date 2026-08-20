@@ -11,7 +11,17 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "@capacitor/core": ["./node_modules/@capacitor/core"],
+      "@capacitor/haptics": ["./node_modules/@capacitor/haptics"],
+      "@capacitor/keyboard": ["./node_modules/@capacitor/keyboard"],
+      "@capacitor/status-bar": ["./node_modules/@capacitor/status-bar"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../../lib/native-sync/frontend", "../../lib/native-feel/frontend"]
 }

@@ -491,9 +491,24 @@ button:focus-visible,
 }
 
 .site-footer {
-  margin-top: 2rem;
-  padding-top: 1rem;
+  /* `fixed`, mirroring .topbar (topbar.css) — same reasoning: a footer inside the
+     scrollable .content flow rides along with WKWebView's elastic bounce and normal
+     scrolling instead of staying put. Pinned to the viewport bottom, above
+     .mobile-tab-bar where that's also fixed (mobile-nav.css sets its own `bottom`
+     offset). .content's padding-bottom (below) compensates for the space this no
+     longer occupies in normal flow — must track this rule's actual height, same as
+     .topbar/.content's existing pairing. */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  margin-top: 0;
+  padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--glass-border, rgba(148, 163, 184, 0.25));
+  background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -501,6 +516,10 @@ button:focus-visible,
   flex-wrap: wrap;
   color: var(--text-muted, #64748b);
   font-size: 0.78rem;
+  /* Same GPU-layer-promotion fix as .topbar (topbar.css) — see the comment there. */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
 .site-footer__link {
