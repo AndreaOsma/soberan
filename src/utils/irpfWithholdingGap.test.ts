@@ -25,7 +25,7 @@ const store: IrpfModelo145Store = {
         ss_pct: 6.5,
         dependents: [],
       },
-      irpf_pct: 16.42,
+      irpf_pct: 15.5,
       ss_pct: 6.5,
     },
   ],
@@ -33,10 +33,10 @@ const store: IrpfModelo145Store = {
 
 const job = {
   id: 1,
-  empresa: "Knowmad Mood",
-  fecha_inicio: "2025-01-01",
+  empresa: "Empresa Ejemplo",
+  fecha_inicio: "2024-01-01",
   fecha_fin: null,
-  irpf_pct: 16.42,
+  irpf_pct: 15.5,
   ss_pct: 6.5,
 };
 
@@ -47,11 +47,11 @@ describe("calcIrpfWithholdingGap", () => {
       store,
       workHistory: [job],
       breakdowns: [
-        { mes: 1, anio: 2026, empresa: "Knowmad Mood", bruto: 2500, irpf: 250, ss: 160, neto: 2090 },
-        { mes: 2, anio: 2026, empresa: "Knowmad Mood", bruto: 2500, irpf: 250, ss: 160, neto: 2090 },
+        { mes: 1, anio: 2026, empresa: "Empresa Ejemplo", bruto: 2500, irpf: 250, ss: 160, neto: 2090 },
+        { mes: 2, anio: 2026, empresa: "Empresa Ejemplo", bruto: 2500, irpf: 250, ss: 160, neto: 2090 },
       ],
     });
-    // expected ~16.42% of 5000 = 821; real 500 → under by ~321
+    // expected ~15.5% of 5000 = 821; real 500 → under by ~321
     expect(gap.hasExpectedRate).toBe(true);
     expect(gap.outcomeHint).toBe("pay_likely");
     expect(gap.gapReten).toBeLessThan(0);
@@ -64,8 +64,8 @@ describe("calcIrpfWithholdingGap", () => {
       store,
       workHistory: [job],
       breakdowns: [
-        { mes: 1, anio: 2026, empresa: "knowmad mood", bruto: 2500, irpf: 550, ss: 160, neto: 1790 },
-        { mes: 2, anio: 2026, empresa: "knowmad mood", bruto: 2500, irpf: 550, ss: 160, neto: 1790 },
+        { mes: 1, anio: 2026, empresa: "empresa ejemplo", bruto: 2500, irpf: 550, ss: 160, neto: 1790 },
+        { mes: 2, anio: 2026, empresa: "empresa ejemplo", bruto: 2500, irpf: 550, ss: 160, neto: 1790 },
       ],
     });
     expect(gap.outcomeHint).toBe("refund_likely");
@@ -78,7 +78,7 @@ describe("calcIrpfWithholdingGap", () => {
       store,
       workHistory: [job],
       breakdowns: [
-        { mes: 1, anio: 2026, empresa: "Knowmad Mood", bruto: 2500, irpf: 100, ss: 160, neto: 2240 },
+        { mes: 1, anio: 2026, empresa: "Empresa Ejemplo", bruto: 2500, irpf: 100, ss: 160, neto: 2240 },
       ],
     });
     expect(gap.outcomeHint).toBe("pay_likely");
@@ -91,8 +91,8 @@ describe("calcIrpfWithholdingGap", () => {
       store: { versions: [] },
       workHistory: [{ ...job, irpf_pct: 0 }],
       breakdowns: [
-        { mes: 1, anio: 2026, empresa: "Knowmad Mood", bruto: 2500, irpf: 400, ss: 160, neto: 1940 },
-        { mes: 2, anio: 2026, empresa: "Knowmad Mood", bruto: 2500, irpf: 400, ss: 160, neto: 1940 },
+        { mes: 1, anio: 2026, empresa: "Empresa Ejemplo", bruto: 2500, irpf: 400, ss: 160, neto: 1940 },
+        { mes: 2, anio: 2026, empresa: "Empresa Ejemplo", bruto: 2500, irpf: 400, ss: 160, neto: 1940 },
       ],
     });
     expect(gap.hasExpectedRate).toBe(false);
@@ -102,7 +102,7 @@ describe("calcIrpfWithholdingGap", () => {
 
 describe("matchJobForBreakdown", () => {
   it("hace match case-insensitive", () => {
-    const m = matchJobForBreakdown([job], "KNOWMAD MOOD", 2026, 3);
-    expect(m?.empresa).toBe("Knowmad Mood");
+    const m = matchJobForBreakdown([job], "EMPRESA EJEMPLO", 2026, 3);
+    expect(m?.empresa).toBe("Empresa Ejemplo");
   });
 });

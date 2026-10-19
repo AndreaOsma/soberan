@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../services/api";
 import { EmptyState } from "../../components/EmptyState";
 import { BankConnectPanel } from "../../components/data/BankConnectPanel";
@@ -6,7 +6,6 @@ import { BankStatementImportPanel } from "../../components/data/BankStatementImp
 import { parseNum } from "../../utils/format";
 import {
   formatBankLastSync,
-  formatBankImportMessage,
   formatBankSyncMessage,
   isBankLinked,
   isBankSyncStale,
@@ -42,11 +41,6 @@ export function AccountsListPanel({
   const [syncingAllBanks, setSyncingAllBanks] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<{
-    stale_count: number;
-    error_count: number;
-    requisitions_needing_reauth: Array<Record<string, unknown>>;
-  } | null>(null);
   const [importingHistory, setImportingHistory] = useState(false);
 
   const operatingAccounts = listVisibleAccounts(accounts);
@@ -114,36 +108,6 @@ export function AccountsListPanel({
     }
   }
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const status = await api.getBankSyncStatus();
-        setSyncStatus({
-          stale_count: status.stale_count,
-          error_count: status.error_count,
-          requisitions_needing_reauth: status.requisitions_needing_reauth,
-        });
-      } catch {
-        // GC puede no estar configurado
-      }
-    })();
-  }, [accounts]);
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const imported = await api.importBankAccounts();
-        const msg = formatBankImportMessage(imported.imported, imported.transactions_created);
-        if (msg) {
-          await loadAll({ silent: true });
-          addToast(msg, "success");
-        }
-      } catch {
-        // GoCardless puede no estar configurado.
-      }
-    })();
-  }, [addToast, loadAll]);
-
   async function importHistorical() {
     setImportingHistory(true);
     try {
@@ -156,12 +120,6 @@ export function AccountsListPanel({
         formatBankSyncMessage(result.created, result.updated, errors),
         errors > 0 ? "info" : "success",
       );
-      const status = await api.getBankSyncStatus();
-      setSyncStatus({
-        stale_count: status.stale_count,
-        error_count: status.error_count,
-        requisitions_needing_reauth: status.requisitions_needing_reauth,
-      });
     } catch {
       addToast("No se pudo importar histórico.", "error");
     } finally {
@@ -211,23 +169,6 @@ export function AccountsListPanel({
             )}
           </div>
         </div>
-
-        {syncStatus && (syncStatus.stale_count > 0 || syncStatus.error_count > 0 || syncStatus.requisitions_needing_reauth.length > 0) && (
-          <div className="budget-banner budget-banner--warn" style={{ marginBottom: "1rem" }} role="status">
-            {syncStatus.requisitions_needing_reauth.length > 0 && (
-              <span>Consentimiento bancario caducado — renueva la conexión. </span>
-            )}
-            {syncStatus.stale_count > 0 && (
-              <span>{syncStatus.stale_count} cuenta{syncStatus.stale_count !== 1 ? "s" : ""} con sync antigua. </span>
-            )}
-            {syncStatus.error_count > 0 && (
-              <span>{syncStatus.error_count} error{syncStatus.error_count !== 1 ? "es" : ""} de sync. </span>
-            )}
-            <button type="button" className="button-secondary" style={{ marginLeft: "0.5rem" }} onClick={() => setBankPanelOpen(true)}>
-              Gestionar
-            </button>
-          </div>
-        )}
 
         {linkedAccounts.length > 0 && (
           <div

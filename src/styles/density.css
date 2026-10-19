@@ -1,0 +1,32 @@
+/* ════════════════════════════════════════════════════
+   MODO DENSIDAD — "simple" (minimal) vs "normal" (detailed)
+   ════════════════════════════════════════════════════
+   AppShell pone `density-minimal` | `density-detailed` en `.app-shell`
+   (ver AppShell.tsx). El modo por defecto es `minimal` (AGENTS.md).
+
+   Filosofía: `detailed` = todo, como siempre. `minimal` = "simple", oculta
+   lo SECUNDARIO/analítico/explicativo de las pantallas densas para no saturar
+   de datos — dejando siempre lo esencial (importes principales, listas de
+   partidas/movimientos, totales). Es solo presentación: nada se borra ni deja
+   de calcularse, basta con volver a `detailed` para verlo todo.
+
+   Uso: marca un elemento secundario con `class="detail-only"` (o añade la
+   clase existente del bloque a la lista de abajo) y desaparece en simple. */
+
+.app-shell.density-minimal .detail-only {
+  display: none !important;
+}
+
+/* Elementos secundarios por su clase ya existente (sin tocar el TSX):
+   se ocultan en modo simple. Núcleo (importes, listas, totales) intacto.
+   Añade aquí la clase de un panel analítico/resumen para que desaparezca en
+   simple, o marca el elemento con `detail-only` en su TSX. */
+.app-shell.density-minimal .budget-summary-card__meta, /* desglose bajo "disponible" */
+.app-shell.density-minimal .inv-summary,               /* KPIs de Inversiones */
+.app-shell.density-minimal .pasivos-summary-chip,      /* resumen DTI/próxima cuota (Deudas) */
+.app-shell.density-minimal .budget-projection-hint,    /* textos explicativos de proyecciones */
+.app-shell.density-minimal .debt-strategy-card,        /* avalanche/snowball */
+.app-shell.density-minimal .debt-capacity-card,        /* capacidad de endeudamiento */
+.app-shell.density-minimal .inicio-shortcuts {         /* atajos: el menú/tabs ya navegan */
+  display: none !important;
+}

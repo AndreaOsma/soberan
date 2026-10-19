@@ -1,6 +1,7 @@
 """iCal payment calendar feed, feed-url, and subscribe helpers."""
 from __future__ import annotations
 
+import hmac
 import os
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
@@ -51,9 +52,14 @@ def get_ical(
 ):
     from ..calendar_events import build_payment_calendar_horizon
 
+    # When a key is configured this feed requires it (constant-time compare) —
+    # it leaks the payment calendar (creditors, subscriptions, income, dates).
+    # No key = open by design (protect with your proxy), same as /agent.
     expected_key = os.environ.get("SOBERAN_API_KEY", "").strip()
-    if expected_key and (not token or token.strip() != expected_key):
-        raise HTTPException(status_code=401, detail="Token inválido. Usa ?token=TU_API_KEY")
+    if expected_key:
+        provided = (token or "").strip()
+        if not provided or not hmac.compare_digest(provided, expected_key):
+            raise HTTPException(status_code=401, detail="Token inválido. Usa ?token=TU_API_KEY")
     cal = Calendar()
     cal.add('prodid', '-//Soberan//Finanzas//ES')
     cal.add('version', '2.0')

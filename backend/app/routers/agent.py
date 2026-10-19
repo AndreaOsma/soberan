@@ -1,9 +1,12 @@
 """OpenClaw agent context, commands, and transaction hooks."""
 from __future__ import annotations
 
+import hmac
+import os
 from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from .. import models
@@ -14,7 +17,32 @@ from ..helpers import sanitize_string, validate_transaction_category
 from ..schemas import AgentCommandRequest, AgentCommandResponse, AgentTransactionCreate
 from ..transaction_splits import budget_expense_amount
 
-router = APIRouter()
+
+def require_agent_api_key(
+    x_api_key: Optional[str] = Header(None, alias="X-Api-Key"),
+    token: Optional[str] = Query(None, description="Alternativa a la cabecera X-Api-Key."),
+) -> None:
+    """Gate the whole /agent/* surface behind SOBERAN_API_KEY, same opt-in as the iCal feed.
+
+    Unset (the default for a fresh self-host) means open, matching current behavior —
+    this only tightens things for deployments that already set SOBERAN_API_KEY, where
+    it previously protected nothing but the iCal feed while /agent/command could still
+    create real transactions for anyone who could reach the port.
+    """
+    # When a key is configured, gate /agent with it (constant-time compare).
+    # No key = open by design (protect with your proxy).
+    expected = os.environ.get("SOBERAN_API_KEY", "").strip()
+    if not expected:
+        return
+    provided = (x_api_key or token or "").strip()
+    if not provided or not hmac.compare_digest(provided, expected):
+        raise HTTPException(
+            status_code=401,
+            detail="API key inválida o ausente. Envía la cabecera X-Api-Key o ?token=TU_SOBERAN_API_KEY.",
+        )
+
+
+router = APIRouter(dependencies=[Depends(require_agent_api_key)])
 
 @router.get("/api/agent/context")
 @router.get("/agent/context")

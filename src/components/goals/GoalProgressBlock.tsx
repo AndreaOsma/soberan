@@ -10,15 +10,15 @@ export function GoalProgressBlock({ snapshot, formatEUR, compact }: Props) {
   const { goal, current, target, pct, etaLabel, isComplete, monthlyContribution } = snapshot;
 
   return (
-    <div style={{ fontSize: compact ? "0.78rem" : "0.82rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem", gap: "0.5rem", flexWrap: "wrap" }} className="muted">
-        <span>
+    <div className={`goal-progress${compact ? " goal-progress--compact" : ""}`}>
+      <div className="goal-progress__row muted">
+        <span className="goal-progress__target">
           Objetivo: <span className="sensitive">{formatEUR(target)}</span>
           {goal.fecha_limite && (
             <> · límite {new Date(goal.fecha_limite).toLocaleDateString("es", { month: "short", year: "numeric" })}</>
           )}
         </span>
-        <span>
+        <span className="goal-progress__current">
           <span className="sensitive">{formatEUR(current)}</span>
           {" "}({pct.toFixed(1)}%)
           {isComplete ? (

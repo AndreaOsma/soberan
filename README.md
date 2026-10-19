@@ -265,4 +265,4 @@ Para automatización (detalle en [docs/operations.md](docs/operations.md)):
 - `GET /api/agent/commands` · `POST /api/agent/command`  
 - `GET /api/agent/context` · `POST /api/agent/transaction` · `GET /api/agent/audit`  
 
-Con `SOBERAN_API_KEY`, el feed iCal exige `?token=`; el resto de la API no usa esa clave.
+Con `SOBERAN_API_KEY`, el feed iCal y toda la API de agente exigen `?token=` (o cabecera `X-Api-Key`); el resto de la API no usa esa clave.

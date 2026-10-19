@@ -29,6 +29,8 @@ import type {
   WorkHistoryCreate
 } from "../types";
 
+import { createSyncApiClient } from "../vendor/native-sync/useSyncPanel";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export { API_BASE_URL };
@@ -198,6 +200,7 @@ export const api = {
       linked_count: number;
       stale_count: number;
       error_count: number;
+      sample_error?: string | null;
       accounts: Array<{
         id: number;
         alias_real: string;
@@ -360,6 +363,13 @@ export const api = {
       clamp_techo?: number | null;
       nota?: string;
     }>(`/properties/vehicle-valuation/${id}`, { method: "POST" }),
+  syncGaraje: (force = false) =>
+    request<{
+      status: "ok" | "disabled" | "skipped" | "error";
+      km_actualizados?: Array<{ id: number; nombre: string; km_antes: number | null; km: number; revalorar: boolean }>;
+      movimientos_enviados?: number;
+      detail?: string;
+    }>(`/integrations/garaje/sync${force ? "?force=true" : ""}`, { method: "POST" }),
   refreshDueVehicleValuations: () =>
     request<{
       refreshed: Array<{
@@ -473,6 +483,11 @@ export const api = {
   getMonthlyBudget: (mes: number, anio: number) => request<MonthlyBudget[]>(`/monthly-budget/${mes}/${anio}`),
   upsertMonthlyBudget: (payload: Omit<MonthlyBudget, "id">) =>
     request<MonthlyBudget>("/monthly-budget/", { method: "POST", body: JSON.stringify(payload) }),
+  propagateMonthlyBudget: (recurringEntryId: number, fromMes: number, fromAnio: number, montoReal: number) =>
+    request<{ updated: number }>("/monthly-budget/propagate", {
+      method: "POST",
+      body: JSON.stringify({ recurring_entry_id: recurringEntryId, from_mes: fromMes, from_anio: fromAnio, monto_real: montoReal }),
+    }),
   copyMonthlyBudget: (fromMes: number, fromAnio: number, toMes: number, toAnio: number) =>
     request<{ copied: number; total: number }>("/monthly-budget/copy", {
       method: "POST",
@@ -518,30 +533,9 @@ export const api = {
 
   getKrakenBalance: () => request<{ balances: Array<{ asset: string; amount: number; eur_value: number | null; eur_price: number | null; type: string }> }>("/kraken/balance"),
   syncKraken: () => request<Record<string, unknown>>("/kraken/sync", { method: "POST" }),
-  getSyncStatus: () =>
-    request<{
-      enabled: boolean;
-      google_configured?: boolean;
-      google_connected?: boolean;
-      custom_server_configured?: boolean;
-      custom_url?: string;
-      // Only present when connected to a private server with the proxy-with-offline-
-      // cache design (dev/lib/native-sync/backend/sync_proxy_middleware.py) — reflects
-      // the cached reachability flag and the local write queue awaiting replay.
-      custom_server_reachable?: boolean;
-      pending_ops?: number;
-    }>("/sync/status"),
-  startGoogleDeviceAuth: () =>
-    request<{ status: string; verification_url?: string; user_code?: string; expires_in?: number }>(
-      "/sync/google/device/start",
-      { method: "POST" },
-    ),
-  completeGoogleDeviceAuth: () =>
-    request<{ status: string; provider?: string }>("/sync/google/device/complete", { method: "POST" }),
-  syncGooglePush: () => request<Record<string, unknown>>("/sync/google/push", { method: "POST" }),
-  syncGooglePull: () => request<Record<string, unknown>>("/sync/google/pull", { method: "POST" }),
-  syncCustomPush: () => request<Record<string, unknown>>("/sync/custom/push", { method: "POST" }),
-  syncCustomPull: () => request<Record<string, unknown>>("/sync/custom/pull", { method: "POST" }),
+  // /sync/* (Google Drive, servidor propio, auto-sync con conflictos): contrato de
+  // app/native_sync, implementado entero por la librería vendorizada.
+  ...createSyncApiClient((path, init) => fetch(`${API_BASE_URL}${path}`, init)),
 
   exportCsv: async (table: string) => {
     const response = await fetch(`${API_BASE_URL}/export-csv/${table}`);

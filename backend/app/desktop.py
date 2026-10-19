@@ -188,12 +188,15 @@ def mount_desktop_static(app, static_dir: Path) -> None:
 
         app.get(f"/{name}")(_make_handler(file_path))
 
+    static_root = static_dir.resolve()
+
     @app.get("/{full_path:path}")
     def desktop_spa_fallback(full_path: str):
         if full_path.startswith("api"):
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail="Not found")
-        candidate = static_dir / full_path
-        if candidate.is_file():
+        # El path llega ya decodificado: "..%2f" sería "../" y saldría de static_dir.
+        candidate = (static_dir / full_path).resolve()
+        if candidate.is_relative_to(static_root) and candidate.is_file():
             return FileResponse(candidate)
         return FileResponse(index_path, media_type="text/html")

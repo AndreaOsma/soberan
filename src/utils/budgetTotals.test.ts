@@ -306,8 +306,8 @@ describe("buildNetWorthProjections", () => {
   it("usa planilla de deudas mes a mes (cuotas variables)", () => {
     const debt: Debt = {
       id: 1,
-      nombre: "Ortodoncia",
-      acreedor: "Clínica",
+      nombre: "Compra a plazos",
+      acreedor: "Tienda",
       monto_total: 5000,
       monto_pagado: 4787,
       cuota_mensual: 99,

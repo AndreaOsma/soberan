@@ -728,12 +728,23 @@ def _import_single_account(
     gc_id: str,
     institution_name: str,
     category_rules: dict | None = None,
-) -> tuple[int | None, int]:
+    *,
+    sync_existing: bool = False,
+) -> tuple[int | None, int, bool]:
+    """Create/link one GoCardless account.
+
+    Returns (account_id, transactions_created, is_new).
+    Already-linked accounts are left alone unless sync_existing=True — soft
+    import-accounts used to re-sync every pocket on every call and report them
+    all as "imported", which made the Cuentas screen reload in a loop.
+    """
     profile = _merge_account_profile(client, gc_id)
     existing = db.query(models.Account).filter(models.Account.gocardless_account_id == gc_id).first()
+    is_new = False
     if existing:
         acc = existing
     else:
+        is_new = True
         iban = profile.get("iban")
         manual = None
         if iban:
@@ -762,11 +773,14 @@ def _import_single_account(
             db.flush()
 
     _apply_gocardless_identity(acc, client, gc_id, institution_name=institution_name, profile=profile)
-    rules = category_rules if category_rules is not None else _load_category_rules(db)
-    sync_result = _sync_bank_account(db, client, acc, rules)
-    if sync_result.get("error"):
-        logger.warning(f"import sync partial for {gc_id}: {sync_result['error']}")
-    return acc.id, int(sync_result.get("created") or 0)
+    tx_created = 0
+    if is_new or sync_existing:
+        rules = category_rules if category_rules is not None else _load_category_rules(db)
+        sync_result = _sync_bank_account(db, client, acc, rules)
+        if sync_result.get("error"):
+            logger.warning(f"import sync partial for {gc_id}: {sync_result['error']}")
+        tx_created = int(sync_result.get("created") or 0)
+    return acc.id, tx_created, is_new
 
 
 def _import_requisition_accounts(
@@ -789,20 +803,20 @@ def _import_requisition_accounts(
 
     institution_name = _pretty_institution_name(db_req.institution_name, db_req.institution_id)
     category_rules = _load_category_rules(db)
-    touched: list[int] = []
+    newly_imported: list[int] = []
     transactions_created = 0
     for gc_id in account_ids:
         try:
-            account_id, tx_created = _import_single_account(
-                db, client, gc_id, institution_name, category_rules
+            account_id, tx_created, is_new = _import_single_account(
+                db, client, gc_id, institution_name, category_rules, sync_existing=False,
             )
-            if account_id is not None:
-                touched.append(account_id)
+            if account_id is not None and is_new:
+                newly_imported.append(account_id)
                 transactions_created += tx_created
         except Exception as err:
             logger.error(f"import bank account {gc_id}: {err}")
             db.rollback()
-    return touched, transactions_created
+    return newly_imported, transactions_created
 
 
 @router.get("/banks/list")
@@ -1041,12 +1055,24 @@ def _apply_category_rules(description: str, rules: dict) -> str:
 
 @router.get("/banks/sync-status")
 def bank_sync_status(db: Session = Depends(get_db)):
-    """Summary of linked accounts, last sync and consent health."""
-    linked = db.query(models.Account).filter(models.Account.gocardless_account_id.isnot(None)).all()
+    """Summary of linked accounts, last sync and consent health.
+
+    Archived accounts are ignored — Revolut pockets left linked after archive
+    otherwise inflate stale/error banners on the Cuentas screen.
+    """
+    linked = (
+        db.query(models.Account)
+        .filter(
+            models.Account.gocardless_account_id.isnot(None),
+            models.Account.archivada.is_(False),
+        )
+        .all()
+    )
     now = datetime.utcnow()
     accounts = []
     stale_count = 0
     error_count = 0
+    sample_error = None
     for acc in linked:
         stale = False
         if acc.last_sync_at:
@@ -1057,6 +1083,8 @@ def bank_sync_status(db: Session = Depends(get_db)):
             stale_count += 1
         if acc.last_sync_error:
             error_count += 1
+            if sample_error is None:
+                sample_error = acc.last_sync_error
         accounts.append({
             "id": acc.id,
             "alias_real": acc.alias_real,
@@ -1070,6 +1098,7 @@ def bank_sync_status(db: Session = Depends(get_db)):
         "linked_count": len(linked),
         "stale_count": stale_count,
         "error_count": error_count,
+        "sample_error": sample_error,
         "accounts": accounts,
         "requisitions_needing_reauth": needs_reauth,
         "gocardless_configured": bool(os.getenv("GOCARDLESS_SECRET_ID") and os.getenv("GOCARDLESS_SECRET_KEY")),

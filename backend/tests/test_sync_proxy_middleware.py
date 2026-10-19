@@ -1,4 +1,4 @@
-"""Tests for dev/lib/native-sync/backend/sync_proxy_middleware.py's two middlewares:
+"""Tests for native-sync's sync_proxy_middleware.py (app/native_sync/) two middlewares:
 SyncProxyMiddleware (client side — forwards to a connected private server, falls back
 to local + queues writes when offline) and DeviceApiAuthMiddleware (server side — the
 bare /device bypass a client's own requests land on, gated by SOBERAN_SYNC_SERVER_TOKEN).
@@ -9,7 +9,6 @@ env vars can't retroactively reconfigure an already-built app within one test pr
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -20,9 +19,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "lib" / "native-sync" / "backend"))
-import sync_proxy_middleware as spm  # noqa: E402
-from native_sync_router import create_sync_router  # noqa: E402
+from app.native_sync import sync_proxy_middleware as spm
+from app.native_sync.native_sync_router import create_sync_router
 
 Base = declarative_base()
 
@@ -519,12 +517,13 @@ def test_device_api_404_when_server_mode_disabled(monkeypatch):
     assert resp.status_code == 404
 
 
-def test_device_api_open_when_server_mode_on_and_no_token(monkeypatch):
+def test_device_api_closed_when_server_mode_on_and_no_token(monkeypatch):
+    # Fails closed: /device bypasses the SSO proxy and proxies the whole API, so
+    # server mode without a configured token must reject, not wave everyone in.
     app = make_device_api_app(env={"TESTAPP_SYNC_SERVER_MODE": "1"}, monkeypatch=monkeypatch)
     client = TestClient(app)
     resp = client.get("/device/accounts")
-    assert resp.status_code == 200
-    assert resp.json() == {"ok": True}
+    assert resp.status_code == 401
 
 
 def test_device_api_401_wrong_token(monkeypatch):

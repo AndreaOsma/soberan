@@ -18,10 +18,15 @@
   }
 
   .period-view-toggle__btn {
-    flex: 1;
+    flex: 1 1 0;
+    /* Equal 50% segments for the sliding pill; allow the long "Mes · …" label to
+       shrink with ellipsis rather than overflowing the clipped pill container. */
+    min-width: 0;
     text-align: center;
-    padding: 0.55rem 0.65rem;
+    padding: 0.55rem 0.7rem;
     font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Summary card */
@@ -100,7 +105,10 @@
     justify-content: center;
   }
 
-  /* Budget entry rows */
+  /* Budget entry rows — stack label + actions so amount buttons stay inside the <li>.
+     Rows that wrap label/actions in .budget-list__row need the row itself to column
+     on mobile; a nested .inline-actions { width:100% } inside a horizontal flex was
+     overflowing past the card edge ("quedan fuera"). */
   .list.budget-list > li {
     flex-direction: column;
     align-items: stretch;
@@ -108,19 +116,29 @@
     padding: 0.85rem 0.9rem;
   }
 
-  .list.budget-list > li > span:first-child {
+  .list.budget-list > li > .budget-list__row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .list.budget-list > li > span:first-child,
+  .list.budget-list > li > .budget-list__row > :first-child {
     min-width: 0;
     line-height: 1.35;
   }
 
-  .list.budget-list > li > span:first-child small {
+  .list.budget-list > li > span:first-child small,
+  .list.budget-list > li > .budget-list__row > :first-child small {
     display: block;
     margin-left: 0 !important;
     margin-top: 0.2rem;
   }
 
-  .list.budget-list .inline-actions {
+  .list.budget-list > li > .inline-actions,
+  .list.budget-list > li > .budget-list__row > .inline-actions {
     width: 100%;
+    max-width: 100%;
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 0.4rem;
@@ -140,6 +158,7 @@
   .budget-amount-input {
     min-height: 2.5rem;
     min-width: 5.5rem;
+    max-width: 100%;
   }
 
   /* Annual view — card per month instead of horizontal scroll */

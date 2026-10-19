@@ -19,11 +19,15 @@
   border-radius: 999px;
   overflow: hidden;
   background: var(--surface);
+  max-width: 100%;
 }
 /* Sliding pill behind the active option, like a real iOS segmented control, instead of an
    instant background swap on whichever button was clicked. Only generated when there are
    two buttons (hideMonthButton leaves a single "Año" button with nothing to slide between,
-   so :has(> :nth-child(2)) simply never matches and no pseudo-element is created). */
+   so :has(> :nth-child(2)) simply never matches and no pseudo-element is created).
+   Segments must stay equal width — the pill is hard-coded to 50%, and "Mes · Sep 2026"
+   is much wider than "Año", so content-sized buttons left the active half unpainted /
+   clipped under overflow:hidden. */
 .period-view-toggle:has(> :nth-child(2))::before {
   content: "";
   position: absolute;
@@ -42,13 +46,27 @@
 .period-view-toggle__btn {
   position: relative;
   z-index: 1;
+  flex: 1 1 0;
+  min-width: max-content;
   border: none;
   background: transparent;
-  padding: 0.35rem 0.85rem;
+  box-shadow: none;
+  padding: 0.4rem 0.9rem;
   font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  text-align: center;
   cursor: pointer;
   color: var(--text-muted);
   transition: color 0.2s ease;
+}
+.period-view-toggle__btn:hover,
+.period-view-toggle__btn:active {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+  opacity: 1;
 }
 .period-view-toggle__btn.is-active {
   color: var(--text-main);

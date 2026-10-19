@@ -7,26 +7,45 @@
 #   docker build --target api -t soberan-api .
 #   docker build --target frontend -t soberan-frontend .
 #
-# Build context: repository root.
+# Build context: dev/ (one level above this app), NOT this app's own root —
+# src/App.tsx imports shared code from ../../../lib/native-feel
+# (dev/lib/, a sibling of dev/apps/soberan — see AGENTS.md's "librería de
+# runtime compartida" section), and tsc needs those directories to actually
+# exist on disk at build time (tsconfig.app.json's "include" lists them
+# explicitly, not just an import path). A context scoped to this app alone
+# can never reach them — confirmed broken since the native-feel import
+# landed 2026-08-16, only surfaced 2026-09-22 when a new feature's CI run
+# was the first to hit the frontend build step in a while. Local dev and
+# vite's own dev server were never affected (both already run from inside
+# the full monorepo checkout); this was purely a CI/Docker gap.
+#
+#   docker buildx build -f apps/soberan/Dockerfile <flags> dev/
+#
+# (dev/apps/soberan/Dockerfile itself, but context = dev/ — see
+# .gitea/workflows/deploy-soberan.yml's "Build and push" step.)
 
 # ---------------------------------------------------------------------------
 # Frontend (Vite)
 # ---------------------------------------------------------------------------
 FROM node:20-bookworm-slim AS frontend-build
-WORKDIR /app
+WORKDIR /build/apps/soberan
 ENV NODE_ENV=development
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 ENV NPM_CONFIG_FUND=false
 ENV NPM_CONFIG_AUDIT=false
 
-COPY package.json package-lock.json ./
+COPY apps/soberan/package.json apps/soberan/package-lock.json ./
 RUN npm ci \
   && test -x node_modules/.bin/tsc \
   && test -x node_modules/.bin/vite
 
-COPY index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json eslint.config.js ./
-COPY public ./public
-COPY src ./src
+COPY apps/soberan/index.html apps/soberan/vite.config.ts apps/soberan/tsconfig.json apps/soberan/tsconfig.app.json apps/soberan/tsconfig.node.json apps/soberan/eslint.config.js ./
+COPY apps/soberan/public ./public
+COPY apps/soberan/src ./src
+# Absolute destination: lands at /build/lib/..., a sibling of /build/apps —
+# mirrors dev/lib/'s position relative to dev/apps/soberan/ exactly, which
+# is what makes the app's existing ../../../lib/... imports resolve.
+COPY lib/native-feel /build/lib/native-feel
 RUN npm run build
 
 # ---------------------------------------------------------------------------
@@ -36,11 +55,17 @@ FROM python:3.11-slim AS api
 WORKDIR /app
 
 # psycopg2-binary ships wheels — no build-essential/libpq-dev (avoids linux-libc-dev CVEs).
+# CACHEBUST forces apt to re-run when Debian publishes security updates that Trivy
+# would otherwise block on a stale buildx layer (seen 2026-10-01: openssl/pcre2).
+ARG APT_CACHEBUST=2026-10-01
 RUN apt-get update \
   && apt-get upgrade -y --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends --only-upgrade \
+       libssl3t64 openssl openssl-provider-legacy libpcre2-8-0 \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "apt-cachebust=${APT_CACHEBUST}" >/dev/null
 
-COPY backend/requirements.txt .
+COPY apps/soberan/backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip "setuptools>=83" "wheel>=0.46.2" \
   && pip install --no-cache-dir -r requirements.txt \
   && pip install --no-cache-dir "jaraco.context>=6.1.0" \
@@ -50,7 +75,8 @@ RUN pip install --no-cache-dir --upgrade pip "setuptools>=83" "wheel>=0.46.2" \
   && find /usr/local -type f \( -name '*.spdx.json' -o -name '*.cdx.json' -o -name 'sbom.json' \) -delete 2>/dev/null || true \
   && python -c "import setuptools; assert tuple(map(int, setuptools.__version__.split('.')[:2])) >= (83, 0), setuptools.__version__"
 
-COPY backend/ .
+# native-sync va vendorizado en backend/app/native_sync/ (dev/lib/native-sync/sync.mjs).
+COPY apps/soberan/backend/ .
 
 # El bundle de la app de escritorio (desktop/static/index.html) no pinta nada en el
 # contenedor de API pura — si se cuela, resolve_static_dir() lo detecta y main.py
@@ -72,10 +98,18 @@ CMD ["./startup.sh"]
 # ---------------------------------------------------------------------------
 # Frontend only (nginx + SPA)
 # ---------------------------------------------------------------------------
-FROM nginx:1.27-alpine AS frontend
+FROM nginx:1.29-alpine AS frontend
+# apk upgrade picks up patched Alpine packages (e.g. libcrypto3/libssl3). The
+# registry buildcache (mode=max) would otherwise reuse a stale upgrade layer —
+# seen 2026-10-09: pcre2/tiff blocked Trivy. CI passes today's date.
+ARG APK_CACHEBUST=2026-10-09
 RUN apk update && apk upgrade --no-cache
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=frontend-build /app/dist /usr/share/nginx/html
+# Plantilla: el entrypoint de nginx sustituye ${FRAME_ANCESTORS} al arrancar (solo variables
+# definidas; $uri y compañía quedan intactas). Por defecto nadie puede incrustar Soberan; en el
+# homelab el job pone https://agora.andreaosma.com para abrirlo dentro de ágora.
+ENV FRAME_ANCESTORS="'none'"
+COPY apps/soberan/deploy/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=frontend-build /build/apps/soberan/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
@@ -84,7 +118,7 @@ CMD ["nginx", "-g", "daemon off;"]
 # ---------------------------------------------------------------------------
 FROM api AS allinone
 
-COPY --from=frontend-build /app/dist /app/static
+COPY --from=frontend-build /build/apps/soberan/dist /app/static
 
 ENV SOBERAN_STATIC_DIR=/app/static \
     DATABASE_URL=sqlite:////data/soberan.db \

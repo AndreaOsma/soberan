@@ -132,6 +132,15 @@ button.badge:active {
   gap: 0.6rem;
 }
 
+/* Goals are stacked cards (header + progress + meta), not name|actions rows. */
+.goals-list li {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  padding: 0.95rem 1rem;
+}
+
 .theme-dark .list li,
 .theme-dark .goals-list li {
   border-color: var(--border-soft);
@@ -556,9 +565,116 @@ pre {
 .goal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.75rem;
   width: 100%;
-  margin-bottom: 0.45rem;
+}
+
+.goal-header__title {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.goal-header__name {
+  font-weight: 650;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.goal-header__meta {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.goal-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.goal-header__actions .button-secondary,
+.goal-header__actions .danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  min-width: 2.15rem;
+  min-height: 2.15rem;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.goal-item__footer {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.goal-item--done {
+  opacity: 0.55;
+}
+
+.goal-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+
+.goal-progress--compact {
+  font-size: 0.78rem;
+  gap: 0.25rem;
+}
+
+.goal-progress__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.goal-progress__target,
+.goal-progress__current {
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.goal-progress__current {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.card-section-head h2 {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  text-transform: none;
+  color: var(--text-main);
+}
+
+.card-section-head > button {
+  flex-shrink: 0;
+}
+
+.card-section-foot {
+  margin-top: var(--space-3);
 }
 
 progress {

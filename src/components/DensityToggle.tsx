@@ -11,14 +11,14 @@ const OPTIONS: Array<{ id: UiDensity; icon: string; label: string; hint: string 
   {
     id: "minimal",
     icon: "◫",
-    label: "Vista simple",
-    hint: "Resumen e índice",
+    label: "Simple",
+    hint: "Lo esencial",
   },
   {
     id: "detailed",
     icon: "▦",
-    label: "Vista detallada",
-    hint: "Resumen + widgets",
+    label: "Detalle",
+    hint: "Todo visible",
   },
 ];
 
@@ -47,8 +47,6 @@ export function DensityToggle({ value, onChange }: Props) {
     <div
       ref={rootRef}
       className={`density-toggle${open ? " is-open" : ""}`}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
     >
       <button
         type="button"
@@ -60,8 +58,7 @@ export function DensityToggle({ value, onChange }: Props) {
         aria-label={`Densidad actual: ${active.label}. Abrir opciones`}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="density-toggle__trigger-icon" aria-hidden>{active.icon}</span>
-        <span className="density-toggle__trigger-label">{value === "minimal" ? "Simple" : "Detalle"}</span>
+        <span aria-hidden>{active.icon}</span>
       </button>
       <div
         id="density-toggle-menu"

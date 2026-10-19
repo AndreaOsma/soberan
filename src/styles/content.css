@@ -9,23 +9,26 @@
   height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1.25rem 1.5rem;
+  padding: var(--space-content-y) var(--space-content-x);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
   min-width: 0;
   width: 100%;
 }
 
 @media (min-width: 1280px) {
   .content {
-    padding: 1.5rem 2rem;
+    --space-content-x: 2rem;
+    --space-content-y: 1.5rem;
+    padding: var(--space-content-y) var(--space-content-x);
   }
 }
 
 @media (min-width: 1600px) {
   .content {
-    padding: 1.5rem 2.5rem;
+    --space-content-x: 2.5rem;
+    padding: var(--space-content-y) var(--space-content-x);
   }
 }
 
@@ -36,7 +39,7 @@
    track .topbar's actual rendered height: min-height 3.2rem + env(safe-area-inset-top) —
    see the comment there for why that's the full height, not an approximation. */
 .content {
-  padding-top: calc(3.2rem + env(safe-area-inset-top, 0px) + 1.25rem);
+  padding-top: calc(3.2rem + env(safe-area-inset-top, 0px) + var(--space-content-y));
 }
 
 /* Same pairing as the topbar compensation above, for .site-footer (responsive.css) now
@@ -59,7 +62,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
 .content-toolbar__actions {

@@ -15,5 +15,5 @@ def test_ical_all_day_uses_date_values():
 
 
 def test_ical_summary_format():
-    assert ical_summary_for_event({"tipo": "subscription", "titulo": "Songsterr"}) == "SUSCRIPCIÓN: Songsterr"
+    assert ical_summary_for_event({"tipo": "subscription", "titulo": "App de música"}) == "SUSCRIPCIÓN: App de música"
     assert ical_summary_for_event({"tipo": "recurring_income", "titulo": " Nómina "}) == "INGRESO: Nómina"

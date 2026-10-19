@@ -8,16 +8,25 @@ type Props = {
   type?: "text" | "password" | "date";
   placeholder?: string;
   onSave: (key: string, value: string) => Promise<void>;
+  /**
+   * Write-only credential field. The backend never returns the stored plaintext
+   * (it sends a mask), so `value` is only ever "" (unset) or an opaque mask
+   * (set). The input therefore starts empty, shows a "saved" hint when a secret
+   * exists, and only saves a non-empty draft — leaving it blank keeps the
+   * current secret instead of erasing it.
+   */
+  secret?: boolean;
 };
 
 function normalizeFieldValue(type: Props["type"], value: string): string {
   return type === "date" ? toDateOnly(value) : value;
 }
 
-export function SettingTextField({ label, settingKey, value, type = "text", placeholder, onSave }: Props) {
+export function SettingTextField({ label, settingKey, value, type = "text", placeholder, onSave, secret = false }: Props) {
   const safeValue = normalizeFieldValue(type, value);
-  const [draft, setDraft] = useState(safeValue);
-  useEffect(() => setDraft(safeValue), [safeValue]);
+  const hasStoredSecret = secret && safeValue !== "";
+  const [draft, setDraft] = useState(secret ? "" : safeValue);
+  useEffect(() => setDraft(secret ? "" : safeValue), [safeValue, secret]);
 
   return (
     <label>
@@ -25,9 +34,16 @@ export function SettingTextField({ label, settingKey, value, type = "text", plac
       <input
         type={type}
         value={draft}
-        placeholder={placeholder}
+        placeholder={hasStoredSecret ? "•••••••• guardado — escribe para cambiarlo" : placeholder}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => {
+          if (secret) {
+            const next = draft.trim();
+            if (next === "") return; // blank = keep the stored secret
+            void onSave(settingKey, next);
+            setDraft(""); // clear so the field stays write-only
+            return;
+          }
           const next = normalizeFieldValue(type, draft);
           if (next !== safeValue) void onSave(settingKey, next);
         }}

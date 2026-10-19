@@ -1,4 +1,5 @@
 import type { CalendarEvent, MenuKey } from "./inicioTypes";
+import { calendarEventClass } from "../../utils/statusColors";
 
 export type InicioUpcomingPanelProps = {
   upcoming: CalendarEvent[];
@@ -6,6 +7,12 @@ export type InicioUpcomingPanelProps = {
   formatEUR: (v: number) => string;
   onNavigate: (key: MenuKey) => void;
 };
+
+/** API amounts are absolute; income vs outflow comes from event tipo, not the sign. */
+function isCalendarInflow(tipo: string): boolean {
+  const cls = calendarEventClass(tipo);
+  return cls.includes("ingreso") || cls.includes("prestacion");
+}
 
 export function InicioUpcomingPanel({ upcoming, today, formatEUR, onNavigate }: InicioUpcomingPanelProps) {
   if (upcoming.length === 0) return null;
@@ -19,6 +26,7 @@ export function InicioUpcomingPanel({ upcoming, today, formatEUR, onNavigate }: 
         {upcoming.map((ev, i) => {
           const d = new Date(ev.fecha);
           const daysAway = Math.ceil((d.getTime() - today.getTime()) / 86_400_000);
+          const inflow = isCalendarInflow(ev.tipo);
           return (
             <div key={i} className="inicio-proj-row">
               <div>
@@ -33,8 +41,8 @@ export function InicioUpcomingPanel({ upcoming, today, formatEUR, onNavigate }: 
                   {" · "}{d.toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
                 </small>
               </div>
-              <strong className={`sensitive ${ev.monto < 0 ? "negative" : "positive"}`} style={{ fontSize: "0.875rem" }}>
-                {ev.monto < 0 ? "−" : "+"}{formatEUR(Math.abs(ev.monto))}
+              <strong className={`sensitive ${inflow ? "positive" : "negative"}`} style={{ fontSize: "0.875rem" }}>
+                {inflow ? "+" : "−"}{formatEUR(Math.abs(ev.monto))}
               </strong>
             </div>
           );

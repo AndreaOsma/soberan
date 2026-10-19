@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 class AccountBase(BaseModel):
     alias_real: str
@@ -348,6 +348,12 @@ class MonthlyBudgetCreate(MonthlyBudgetBase): pass
 class MonthlyBudget(MonthlyBudgetBase):
     id: int
     class Config: from_attributes = True
+
+class BudgetPropagateRequest(BaseModel):
+    recurring_entry_id: int
+    from_mes: int = Field(ge=1, le=12)
+    from_anio: int = Field(ge=1900, le=9999)
+    monto_real: float
 
 class BudgetCopyRequest(BaseModel):
     from_mes: int

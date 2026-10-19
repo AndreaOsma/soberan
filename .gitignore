@@ -22,10 +22,9 @@ backend/desktop/static/*
 backend/desktop/VERSION
 backend/dist/
 backend/build/
-# Staged copy of dev/lib/native-sync/backend/native_sync_router.py — only build
-# scripts/CI put this here (needed for Docker's build context, which can't reach
-# dev/lib directly); never hand-edit or commit it, it's the shared library.
-backend/native_sync_router.py
+# Client OAuth de Google que escriben los scripts de native-packaging al compilar
+# (secreto de Agenix) — nunca en git.
+backend/app/native_sync/build_config.py
 backend/.venv-desktop/
 backend/.venv-desktop-mac/
 packaging/out/

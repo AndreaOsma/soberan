@@ -5,7 +5,7 @@ import { DataToolsView } from "../data/DataToolsView";
 import { api } from "../../services/api";
 import { resolveAccentFromSettings } from "../../utils/accentTheme";
 import type { CsvTableId } from "../../utils/csvExport";
-import { SyncSettingsCard } from "../../../../../lib/native-sync/frontend/SyncSettingsCard";
+import { SyncSettingsCard } from "../../vendor/native-sync/SyncSettingsCard";
 
 type Props = {
   settings: Record<string, string>;
@@ -220,6 +220,7 @@ export function SettingsView({
             settingKey="kraken_api_key"
             value={settings.kraken_api_key || ""}
             type="password"
+            secret
             placeholder="Clave API Kraken (solo lectura)"
             onSave={(key, val) => saveSetting(key, val, false)}
           />
@@ -229,6 +230,7 @@ export function SettingsView({
               settingKey="kraken_api_secret"
               value={settings.kraken_api_secret || ""}
               type="password"
+              secret
               onSave={(key, val) => saveSetting(key, val, false)}
             />
           </div>

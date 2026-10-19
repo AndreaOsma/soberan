@@ -1,27 +1,65 @@
 :root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Brand UI font (web/Docker). Native shell below opts into real OS faces instead. */
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   color: #0f172a;
-  background: #f8fafc;
+  background: #f4f7fb;
   --primary: #2563eb;
   --accent: #60a5fa;
-  --bg: #f8fafc;
+  --bg: #f4f7fb;
   --gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   --ui-font: 16px;
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(100, 130, 180, 0.2);
-  --glass-blur: 20px;
+
+  /* Type scale */
+  --text-xs: 0.75rem; /* 12 px: mínimo legible (UXGuide) */
+  --text-sm: 0.84rem;
+  --text-base: 1rem;
+  --text-md: 1.05rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.4rem;
+  --text-kpi: 1.45rem;
+  --leading-tight: 1.2;
+  --leading-body: 1.55;
+  --tracking-label: 0.055em;
+  --tracking-tight: -0.018em;
+
+  /* Spacing rhythm (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-content-x: 1.5rem;
+  --space-content-y: 1.25rem;
+  --space-card: 1.35rem;
+  --space-grid: 1.15rem;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.15rem;
+  --radius-pill: 999px;
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(90, 120, 170, 0.18);
+  --glass-blur: 18px;
   --surface: var(--glass-bg);
-  --surface-soft: rgba(255, 255, 255, 0.4);
-  --border-soft: rgba(15, 23, 42, 0.1);
-  --text-main: #0f1f36;
-  --text-muted: #2a4568;
-  --shadow-soft: 0 12px 40px rgba(15, 23, 42, 0.06);
+  --surface-soft: rgba(255, 255, 255, 0.45);
+  --border-soft: rgba(15, 23, 42, 0.09);
+  --text-main: #0c1a2e;
+  --text-muted: #3a5474;
+  --shadow-soft: 0 8px 28px rgba(15, 23, 42, 0.055), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 14px 36px rgba(15, 23, 42, 0.08);
   --row-alt: rgba(15, 23, 42, 0.02);
   /* Floating panels (popovers, dropdowns, tooltips) that open with no dimming
      scrim behind them: needs to stay near-opaque so blurred content behind
      doesn't wash the panel in whatever colors happen to be under it. */
-  --glass-panel-bg: rgba(248, 250, 252, 0.9);
-  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  --glass-panel-bg: rgba(248, 250, 252, 0.94);
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.18);
   --status-ok: #10b981;
   --status-warn: #f59e0b;
   --status-crit: #ef4444;
@@ -36,12 +74,11 @@
   --color-negative: var(--status-crit);
 }
 
-/* Consistent brand font across every OS (Docker/desktop-browser access) vs. actually
-   looking native on each OS are opposite goals — the native app (html.native-shell, set by
-   useNativeShellClass()) opts into the latter: real San Francisco on iOS, real Roboto on
-   Android, instead of Inter standing out as "not quite the OS font" on either. */
+/* Brand font (web) vs native OS faces — opposite goals. html.native-shell (set by
+   useNativeShellClass()) uses real San Francisco / Roboto instead of the web face. */
 :root.native-shell {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, Roboto, "Segoe UI", sans-serif;
+  --font-sans: -apple-system, system-ui, BlinkMacSystemFont, Roboto, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .sr-only {
@@ -105,10 +142,11 @@ body {
 body {
   margin: 0;
   font-size: var(--ui-font);
-  line-height: 1.5;
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   color: var(--text-main);
+  letter-spacing: -0.011em;
 }
 
 .app-shell {
@@ -120,39 +158,50 @@ body {
      allowed to overflow, and it does so in its own independent scroll box. */
   height: 100dvh;
   padding: 0;
-  background: linear-gradient(165deg, #eef4ff 0%, #f6fbff 60%, #e7f0ff 100%);
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(96, 165, 250, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 88% 8%, rgba(56, 189, 248, 0.1), transparent 50%),
+    linear-gradient(165deg, #e8f0fa 0%, #f5f8fc 55%, #e9f1f8 100%);
   background-attachment: fixed;
   transition: background 0.35s ease, color 0.35s ease;
   position: relative;
 }
 
 .app-shell.theme-light {
-  color: #0f1f36;
-  background: linear-gradient(165deg, #eef4ff 0%, #f6fbff 60%, #e7f0ff 100%);
+  color: #0c1a2e;
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(96, 165, 250, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 88% 8%, rgba(56, 189, 248, 0.1), transparent 50%),
+    linear-gradient(165deg, #e8f0fa 0%, #f5f8fc 55%, #e9f1f8 100%);
   background-attachment: fixed;
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(100, 130, 180, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(90, 120, 170, 0.18);
   --surface: var(--glass-bg);
-  --surface-soft: rgba(255, 255, 255, 0.4);
-  --border-soft: rgba(15, 23, 42, 0.1);
-  --text-main: #0f1f36;
-  --text-muted: #2a4568;
-  --shadow-soft: 0 12px 40px rgba(15, 23, 42, 0.06);
-  --glass-panel-bg: rgba(248, 250, 252, 0.9);
+  --surface-soft: rgba(255, 255, 255, 0.45);
+  --border-soft: rgba(15, 23, 42, 0.09);
+  --text-main: #0c1a2e;
+  --text-muted: #3a5474;
+  --shadow-soft: 0 8px 28px rgba(15, 23, 42, 0.055), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 14px 36px rgba(15, 23, 42, 0.08);
+  --glass-panel-bg: rgba(248, 250, 252, 0.94);
 }
 
 .app-shell.theme-dark {
   color: #eaf1ff;
-  background: linear-gradient(165deg, #03060d 0%, #060b14 55%, #0b1220 100%);
+  background:
+    radial-gradient(1000px 520px at 10% -8%, rgba(59, 130, 246, 0.16), transparent 55%),
+    radial-gradient(800px 420px at 92% 0%, rgba(14, 165, 233, 0.08), transparent 50%),
+    linear-gradient(165deg, #03060d 0%, #060b14 55%, #0b1220 100%);
   background-attachment: fixed;
-  --glass-bg: rgba(18, 28, 45, 0.75);
-  --glass-border: rgba(141, 173, 255, 0.18);
+  --glass-bg: rgba(18, 28, 45, 0.78);
+  --glass-border: rgba(141, 173, 255, 0.16);
   --surface: var(--glass-bg);
   --surface-soft: rgba(15, 30, 55, 0.6);
   --border-soft: rgba(141, 173, 255, 0.14);
   --text-main: #eaf1ff;
   --text-muted: #b8c8e8;
-  --shadow-soft: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --glass-panel-bg: rgba(8, 14, 26, 0.9);
+  --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 20px 48px rgba(0, 0, 0, 0.5);
+  --glass-panel-bg: rgba(8, 14, 26, 0.92);
 }
 

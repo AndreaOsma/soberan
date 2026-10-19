@@ -23,5 +23,5 @@
       "@capacitor/status-bar": ["./node_modules/@capacitor/status-bar"]
     }
   },
-  "include": ["src", "../../lib/native-sync/frontend", "../../lib/native-feel/frontend"]
+  "include": ["src", "../../lib/native-feel/frontend"]
 }

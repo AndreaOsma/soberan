@@ -5,7 +5,6 @@ import csv
 import io
 import re
 import zipfile
-from datetime import datetime
 from typing import Any, Dict
 
 from sqlalchemy.orm import Session
@@ -56,7 +55,9 @@ CSV_TABLE_SLUGS: Dict[str, str] = {
 
 def csv_bytes_for_table(db: Session, table: str) -> bytes:
     model = CSV_TABLE_MODELS[table]
-    rows = db.query(model).all()
+    # Orden estable: el bundle de sync tiene que salir idéntico si los datos no cambian
+    # (native_sync compara hashes para saber si hay cambios locales).
+    rows = db.query(model).order_by(*model.__table__.primary_key.columns).all()
     columns = [c.name for c in model.__table__.columns]
     stream = io.StringIO()
     writer = csv.DictWriter(stream, fieldnames=columns)
@@ -67,16 +68,23 @@ def csv_bytes_for_table(db: Session, table: str) -> bytes:
 
 
 def export_bundle_bytes(db: Session) -> bytes:
-    stamp = datetime.utcnow().strftime("%Y-%m-%d")
+    """ZIP determinista: mismos datos → mismos bytes. Sin fecha en los nombres ni hora de
+    escritura en las entradas, o cada día (o cada export) parecería un cambio local y el
+    auto-sync de native_sync subiría de más o daría conflictos falsos."""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for table in CSV_TABLE_MODELS:
             slug = CSV_TABLE_SLUGS.get(table, table)
-            zf.writestr(f"soberan-{slug}-{stamp}.csv", csv_bytes_for_table(db, table))
+            info = zipfile.ZipInfo(f"soberan-{slug}.csv", date_time=_FIXED_ZIP_TIME)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            zf.writestr(info, csv_bytes_for_table(db, table))
     return buf.getvalue()
 
 
-_MEMBER_NAME_RE = re.compile(r"^soberan-(?P<slug>.+)-\d{4}-\d{2}-\d{2}\.csv$", re.IGNORECASE)
+_FIXED_ZIP_TIME = (1980, 1, 1, 0, 0, 0)
+# Bundles antiguos (aún en el Drive de quien no ha vuelto a sincronizar) llevaban la fecha
+# del export en el nombre: soberan-<slug>-AAAA-MM-DD.csv.
+_MEMBER_NAME_RE = re.compile(r"^soberan-(?P<slug>.+?)(?:-\d{4}-\d{2}-\d{2})?\.csv$", re.IGNORECASE)
 
 
 def import_bundle_replace(db: Session, payload: bytes) -> dict[str, int]:

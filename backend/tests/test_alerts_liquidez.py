@@ -13,7 +13,7 @@ def test_riesgo_liquidez_muestra_magnitud_sin_signo():
             "alias_real": "Cuenta liquidez test",
             "alias_anonimo": "ACC_LIQ_TEST",
             "tipo": "fondos",
-            "balance_actual": -4159.99,
+            "balance_actual": -1234.56,
             "banco": "Banco Test",
             "iban": None,
         },
@@ -27,6 +27,6 @@ def test_riesgo_liquidez_muestra_magnitud_sin_signo():
 
     # Assert: liquidity alert should show positive discovered amount
     msg = next((a.get("mensaje", "") for a in alertas if a.get("tipo") == "riesgo_liquidez"), "")
-    assert "descubierto de 4159.99€" in msg
-    assert "-4159.99" not in msg
+    assert "descubierto de 1234.56€" in msg
+    assert "-1234.56" not in msg
 

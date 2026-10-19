@@ -1,0 +1,208 @@
+/* Baseline UX común del homelab (AGENTS.md → UXGuide). Soberan mantiene su marca; esto solo añade
+   lo que la guía exige y no estaba: color-scheme según el tema elegido (controles nativos y barras
+   de scroll a juego), «Saltar al contenido» y zonas táctiles de 44 px / campos de 16 px en táctil. */
+:root:has(.app-shell.theme-dark) {
+  color-scheme: dark;
+}
+:root:has(.app-shell.theme-light) {
+  color-scheme: light;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1000;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.skip-link:not(:focus) {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#contenido:focus {
+  outline: none;
+}
+
+@media (pointer: coarse) {
+  .topbar-menu-btn,
+  .btn,
+  button.btn-link,
+  .segmented > button,
+  .density-toggle__trigger,
+  .appearance-toggle__trigger,
+  .appearance-toggle__btn {
+    min-height: 44px;
+  }
+  .topbar-menu-btn,
+  .density-toggle__trigger,
+  .appearance-toggle__trigger,
+  .appearance-toggle__btn {
+    min-width: 44px;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
+/* Onboarding: pasos legibles (≥12 px y contraste AA en vez de opacity 0.45) y botones de 44 px */
+.onboarding-progress {
+  font-size: 0.75rem;
+}
+.onboarding-step {
+  opacity: 1;
+  color: var(--text-muted);
+}
+.onboarding-step.is-active {
+  color: var(--text-main);
+}
+.onboarding-actions button {
+  min-height: 44px;
+}
+
+/* Ningún texto por debajo de 12 px en Inicio (la barra de pestañas es la excepción de la guía) */
+.inicio-header__badge,
+.inicio-kpi__label,
+.inicio-panel__head h3 {
+  font-size: 0.75rem !important;
+}
+
+/* Zonas táctiles de 44 px en la cabecera y acciones de Inicio */
+@media (pointer: coarse) {
+  /* La columna de controles mide justo su contenido; el título cede con elipsis (a 320 px se pisaban) */
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+  .topbar-end {
+    gap: 0.25rem;
+    min-width: max-content;
+  }
+  .topbar-end > * {
+    flex-shrink: 0;
+  }
+  .content-toolbar__period-nav {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 24px;
+    height: 24px;
+  }
+  /* Deslizadores, selectores de archivo y filas de casilla: zona táctil de 44 px */
+  input[type="range"],
+  input[type="file"] {
+    min-height: 44px;
+  }
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]),
+  .csv-export-item__check {
+    min-height: 44px;
+    align-items: center;
+  }
+  /* Con botones de 44 px la cabecera no envuelve: cede el título (elipsis), no los controles */
+  .topbar-end {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+  .topbar-center {
+    min-width: 0;
+    justify-self: stretch;
+  }
+  .alerts-popover-trigger {
+    white-space: nowrap;
+  }
+  .topbar-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar-icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .alerts-popover-trigger,
+  .inicio-header__badge,
+  .content button:not(.btn-link) {
+    min-height: 44px;
+  }
+}
+
+/* Móvil: la cabecera es fixed (ver topbar.css) y content.css deja su hueco con padding-top, pero
+   mobile-nav.css redefinía .content { padding: 0.65rem … } y lo anulaba: la barra «+ Movimiento»
+   y el principio de cada vista quedaban tapados bajo la cabecera. */
+@media (max-width: 720px) {
+  .content {
+    padding-top: calc(max(0.45rem, env(safe-area-inset-top, 0px)) + 44px + 0.45rem + 0.65rem);
+  }
+}
+
+/* ── Sello espacial (marca personal) ────────────────────────────────────────
+   Soberan conserva sus degradados de marca; encima, de noche un cielo de estrellas y una nebulosa
+   tenue, y en los dos temas la constelación del Triángulo de Verano (Altair), muy suave. */
+.app-shell.theme-dark {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1600 1000%22 preserveAspectRatio=%22xMaxYMin slice%22%3E%3Cline x1=%221150%22 y1=%22160%22 x2=%221460%22 y2=%22120%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221460%22 y1=%22120%22 x2=%221330%22 y2=%22470%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221330%22 y1=%22470%22 x2=%221150%22 y2=%22160%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221306%22 y1=%22446%22 x2=%221330%22 y2=%22470%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221330%22 y1=%22470%22 x2=%221354%22 y2=%22494%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221460%22 y1=%22120%22 x2=%221405%22 y2=%22215%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221405%22 y1=%22215%22 x2=%221330%22 y2=%22335%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221478%22 y1=%22268%22 x2=%221405%22 y2=%22215%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221405%22 y1=%22215%22 x2=%221335%22 y2=%22175%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221150%22 y1=%22160%22 x2=%221168%22 y2=%22196%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221168%22 y1=%22196%22 x2=%221190%22 y2=%22232%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221190%22 y1=%22232%22 x2=%221212%22 y2=%22222%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221212%22 y1=%22222%22 x2=%221194%22 y2=%22186%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221194%22 y1=%22186%22 x2=%221150%22 y2=%22160%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Ccircle cx=%221150%22 cy=%22160%22 r=%222.8%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221460%22 cy=%22120%22 r=%222.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22470%22 r=%223.4%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221306%22 cy=%22446%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221354%22 cy=%22494%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221405%22 cy=%22215%22 r=%221.8%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22335%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221478%22 cy=%22268%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221335%22 cy=%22175%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221168%22 cy=%22196%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221190%22 cy=%22232%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221212%22 cy=%22222%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221194%22 cy=%22186%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22470%22 r=%229%22 fill=%22none%22 stroke=%22rgba(120,150,210,0.18)%22/%3E%3C/svg%3E"),
+radial-gradient(1.2px 1.2px at 40.5% 17.1%, rgb(234 241 255 / 0.72), transparent),
+    radial-gradient(1.2px 1.2px at 25.3% 67.3%, rgb(170 200 255 / 0.41), transparent),
+    radial-gradient(1.8px 1.8px at 85.8% 48.0%, rgb(170 200 255 / 0.76), transparent),
+    radial-gradient(1.2px 1.2px at 25.7% 61.2%, rgb(234 241 255 / 0.73), transparent),
+    radial-gradient(1.2px 1.2px at 52.7% 6.6%, rgb(170 200 255 / 0.82), transparent),
+    radial-gradient(1.2px 1.2px at 63.5% 39.6%, rgb(234 241 255 / 0.41), transparent),
+    radial-gradient(1.2px 1.2px at 70.6% 53.5%, rgb(234 241 255 / 0.72), transparent),
+    radial-gradient(2.4px 2.4px at 31.1% 89.4%, rgb(170 200 255 / 0.9), transparent),
+    radial-gradient(1.8px 1.8px at 96.9% 8.7%, rgb(234 241 255 / 0.54), transparent),
+    radial-gradient(1.5px 1.5px at 16.4% 14.5%, rgb(170 200 255 / 0.63), transparent),
+    radial-gradient(1.2px 1.2px at 64.7% 16.3%, rgb(170 200 255 / 0.82), transparent),
+    radial-gradient(2.4px 2.4px at 24.4% 60.5%, rgb(170 200 255 / 0.9), transparent),
+    radial-gradient(1.2px 1.2px at 41.2% 31.3%, rgb(234 241 255 / 0.68), transparent),
+    radial-gradient(1.5px 1.5px at 85.2% 19.4%, rgb(234 241 255 / 0.65), transparent),
+    radial-gradient(1.8px 1.8px at 21.6% 22.4%, rgb(170 200 255 / 0.58), transparent),
+    radial-gradient(1.2px 1.2px at 8.0% 24.5%, rgb(170 200 255 / 0.67), transparent),
+    radial-gradient(1.8px 1.8px at 63.6% 14.2%, rgb(234 241 255 / 0.59), transparent),
+    radial-gradient(1.5px 1.5px at 87.4% 60.5%, rgb(170 200 255 / 0.56), transparent),
+    radial-gradient(2.4px 2.4px at 15.4% 33.5%, rgb(234 241 255 / 0.9), transparent),
+    radial-gradient(2.4px 2.4px at 75.4% 80.0%, rgb(234 241 255 / 0.9), transparent),
+    radial-gradient(1.2px 1.2px at 97.8% 21.9%, rgb(170 200 255 / 0.63), transparent),
+    radial-gradient(1.5px 1.5px at 92.5% 82.9%, rgb(234 241 255 / 0.65), transparent),
+    radial-gradient(2.4px 2.4px at 30.1% 68.6%, rgb(234 241 255 / 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 87.5% 31.6%, rgb(234 241 255 / 0.74), transparent),
+    radial-gradient(1.2px 1.2px at 12.6% 12.5%, rgb(234 241 255 / 0.8), transparent),
+    radial-gradient(1.2px 1.2px at 87.1% 24.3%, rgb(234 241 255 / 0.37), transparent),
+    radial-gradient(2.4px 2.4px at 61.4% 83.1%, rgb(234 241 255 / 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 14.9% 84.8%, rgb(234 241 255 / 0.57), transparent),
+    radial-gradient(1.5px 1.5px at 79.4% 94.5%, rgb(170 200 255 / 0.58), transparent),
+    radial-gradient(1.2px 1.2px at 88.3% 97.1%, rgb(234 241 255 / 0.64), transparent),
+    radial-gradient(1.5px 1.5px at 94.2% 77.6%, rgb(234 241 255 / 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 3.5% 17.6%, rgb(234 241 255 / 0.42), transparent),
+    radial-gradient(1.8px 1.8px at 64.5% 23.9%, rgb(234 241 255 / 0.64), transparent),
+    radial-gradient(1.5px 1.5px at 69.0% 83.7%, rgb(170 200 255 / 0.45), transparent),
+    radial-gradient(1.8px 1.8px at 45.6% 84.4%, rgb(234 241 255 / 0.46), transparent),
+    radial-gradient(1.2px 1.2px at 26.3% 9.9%, rgb(234 241 255 / 0.81), transparent),
+    radial-gradient(1.5px 1.5px at 92.5% 47.9%, rgb(234 241 255 / 0.56), transparent),
+    radial-gradient(1.2px 1.2px at 95.7% 53.6%, rgb(234 241 255 / 0.36), transparent),
+radial-gradient(760px 460px at 86% 12%, rgba(124, 92, 255, 0.10), transparent 70%),
+    radial-gradient(620px 420px at 6% 88%, rgba(56, 189, 248, 0.065), transparent 70%),
+    radial-gradient(1000px 520px at 10% -8%, rgba(59, 130, 246, 0.16), transparent 55%),
+    radial-gradient(800px 420px at 92% 0%, rgba(14, 165, 233, 0.08), transparent 50%),
+    linear-gradient(165deg, #03060d 0%, #060b14 55%, #0b1220 100%);
+  background-attachment: fixed;
+}
+.app-shell.theme-light {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1600 1000%22 preserveAspectRatio=%22xMaxYMin slice%22%3E%3Cline x1=%221150%22 y1=%22160%22 x2=%221460%22 y2=%22120%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221460%22 y1=%22120%22 x2=%221330%22 y2=%22470%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221330%22 y1=%22470%22 x2=%221150%22 y2=%22160%22 stroke=%22rgba(110,140,200,0.15)%22 stroke-width=%221%22 stroke-dasharray=%223 7%22/%3E%3Cline x1=%221306%22 y1=%22446%22 x2=%221330%22 y2=%22470%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221330%22 y1=%22470%22 x2=%221354%22 y2=%22494%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221460%22 y1=%22120%22 x2=%221405%22 y2=%22215%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221405%22 y1=%22215%22 x2=%221330%22 y2=%22335%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221478%22 y1=%22268%22 x2=%221405%22 y2=%22215%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221405%22 y1=%22215%22 x2=%221335%22 y2=%22175%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221150%22 y1=%22160%22 x2=%221168%22 y2=%22196%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221168%22 y1=%22196%22 x2=%221190%22 y2=%22232%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221190%22 y1=%22232%22 x2=%221212%22 y2=%22222%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221212%22 y1=%22222%22 x2=%221194%22 y2=%22186%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%221194%22 y1=%22186%22 x2=%221150%22 y2=%22160%22 stroke=%22rgba(110,140,200,0.22)%22 stroke-width=%221%22/%3E%3Ccircle cx=%221150%22 cy=%22160%22 r=%222.8%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221460%22 cy=%22120%22 r=%222.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22470%22 r=%223.4%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221306%22 cy=%22446%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221354%22 cy=%22494%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221405%22 cy=%22215%22 r=%221.8%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22335%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221478%22 cy=%22268%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221335%22 cy=%22175%22 r=%221.6%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221168%22 cy=%22196%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221190%22 cy=%22232%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221212%22 cy=%22222%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221194%22 cy=%22186%22 r=%221.3%22 fill=%22rgba(120,150,210,0.5)%22/%3E%3Ccircle cx=%221330%22 cy=%22470%22 r=%229%22 fill=%22none%22 stroke=%22rgba(120,150,210,0.18)%22/%3E%3C/svg%3E"),
+    radial-gradient(1200px 600px at 12% -10%, rgba(96, 165, 250, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 88% 8%, rgba(56, 189, 248, 0.1), transparent 50%),
+    linear-gradient(165deg, #e8f0fa 0%, #f5f8fc 55%, #e9f1f8 100%);
+  background-attachment: fixed;
+}

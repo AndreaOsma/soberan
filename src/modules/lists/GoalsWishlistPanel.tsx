@@ -50,9 +50,9 @@ export function GoalsWishlistPanel({
   return (
         <section className="grid one-col">
           <article className="card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div className="card-section-head">
               <h2>Objetivos</h2>
-              <button onClick={() => setIsGoalFormOpen(true)}>+ Nuevo objetivo</button>
+              <button type="button" className="button-secondary" onClick={() => setIsGoalFormOpen(true)}>+ Nuevo objetivo</button>
             </div>
             {goals.length === 0 ? (
               <EmptyState
@@ -76,24 +76,39 @@ export function GoalsWishlistPanel({
                       const daysToDeadline = goal.fecha_limite
                         ? Math.ceil((new Date(goal.fecha_limite).getTime() - Date.now()) / 86_400_000)
                         : null;
+                      const sourceBits: Array<{ text: string; urgent?: boolean }> = [
+                        { text: `Fuente: ${goalProgressLabel(snapshot)}` },
+                      ];
+                      if (snapshot.monthlyContribution > 0) {
+                        sourceBits.push({
+                          text: `Aportación (${MONTH_NAMES[month - 1]} ${year}): ${formatEUR(snapshot.monthlyContribution)}/mes`,
+                        });
+                      } else if (snapshot.fundingKind === "partidas") {
+                        sourceBits.push({ text: "Sin aportación planificada este mes" });
+                      }
+                      if (!snapshot.isComplete && daysToDeadline !== null && daysToDeadline < 180) {
+                        sourceBits.push({
+                          text: `vence en ${daysToDeadline}d`,
+                          urgent: daysToDeadline < 30,
+                        });
+                      }
                       return (
-                        <li key={goal.id} style={snapshot.isComplete ? { opacity: 0.5 } : undefined}>
+                        <li key={goal.id} className={snapshot.isComplete ? "goal-item--done" : undefined}>
                           <div className="goal-header">
-                            <div>
-                              <span>{snapshot.isComplete && "✓ "}{goal.nombre}</span>
-                              {linkedAccount && (
-                                <small className="muted" style={{ marginLeft: "0.5rem" }}>
-                                  · {linkedAccount.alias_real}
-                                </small>
-                              )}
-                              {goal.cartera_destino && (
-                                <small className="muted" style={{ marginLeft: "0.5rem" }}>
-                                  · {goal.cartera_destino}
+                            <div className="goal-header__title">
+                              <span className="goal-header__name">
+                                {snapshot.isComplete ? "✓ " : ""}{goal.nombre}
+                              </span>
+                              {(linkedAccount || goal.cartera_destino) && (
+                                <small className="muted goal-header__meta">
+                                  {linkedAccount ? linkedAccount.alias_real : null}
+                                  {linkedAccount && goal.cartera_destino ? " · " : null}
+                                  {goal.cartera_destino || null}
                                 </small>
                               )}
                             </div>
-                            <div className="inline-actions">
-                              <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
+                            <div className="goal-header__actions">
+                              <button type="button" className="button-secondary"
                                 aria-label={`Editar objetivo ${goal.nombre}`} title="Editar"
                                 onClick={() => setEditGoalModal(goal)}>✎</button>
                               <button type="button" className="danger"
@@ -104,16 +119,13 @@ export function GoalsWishlistPanel({
                             </div>
                           </div>
                           <GoalProgressBlock snapshot={snapshot} formatEUR={formatEUR} />
-                          <small className="muted" style={{ display: "block", marginTop: "0.35rem" }}>
-                            Fuente: {goalProgressLabel(snapshot)}
-                            {snapshot.monthlyContribution > 0 ? (
-                              <> · Aportación en presupuesto ({MONTH_NAMES[month - 1]} {year}): <span className="sensitive">{formatEUR(snapshot.monthlyContribution)}</span>/mes</>
-                            ) : snapshot.fundingKind === "partidas" ? (
-                              <> · Sin aportación planificada este mes</>
-                            ) : null}
-                            {!snapshot.isComplete && daysToDeadline !== null && daysToDeadline < 180 && (
-                              <span className={daysToDeadline < 30 ? "negative" : ""}> · vence en {daysToDeadline}d</span>
-                            )}
+                          <small className="muted goal-item__footer">
+                            {sourceBits.map((bit, idx) => (
+                              <span key={bit.text}>
+                                {idx > 0 ? " · " : null}
+                                <span className={bit.urgent ? "negative" : undefined}>{bit.text}</span>
+                              </span>
+                            ))}
                           </small>
                         </li>
                       );
@@ -122,8 +134,8 @@ export function GoalsWishlistPanel({
                   {completedGoals.length > 0 && (
                     <button
                       type="button"
-                      className="button-secondary"
-                      style={{ marginTop: "0.75rem", fontSize: "0.8rem" }}
+                      className="button-secondary card-section-foot"
+                      style={{ fontSize: "0.8rem" }}
                       onClick={() => setShowCompletedGoals(v => !v)}
                     >
                       {showCompletedGoals
@@ -137,9 +149,9 @@ export function GoalsWishlistPanel({
           </article>
 
           <article className="card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div className="card-section-head">
               <h2>Lista de deseos</h2>
-              <button onClick={() => setIsWishlistFormOpen(true)}>+ Añadir</button>
+              <button type="button" className="button-secondary" onClick={() => setIsWishlistFormOpen(true)}>+ Añadir</button>
             </div>
             {(() => {
               const activeWishlist = wishlist.filter(isWishlistActive);

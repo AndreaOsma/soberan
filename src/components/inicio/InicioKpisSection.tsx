@@ -80,8 +80,8 @@ export function InicioKpisSection({
         </div>
         {totals.totalDebt > 0 && (
           <>
-            <div className="inicio-kpi inicio-kpi--sep" aria-hidden />
-            <button type="button" className="inicio-kpi inicio-kpi--clickable" onClick={() => onNavigate("Pasivos")}>
+            <div className="inicio-kpi inicio-kpi--sep detail-only" aria-hidden />
+            <button type="button" className="inicio-kpi inicio-kpi--clickable detail-only" onClick={() => onNavigate("Pasivos")}>
               <span className="inicio-kpi__label">DTI deudas</span>
               <strong className={`inicio-kpi__value sensitive ${dtiPct >= 35 ? "negative" : dtiPct >= 28 ? "" : "positive"}`}>
                 {dtiPct.toFixed(1)}%
@@ -97,7 +97,7 @@ export function InicioKpisSection({
       </div>
 
       {!privacyMode && (
-        <div className="inicio-panel inicio-breakdown-panel">
+        <div className="inicio-panel inicio-breakdown-panel detail-only">
           <button
             type="button"
             className="inicio-breakdown-toggle"

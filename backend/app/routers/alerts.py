@@ -253,6 +253,16 @@ def get_alertas(db: Session = Depends(get_db)):
         except Exception as e:
             logger.error(f"Error in alert 9: {e}")
 
+        # 10. Sync bancaria (GoCardless) — stale / errors / reauth
+        try:
+            from app.bank_sync_alerts import build_bank_sync_alert
+
+            finding = build_bank_sync_alert(db, now)
+            if finding:
+                alertas.append(finding)
+        except Exception as e:
+            logger.error(f"Error in alert 10: {e}")
+
     except Exception as e:
         logger.error(f"Critical error in get_alertas: {e}")
     

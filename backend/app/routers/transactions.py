@@ -1,9 +1,10 @@
 """Transaction CRUD routes."""
 from __future__ import annotations
 
-from typing import List
+from datetime import datetime, timedelta
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from .. import models
@@ -27,9 +28,40 @@ def _tx_query(db: Session):
     return db.query(models.Transaction).options(joinedload(models.Transaction.splits))
 
 
+def _parse_query_date(label: str, raw: Optional[str]) -> Optional[datetime]:
+    if not raw:
+        return None
+    try:
+        return datetime.strptime(raw[:10], "%Y-%m-%d")
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=f"'{label}' debe tener formato YYYY-MM-DD") from err
+
+
 @router.get("/transactions/", response_model=List[Transaction])
-def get_txs(db: Session = Depends(get_db)):
-    return _tx_query(db).order_by(models.Transaction.date.desc()).all()
+def get_txs(
+    desde: Optional[str] = Query(None, description="Fecha ISO (YYYY-MM-DD), inclusive. Omite para no acotar."),
+    hasta: Optional[str] = Query(None, description="Fecha ISO (YYYY-MM-DD), inclusive. Omite para no acotar."),
+    limit: Optional[int] = Query(None, ge=1, le=5000, description="Máx. filas. Omite para devolver todo el histórico."),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Sin parámetros, comportamiento idéntico al de siempre: todo el histórico.
+
+    desde/hasta/limit/offset son opcionales y aditivos, pensados para vistas o
+    exports que solo necesitan una ventana de tiempo — no cambian nada para los
+    consumidores existentes (frontend, agente, tests) que no los envían.
+    """
+    q = _tx_query(db)
+    desde_dt = _parse_query_date("desde", desde)
+    hasta_dt = _parse_query_date("hasta", hasta)
+    if desde_dt is not None:
+        q = q.filter(models.Transaction.date >= desde_dt)
+    if hasta_dt is not None:
+        q = q.filter(models.Transaction.date < hasta_dt + timedelta(days=1))
+    q = q.order_by(models.Transaction.date.desc())
+    if limit is not None:
+        q = q.offset(offset).limit(limit)
+    return q.all()
 
 
 @router.get("/transactions/split-balances")

@@ -3,6 +3,10 @@ import { api } from "../services/api";
 import { transactionInCalendarMonth } from "../utils/format";
 import { computeMonthlyBudgetTotals } from "../utils/budgetTotals";
 import { getJsonSetting as readJsonSetting } from "../utils/settings";
+import { hasCachedSnapshot, markCachedSnapshot, readCache, writeCache } from "../utils/dataCache";
+import { isOnboardingMarkedDone, persistOnboardingDoneLocal, readOnboardingDoneLocal } from "../utils/onboardingStorage";
+import { useCalendarPeriod } from "./useCalendarPeriod";
+import { useDeleteWithUndo } from "./useDeleteWithUndo";
 import type {
   Account,
   AlertItem,
@@ -24,75 +28,14 @@ import type {
 import type { AddToastOptions } from "./useAppToasts";
 import type { ToastItem } from "../components/Toast";
 
-export const ONBOARDING_DONE_LS = "soberan-onboarding-done";
-
-export function readOnboardingDoneLocal(): boolean {
-  try {
-    return localStorage.getItem(ONBOARDING_DONE_LS) === "true";
-  } catch {
-    return false;
-  }
-}
-
-export function persistOnboardingDoneLocal(): void {
-  try {
-    localStorage.setItem(ONBOARDING_DONE_LS, "true");
-  } catch {
-    // ignore quota / private mode
-  }
-}
-
-export function isOnboardingMarkedDone(settings: Record<string, string>): boolean {
-  return settings.onboarding_done === "true" || readOnboardingDoneLocal();
-}
-
-// Client-side (WebView) mirror of the last successful fetch for every core/month
-// dataset + settings, hydrated synchronously into useState's lazy initializer below —
-// the very first render already has the last-known data instead of empty arrays that
-// silently fill in a beat later once the network round-trip (even a local one, to the
-// embedded backend) resolves. loadAll()/loadMonthData()/loadSettings() write through to
-// this on every successful fetch, so it's never more than one load cycle stale.
-const CACHE_PREFIX = "soberan-cache-v1:";
-
-function readCache<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(CACHE_PREFIX + key);
-    return raw !== null ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeCache(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
-  } catch {
-    // Quota exceeded or localStorage unavailable (private mode) — caching is a nice-to-
-    // have for instant paint, never required for correctness, so this is silently skipped.
-  }
-}
-
-// Written once loadCoreData() has ever succeeded — checked synchronously (not via an
-// effect) to seed `loading`'s initial value below. Populating accounts/transactions/etc.
-// from cache alone wasn't enough: AppShell renders <ViewSkeleton> in place of real
-// content for as long as `loading` is true, and that used to start true unconditionally,
-// hiding the already-hydrated cached data behind a skeleton until the real network round
-// trip finished anyway — the exact "still slow to load" a second app open shouldn't be.
-function hasCachedSnapshot(): boolean {
-  try {
-    return localStorage.getItem(CACHE_PREFIX + "hasSnapshot") === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markCachedSnapshot(): void {
-  try {
-    localStorage.setItem(CACHE_PREFIX + "hasSnapshot", "1");
-  } catch {
-    // best-effort, see writeCache
-  }
-}
+// Re-exported for backward compatibility — call sites (App.tsx) import these from this
+// module; the implementations live in utils/onboardingStorage.ts (pure, unit-tested).
+export {
+  ONBOARDING_DONE_LS,
+  isOnboardingMarkedDone,
+  persistOnboardingDoneLocal,
+  readOnboardingDoneLocal,
+} from "../utils/onboardingStorage";
 
 type AddToast = (
   message: string,
@@ -152,38 +95,10 @@ export function useSoberanData({
     Array<{ asset: string; amount: number; eur_value: number | null; eur_price: number | null; type: string }>
   >([]);
 
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [year, setYear] = useState(new Date().getFullYear());
+  const { month, setMonth, year, setYear, adjustMonth, adjustYear, yearSelectOptions } = useCalendarPeriod();
   const [settings, setSettings] = useState<Record<string, string>>(() => readCache("settings", {}));
 
-  function deleteWithUndo(label: string, onCommit: () => Promise<void>, onCancel?: () => void) {
-    const id = allocateToastId();
-    let cancelled = false;
-    const timer = window.setTimeout(async () => {
-      if (cancelled) return;
-      try {
-        await onCommit();
-      } catch {
-        addToast("No se pudo eliminar.", "error");
-        onCancel?.();
-      }
-      dismissToast(id);
-    }, 5000);
-    pushToast({
-      id,
-      message: `${label} — se eliminará en 5 s`,
-      type: "info" as const,
-      duration: 5500,
-      action: {
-        label: "Deshacer",
-        onClick: () => {
-          cancelled = true;
-          window.clearTimeout(timer);
-          onCancel?.();
-        },
-      },
-    });
-  }
+  const deleteWithUndo = useDeleteWithUndo({ addToast, dismissToast, allocateToastId, pushToast });
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter((tx) => transactionInCalendarMonth(tx.date, month, year));
@@ -612,9 +527,23 @@ export function useSoberanData({
     let cancelled = false;
     const timer = window.setTimeout(() => {
       if (cancelled) return;
+      // Primero los km reales desde Garaje (si está configurado): si el salto es grande,
+      // la valoración queda caducada y refresh-due la rehace ya con esos km.
       void api
-        .refreshDueVehicleValuations()
+        .syncGaraje()
+        .then((sync) => {
+          if (!cancelled && sync.status === "ok" && (sync.km_actualizados?.length ?? 0) > 0) {
+            void api.getProperties().then((propsData) => {
+              if (!cancelled) setProperties(propsData);
+            });
+          }
+        })
+        .catch(() => {
+          /* silent: Garaje es opcional */
+        })
+        .then(() => (cancelled ? null : api.refreshDueVehicleValuations()))
         .then((result) => {
+          if (!result) return;
           if (cancelled) return;
           if (result.refreshed.length > 0) {
             const n = result.refreshed.length;
@@ -642,25 +571,6 @@ export function useSoberanData({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- post-paint once per boot
   }, [bootstrapped]);
-
-  function adjustMonth(offset: number) {
-    const base = new Date(year, month - 1, 1);
-    base.setMonth(base.getMonth() + offset);
-    setMonth(base.getMonth() + 1);
-    setYear(base.getFullYear());
-  }
-
-  const currentCalendarYear = new Date().getFullYear();
-  const yearSelectOptions = useMemo(
-    () => Array.from({ length: 41 }, (_, i) => currentCalendarYear - 20 + i),
-    [currentCalendarYear],
-  );
-
-  function adjustYear(offset: number) {
-    const min = currentCalendarYear - 20;
-    const max = currentCalendarYear + 20;
-    setYear((y) => Math.min(max, Math.max(min, y + offset)));
-  }
 
   return {
     loading,

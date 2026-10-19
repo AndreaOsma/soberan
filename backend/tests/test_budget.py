@@ -115,3 +115,45 @@ def test_recurring_entry_rentabilidad_anual_pct_defaults_to_none():
     )
     assert created.status_code == 200
     assert created.json()["rentabilidad_anual_pct"] is None
+
+
+def test_monthly_budget_propagate_updates_later_overrides_only():
+    entry_id = client.post(
+        "/recurring-entries/",
+        json={"nombre": "Abono propagate", "monto_estimado": 10.0, "es_ingreso": False, "es_fijo": True, "categoria": "Transporte"},
+    ).json()["id"]
+
+    def upsert(mes, anio, monto, excluido=False):
+        r = client.post("/monthly-budget/", json={
+            "mes": mes, "anio": anio, "recurring_entry_id": entry_id,
+            "monto_real": monto, "excluido": excluido,
+        })
+        assert r.status_code == 200
+
+    upsert(9, 2026, 40.0)
+    upsert(10, 2026, 40.0)
+    upsert(11, 2026, 0.0, excluido=True)
+    upsert(1, 2027, 40.0)
+
+    r = client.post("/monthly-budget/propagate", json={
+        "recurring_entry_id": entry_id, "from_mes": 10, "from_anio": 2026, "monto_real": 12.5,
+    })
+    assert r.status_code == 200
+    assert r.json()["updated"] == 2
+
+    def amount(mes, anio):
+        rows = client.get(f"/monthly-budget/{mes}/{anio}").json()
+        return next(x for x in rows if x["recurring_entry_id"] == entry_id)
+
+    assert amount(9, 2026)["monto_real"] == 40.0
+    assert amount(10, 2026)["monto_real"] == 12.5
+    assert amount(11, 2026)["excluido"] is True
+    assert amount(11, 2026)["monto_real"] == 0.0
+    assert amount(1, 2027)["monto_real"] == 12.5
+
+
+def test_monthly_budget_propagate_rejects_bad_month():
+    r = client.post("/monthly-budget/propagate", json={
+        "recurring_entry_id": 1, "from_mes": 13, "from_anio": 2026, "monto_real": 1.0,
+    })
+    assert r.status_code == 422

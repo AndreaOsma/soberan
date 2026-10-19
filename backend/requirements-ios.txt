@@ -23,7 +23,7 @@ pydantic-settings==2.6.1
 python-multipart==0.0.30
 icalendar==6.1.0
 requests==2.32.3
-pypdf==6.14.2
+pypdf==6.19.0
 beautifulsoup4==4.12.3
 platformdirs==4.3.6
 httpx==0.28.1

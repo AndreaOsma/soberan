@@ -16,6 +16,7 @@ import { InicioProjectionsPanel } from "../../components/inicio/InicioProjection
 import { InicioWealthPanels } from "../../components/inicio/InicioWealthPanels";
 import { InicioPatrimonioChart } from "../../components/inicio/InicioPatrimonioChart";
 import { InicioShortcuts } from "../../components/inicio/InicioShortcuts";
+import { InicioSimpleSnapshot } from "../../components/inicio/InicioSimpleSnapshot";
 import { PayrollHintsBanner } from "../../components/data/PayrollHintsBanner";
 
 export type InicioViewProps = {
@@ -241,10 +242,23 @@ export function InicioView({
       />
 
       {uiDensity === "minimal" && (
-        <div className="inicio-panels inicio-panels--minimal">
-          {alertsPanel}
-          {upcomingPanel}
-        </div>
+        <>
+          <InicioSimpleSnapshot
+            totals={totals}
+            privacyMode={privacyMode}
+            formatEUR={formatEUR}
+            showMesWidget={!!showMesWidget}
+            mesStatus={mesStatus}
+            budgetSpentPct={budgetSpentPct}
+            monthSpent={monthSpent}
+            monthlyExpense={totals.monthlyExpense}
+            monthElapsedPct={monthElapsedPct}
+          />
+          <div className="inicio-panels inicio-panels--minimal">
+            {alertsPanel}
+            {upcomingPanel}
+          </div>
+        </>
       )}
 
       {uiDensity === "detailed" && (

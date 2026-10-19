@@ -24,6 +24,10 @@ describe("alertActionFor", () => {
       label: "Ver IRPF",
       menu: "Impuestos",
     });
+    expect(alertActionFor("sync_bancaria")).toEqual({
+      label: "Gestionar bancos",
+      menu: "Cuentas",
+    });
   });
 
   it("usa fallback para tipo desconocido o vacío", () => {

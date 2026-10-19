@@ -23,11 +23,11 @@ class _Job:
 
 
 def test_compute_gap_under_withholding():
-    modelo = '{"versions":[{"id":"v1","effective_from":"2026-01-01","job_id":7,"irpf_pct":16.42,"ss_pct":6.5}]}'
-    jobs = [_Job(7, "Knowmad Mood", "2025-01-01", None, 16.42)]
+    modelo = '{"versions":[{"id":"v1","effective_from":"2026-01-01","job_id":7,"irpf_pct":15.5,"ss_pct":6.5}]}'
+    jobs = [_Job(7, "Empresa Ejemplo", "2024-01-01", None, 15.5)]
     rows = [
-        _Row(1, 2026, 2500, 250, 160, 2090, "Knowmad Mood"),
-        _Row(2, 2026, 2500, 250, 160, 2090, "Knowmad Mood"),
+        _Row(1, 2026, 2500, 250, 160, 2090, "Empresa Ejemplo"),
+        _Row(2, 2026, 2500, 250, 160, 2090, "Empresa Ejemplo"),
     ]
     gap = compute_withholding_gap(rows, jobs, modelo, 2026)
     assert gap is not None
@@ -37,7 +37,7 @@ def test_compute_gap_under_withholding():
 
 def test_compute_gap_aligned_no_alert():
     modelo = '{"versions":[{"id":"v1","effective_from":"2026-01-01","job_id":3,"irpf_pct":10.0,"ss_pct":6.5}]}'
-    jobs = [_Job(3, "Acme", "2025-01-01", None, 10.0)]
+    jobs = [_Job(3, "Acme", "2024-01-01", None, 10.0)]
     rows = [
         _Row(1, 2026, 2000, 200, 120, 1680, "Acme"),
         _Row(2, 2026, 2000, 200, 120, 1680, "Acme"),
@@ -47,7 +47,7 @@ def test_compute_gap_aligned_no_alert():
 
 
 def test_compute_gap_needs_two_months():
-    modelo = '{"versions":[{"id":"v1","effective_from":"2026-01-01","job_id":7,"irpf_pct":16.42,"ss_pct":6.5}]}'
-    jobs = [_Job(7, "Knowmad Mood", "2025-01-01", None, 16.42)]
-    rows = [_Row(1, 2026, 2500, 100, 160, 2240, "Knowmad Mood")]
+    modelo = '{"versions":[{"id":"v1","effective_from":"2026-01-01","job_id":7,"irpf_pct":15.5,"ss_pct":6.5}]}'
+    jobs = [_Job(7, "Empresa Ejemplo", "2024-01-01", None, 15.5)]
+    rows = [_Row(1, 2026, 2500, 100, 160, 2240, "Empresa Ejemplo")]
     assert compute_withholding_gap(rows, jobs, modelo, 2026) is None

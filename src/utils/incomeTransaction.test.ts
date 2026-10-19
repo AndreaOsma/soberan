@@ -15,7 +15,7 @@ const accounts: Account[] = [
 
 describe("payrollIncomeTxDescription", () => {
   it("usa el formato del backend", () => {
-    expect(payrollIncomeTxDescription("knowmad mood", 7, 2026)).toBe("Nómina knowmad mood 7/2026");
+    expect(payrollIncomeTxDescription("empresa ejemplo", 7, 2026)).toBe("Nómina empresa ejemplo 7/2026");
   });
 });
 
@@ -32,8 +32,8 @@ describe("resolveIncomeAccountId", () => {
 
   it("usa payroll_company_config por empresa", () => {
     expect(resolveIncomeAccountId(accounts, {
-      empresa: "Knowmad Mood",
-      payrollConfig: { "knowmad mood": { account_id: 2 } },
+      empresa: "Empresa Ejemplo",
+      payrollConfig: { "empresa ejemplo": { account_id: 2 } },
     })).toBe(2);
   });
 

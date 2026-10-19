@@ -10,6 +10,8 @@ import { CrudListsView } from "./modules/lists/CrudListsView";
 import { AssetsAndServicesView } from "./modules/assets/AssetsAndServicesView";
 import { WorkAndTaxesView } from "./modules/work/WorkAndTaxesView";
 import { SettingsView } from "./modules/general/SettingsView";
+import { SyncConflictDialog } from "./vendor/native-sync/SyncConflictDialog";
+import { useAutoSync } from "./vendor/native-sync/useAutoSync";
 import { PaymentsCalendarView } from "./modules/planning/PaymentsCalendarView";
 import { MonthlyCloseView } from "./modules/planning/MonthlyCloseView";
 import { api } from "./services/api";
@@ -38,6 +40,7 @@ import { OnboardingWizard } from "./components/OnboardingWizard";
 import { MethodGuideModal } from "./components/methodGuide/MethodGuideModal";
 import { AppShell } from "./components/AppShell";
 import { ChatPanel } from "./components/chat/ChatPanel";
+import { FeedbackWidget } from "./components/FeedbackWidget";
 import { useAsyncSubmit } from "./hooks/useAsyncSubmit";
 import { useAppToasts } from "./hooks/useAppToasts";
 import { useChat } from "./hooks/useChat";
@@ -267,42 +270,18 @@ export default function App() {
     return () => document.removeEventListener("click", onClick, { capture: true });
   }, []);
 
-  useEffect(() => {
-    // custom_server no longer needs a periodic backup push: with the proxy-with-
-    // offline-cache middleware, every request already goes live to the connected
-    // server (or gets queued + replayed on reconnect) at the request layer itself —
-    // see dev/lib/native-sync/backend/sync_proxy_middleware.py. This interval stays
-    // for google_drive, which is still a plain backup/restore model.
-    const provider = settings.sync_provider || "google_drive";
-    if (!nativeShellMode || settings.sync_auto_enabled !== "1" || provider === "custom_server") return;
-    const minutes = Number(settings.sync_auto_minutes || "15");
-    const intervalMs = Math.max(2, Number.isFinite(minutes) ? minutes : 15) * 60_000;
-    let cancelled = false;
-
-    const runAutoSync = async () => {
-      try {
-        await api.syncGooglePush();
-        if (!cancelled) {
-          await saveSetting("sync_last_push_at", new Date().toISOString(), false);
-        }
-      } catch {
-        // Silent by design: avoid spamming toasts when offline/background.
-      }
-    };
-
-    void runAutoSync();
-    const timer = window.setInterval(() => void runAutoSync(), intervalMs);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, [
-    nativeShellMode,
-    saveSetting,
-    settings.sync_auto_enabled,
-    settings.sync_auto_minutes,
-    settings.sync_provider,
-  ]);
+  // Google Drive: /sync/auto decide si subir, bajar o preguntar (conflicto) — antes esto
+  // subía a ciegas cada N minutos y, con dos dispositivos, el último pisaba al otro.
+  // custom_server no lo necesita: con el proxy con caché offline cada petición ya va en
+  // vivo al servidor (o se encola y se reenvía al reconectar), ver
+  // app/native_sync/sync_proxy_middleware.py.
+  const syncProvider = settings.sync_provider || "google_drive";
+  const autoSync = useAutoSync({
+    api,
+    enabled: nativeShellMode && settings.sync_auto_enabled === "1" && syncProvider === "google_drive",
+    intervalMinutes: Number(settings.sync_auto_minutes || "15"),
+    onPulled: () => loadAll({ silent: true }),
+  });
 
   const categoryRules = getJsonSetting<Record<string, string>>("category_rules", {});
   const txKnownCategories = useMemo(
@@ -924,7 +903,9 @@ export default function App() {
             />
           )}
 
+          <FeedbackWidget addToast={addToast} />
           <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+          <SyncConflictDialog conflict={autoSync.conflict} resolving={autoSync.resolving} resolve={autoSync.resolve} />
           <MethodGuideModal isOpen={methodGuideOpen} onClose={() => setMethodGuideOpen(false)} />
         </>
       }

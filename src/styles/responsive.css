@@ -122,6 +122,7 @@
 
   /* Section tabs: horizontal scroll instead of wrap */
   .section-tabs {
+    flex-shrink: 0;
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 0.65rem;
@@ -143,10 +144,33 @@
   }
 
   /* List items: wrap so budget/action rows don't crush */
-  .list li,
-  .goals-list li {
+  .list li {
     flex-wrap: wrap;
     gap: 0.45rem;
+  }
+
+  .goals-list li {
+    gap: 0.5rem;
+  }
+
+  .goal-progress__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .goal-progress__current {
+    text-align: left;
+  }
+
+  .card-section-head {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .card-section-head > button {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -219,8 +243,7 @@
   /* (inline styles use flex+wrap — already wraps) */
 
   /* List items: wrap earlier so budget rows don't crush */
-  .list li,
-  .goals-list li {
+  .list li {
     flex-wrap: wrap;
     gap: 0.45rem;
   }
@@ -281,16 +304,18 @@ button:focus-visible,
 .density-toggle__trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   min-height: 2rem;
-  padding: 0.2rem 0.55rem 0.2rem 0.4rem;
+  padding: 0;
   border: 1px solid var(--glass-border);
   border-radius: 999px;
   background: var(--surface-soft);
   color: inherit;
   cursor: pointer;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 600;
   line-height: 1;
   opacity: 0.9;
@@ -307,13 +332,6 @@ button:focus-visible,
   transform: none;
   filter: none;
 }
-.density-toggle__trigger-icon {
-  font-size: 0.9rem;
-  line-height: 1;
-}
-.density-toggle__trigger-label {
-  letter-spacing: 0.01em;
-}
 .density-toggle__menu {
   position: absolute;
   top: calc(100% + 0.35rem);
@@ -321,7 +339,7 @@ button:focus-visible,
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  min-width: 11.5rem;
+  min-width: 9.5rem;
   padding: 0.35rem;
   border: 1px solid var(--glass-border);
   border-radius: 0.85rem;
@@ -344,8 +362,6 @@ button:focus-visible,
   right: 0;
   height: 0.45rem;
 }
-.density-toggle:hover .density-toggle__menu,
-.density-toggle:focus-within .density-toggle__menu,
 .density-toggle.is-open .density-toggle__menu {
   opacity: 1;
   visibility: visible;
@@ -401,7 +417,8 @@ button:focus-visible,
 }
 
 .density-minimal .card {
-  padding: 0.875rem 1rem;
+  --space-card: 0.9rem;
+  padding: var(--space-card) 1rem;
 }
 
 .density-minimal .list li {
@@ -420,10 +437,12 @@ button:focus-visible,
 
 .density-detailed {
   --ui-font: 16px;
+  --space-card: 1.55rem;
+  --space-grid: 1.25rem;
 }
 
 .density-detailed .card {
-  padding: 1.65rem;
+  padding: var(--space-card);
 }
 
 .density-detailed .list li,
@@ -504,18 +523,19 @@ button:focus-visible,
   bottom: 0;
   z-index: 70;
   margin-top: 0;
-  padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.55rem 1.1rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--glass-border, rgba(148, 163, 184, 0.25));
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
   color: var(--text-muted, #64748b);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.01em;
   /* Same GPU-layer-promotion fix as .topbar (topbar.css) — see the comment there. */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);

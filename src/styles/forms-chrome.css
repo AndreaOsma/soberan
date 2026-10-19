@@ -27,7 +27,7 @@ label {
   gap: 0.4rem;
   margin-bottom: 0.95rem;
   color: var(--text-muted);
-  font-size: 0.94rem;
+  font-size: var(--text-sm);
   font-weight: 500;
 }
 
@@ -46,8 +46,8 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 select,
 textarea {
   border: 1px solid var(--border-soft);
-  border-radius: 0.65rem;
-  padding: 0.62rem 0.7rem;
+  border-radius: var(--radius-md);
+  padding: 0.58rem 0.72rem;
   background: var(--surface-soft);
   color: var(--text-main);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -84,24 +84,33 @@ input[type="range"] {
 
 button {
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--gradient);
   color: #fff;
-  padding: 0.56rem 0.96rem;
+  padding: 0.52rem 1rem;
   cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.01em;
-  transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  line-height: 1.25;
+  transition: transform 0.14s ease, box-shadow 0.2s ease, filter 0.2s ease,
+    background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 button:hover {
   transform: translateY(-1px);
   filter: brightness(1.03);
-  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.24);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.22);
 }
 
 button:active {
   transform: translateY(0);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), 0 8px 16px rgba(37, 99, 235, 0.18);
 }
 
 button:disabled,
@@ -123,12 +132,25 @@ button.danger {
   border-color: var(--border-soft);
   background: var(--surface-soft);
   color: var(--text-main);
+  box-shadow: none;
+}
+
+.button-secondary:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-soft));
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .theme-dark .button-secondary {
   border-color: var(--border-soft);
   background: var(--surface-soft);
   color: var(--text-main);
+}
+
+.theme-dark .button-secondary:hover {
+  background: color-mix(in srgb, var(--primary) 18%, var(--surface-soft));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .button-link {
@@ -142,7 +164,32 @@ button.danger {
 .button-link:hover {
   transform: none;
   box-shadow: none;
+  filter: none;
   background: rgba(37, 99, 235, 0.09);
+}
+
+.button-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.button-icon:hover {
+  transform: none;
+  filter: none;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+  box-shadow: var(--focus-ring);
 }
 
 .theme-picker-grid {

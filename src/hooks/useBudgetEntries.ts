@@ -184,24 +184,34 @@ export function useBudgetEntries({
     };
   }
 
+  function monthlyChecklistFields(
+    entry: RecurringEntry,
+    patch: { cuenta_gestion_id?: number | null; movido_a_cuenta?: boolean },
+  ) {
+    const override = monthlyBudgetByEntry[entry.id];
+    const currentChecklist = getEntryMonthlyChecklist(entry);
+    const nextMovido = patch.movido_a_cuenta ?? currentChecklist.movido;
+    const checkedChanged = patch.movido_a_cuenta !== undefined && patch.movido_a_cuenta !== currentChecklist.movido;
+    return {
+      cuenta_gestion_id: patch.cuenta_gestion_id !== undefined ? patch.cuenta_gestion_id : currentChecklist.cuentaGestionId,
+      movido_a_cuenta: nextMovido,
+      movido_checked_at: checkedChanged && nextMovido ? new Date().toISOString() : (override?.movido_checked_at ?? null),
+    };
+  }
+
   async function saveEntryMonthlyChecklist(
     entry: RecurringEntry,
     patch: { cuenta_gestion_id?: number | null; movido_a_cuenta?: boolean },
     opts?: { reload?: boolean },
   ) {
     const override = monthlyBudgetByEntry[entry.id];
-    const currentChecklist = getEntryMonthlyChecklist(entry);
-    const nextMovido = patch.movido_a_cuenta ?? currentChecklist.movido;
-    const checkedChanged = patch.movido_a_cuenta !== undefined && patch.movido_a_cuenta !== currentChecklist.movido;
     await api.upsertMonthlyBudget({
       recurring_entry_id: entry.id,
       mes: month,
       anio: year,
       monto_real: mbMap[entry.id] ?? entry.monto_estimado,
       excluido: override?.excluido ?? false,
-      cuenta_gestion_id: patch.cuenta_gestion_id !== undefined ? patch.cuenta_gestion_id : currentChecklist.cuentaGestionId,
-      movido_a_cuenta: nextMovido,
-      movido_checked_at: checkedChanged && nextMovido ? new Date().toISOString() : (override?.movido_checked_at ?? null),
+      ...monthlyChecklistFields(entry, patch),
     });
     if (opts?.reload !== false) {
       await loadAll({ silent: true });
@@ -477,6 +487,10 @@ export function useBudgetEntries({
         const newAcc = await api.createAccount({ alias_real: editForm.nombre, alias_anonimo: null, banco: editForm.newAccountBanco, tipo: editForm.newAccountTipo, balance_actual: 0, iban: null });
         cuentaId = newAcc.id;
       }
+      const checklist = monthlyChecklistFields(editingEntry, {
+        cuenta_gestion_id: checklistAccountId,
+        movido_a_cuenta: editChecklistMoved,
+      });
       const structural = hasNonAmountStructuralChanges(editingEntry, editForm);
       if (structural) {
         await api.upsertMonthlyBudget({
@@ -485,6 +499,7 @@ export function useBudgetEntries({
           anio: year,
           monto_real: 0,
           excluido: true,
+          ...checklist,
         });
         await api.createRecurringEntry({
           ...buildEntryUpdatePayload(editingEntry),
@@ -507,17 +522,10 @@ export function useBudgetEntries({
           anio: year,
           monto_real: editForm.monto_estimado,
           excluido: false,
+          ...checklist,
         });
         addToast(`Importe actualizado solo en ${monthScopeLabel}.`, "success");
       }
-      await saveEntryMonthlyChecklist(
-        editingEntry,
-        {
-          cuenta_gestion_id: checklistAccountId,
-          movido_a_cuenta: editChecklistMoved,
-        },
-        { reload: false },
-      );
       setEditingEntry(null);
       await loadAll({ silent: true });
       return;
@@ -569,21 +577,22 @@ export function useBudgetEntries({
       historial_precios: priceHistory,
       cuenta_destino_id: recurringChecklistAccount ?? cuentaId,
     });
+    // Un solo upsert con importe + checklist: un segundo upsert del checklist
+    // reenviaba el importe antiguo (estado previo a recargar) y pisaba el nuevo.
     await api.upsertMonthlyBudget({
       recurring_entry_id: editingEntry.id,
       mes: month,
       anio: year,
       monto_real: editForm.monto_estimado,
       excluido: false,
-    });
-    await saveEntryMonthlyChecklist(
-      editingEntry,
-      {
+      ...monthlyChecklistFields(editingEntry, {
         cuenta_gestion_id: checklistAccountId,
         movido_a_cuenta: editChecklistMoved,
-      },
-      { reload: false },
-    );
+      }),
+    });
+    // Los overrides ya existentes en meses posteriores tienen prioridad sobre
+    // el historial de precios: actualizarlos para que "y siguientes" se aplique.
+    await api.propagateMonthlyBudget(editingEntry.id, month, year, editForm.monto_estimado);
     setEditingEntry(null);
     await loadAll({ silent: true });
     const priceChanged = isSub && Math.abs(editForm.monto_estimado - editingEntry.monto_estimado) >= 0.005;

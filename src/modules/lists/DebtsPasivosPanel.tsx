@@ -158,7 +158,7 @@ export function DebtsPasivosPanel({
                 <h2>Deudas y Pasivos</h2>
                 <button onClick={() => { setDebtForm(emptyDebtForm()); setIsDebtFormOpen(true); }}>+ Nueva deuda</button>
               </div>
-              <p className="muted" style={{ fontSize: "0.82rem", margin: "0 0 1rem" }}>
+              <p className="muted detail-only" style={{ fontSize: "0.82rem", margin: "0 0 1rem" }}>
                 Planilla = cuotas previstas del acreedor. Pagos reales = abonos efectivos que actualizan el saldo.
               </p>
 

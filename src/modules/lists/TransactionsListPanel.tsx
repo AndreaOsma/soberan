@@ -384,15 +384,17 @@ export function TransactionsListPanel({
           <input
             type="search"
             placeholder="Buscar descripción…"
+            aria-label="Buscar por descripción"
             value={txSearch}
             onChange={(e) => setTxSearch(e.target.value)}
             style={{ flex: "1 1 160px", minWidth: 0 }}
           />
-          <select value={txFilterCat} onChange={(e) => setTxFilterCat(e.target.value)} style={{ flex: "0 1 160px" }}>
+          <select aria-label="Filtrar por categoría" value={txFilterCat} onChange={(e) => setTxFilterCat(e.target.value)} style={{ flex: "0 1 160px" }}>
             <option value="">Todas las categorías</option>
             {allCats.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <select
+            aria-label="Filtrar por cuenta"
             value={txFilterAccount}
             onChange={(e) => setTxFilterAccount(e.target.value === "" ? "" : Number(e.target.value))}
             style={{ flex: "0 1 140px" }}

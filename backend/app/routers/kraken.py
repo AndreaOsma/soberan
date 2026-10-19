@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..database import get_db
 from ..kraken_api import KrakenAPI, is_fiat, normalize_asset
+from ..secrets_crypto import decrypt_setting
 
 logger = logging.getLogger("soberan")
 router = APIRouter()
@@ -21,10 +22,12 @@ def _kraken_client(db: Session) -> KrakenAPI:
     api_secret = os.environ.get("KRAKEN_API_SECRET", "").strip()
     if not api_key:
         row = db.query(models.UserSettings).filter(models.UserSettings.key == "kraken_api_key").first()
-        api_key = row.value.strip() if row and row.value else ""
+        stored = decrypt_setting("kraken_api_key", row.value) if row else None
+        api_key = stored.strip() if stored else ""
     if not api_secret:
         row = db.query(models.UserSettings).filter(models.UserSettings.key == "kraken_api_secret").first()
-        api_secret = row.value.strip() if row and row.value else ""
+        stored = decrypt_setting("kraken_api_secret", row.value) if row else None
+        api_secret = stored.strip() if stored else ""
     if not api_key or not api_secret:
         raise HTTPException(status_code=503, detail="Credenciales de Kraken no configuradas. Define kraken_api_key y kraken_api_secret en Ajustes.")
     return KrakenAPI(api_key=api_key, api_secret=api_secret)

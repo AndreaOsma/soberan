@@ -155,8 +155,8 @@ describe("budgetMonthProjection", () => {
   it("proyecta pendiente de deuda restando cuotas planificadas", () => {
     const debt = {
       id: 1,
-      nombre: "Ortodoncia",
-      acreedor: "Clínica",
+      nombre: "Compra a plazos",
+      acreedor: "Tienda",
       monto_total: 1000,
       monto_pagado: 400,
       cuota_mensual: 100,

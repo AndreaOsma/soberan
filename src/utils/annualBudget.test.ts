@@ -22,8 +22,8 @@ describe("buildAnnualBudgetSummary", () => {
       monthlyBudgetsByMonth: {},
       debts: [{
         id: 1,
-        nombre: "Ortodoncia",
-        acreedor: "Clínica",
+        nombre: "Compra a plazos",
+        acreedor: "Tienda",
         monto_total: 5000,
         monto_pagado: 4787,
         cuota_mensual: 99,

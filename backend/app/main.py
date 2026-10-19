@@ -308,6 +308,13 @@ app.add_middleware(DeviceApiAuthMiddleware)
 
 include_routers(app)
 
+# Asistentes (ágora): /agent/v1, apagada sin SOBERAN_AGENT_TOKEN.
+from .agent_api.fastapi import create_agent_router  # noqa: E402
+from .agent_tools import agent  # noqa: E402
+from .database import get_db  # noqa: E402
+
+app.include_router(create_agent_router(agent, get_db))
+
 # --- Endpoints API ---
 
 @app.get("/")

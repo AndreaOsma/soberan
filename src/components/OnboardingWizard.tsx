@@ -8,7 +8,7 @@ import { METHOD_SECTIONS } from "../content/methodGuide";
 import { AccentColorPicker } from "./AccentColorPicker";
 import { buildThemeFromAccent, resolveAccentFromSettings } from "../utils/accentTheme";
 import { toDateOnly } from "../utils/format";
-import { SyncOnboardingStep } from "../../../../lib/native-sync/frontend/SyncOnboardingStep";
+import { SyncOnboardingStep } from "../vendor/native-sync/SyncOnboardingStep";
 
 type Props = {
   onComplete: (settingsPatch: Record<string, string>) => void;

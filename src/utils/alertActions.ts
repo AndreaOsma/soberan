@@ -16,6 +16,7 @@ const ALERT_ACTIONS: Record<string, AlertAction> = {
   dti_elevado: { label: "Revisar deudas", menu: "Pasivos" },
   sepe_renovacion: { label: "Historial laboral", menu: "Historial Laboral" },
   irpf_retencion_desviada: { label: "Ver IRPF", menu: "Impuestos" },
+  sync_bancaria: { label: "Gestionar bancos", menu: "Cuentas" },
 };
 
 const DEFAULT_ACTION: AlertAction = {

@@ -38,8 +38,6 @@ export function AppearanceToggle({ value, onChange }: Props) {
     <div
       ref={rootRef}
       className={`appearance-toggle${open ? " is-open" : ""}`}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
     >
       <button
         type="button"

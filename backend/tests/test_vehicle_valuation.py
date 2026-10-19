@@ -100,7 +100,7 @@ def test_url_slug():
 
 def test_title_matches_strict_and_relaxed():
     assert title_matches_vehicle(
-        "Seat León 1.6 TDI Style 2016", "SEAT", "Leon", strict=True
+        "Seat León 1.0 TSI Style 2019", "SEAT", "Leon", strict=True
     )
     assert not title_matches_vehicle(
         "Volkswagen Golf GTI", "SEAT", "Leon", strict=True
@@ -138,10 +138,10 @@ def test_compute_market_applies_haircut_and_asking_band():
     result = compute_market_valuation(
         samples,
         vehicle_km=140_000,
-        vehicle_year=2016,
+        vehicle_year=2019,
         hard_cap=60_000,
         fuente="wallapop",
-        year_note=", año 2016 ±3",
+        year_note=", año 2019 ±3",
         match_mode="strict",
         strict_failed=False,
         haircut=0.12,

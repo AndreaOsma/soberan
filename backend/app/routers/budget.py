@@ -4,13 +4,14 @@ from __future__ import annotations
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, joinedload
 
 from .. import models
 from ..database import get_db
 from ..expense_categories import SUBSCRIPTION_CATEGORY, normalize_category
 from ..transaction_splits import budget_expense_amount
-from ..schemas import BudgetCopyRequest, MonthlyBudget, MonthlyBudgetCreate
+from ..schemas import BudgetCopyRequest, BudgetPropagateRequest, MonthlyBudget, MonthlyBudgetCreate
 
 router = APIRouter()
 
@@ -31,6 +32,27 @@ def update_budget(item: MonthlyBudgetCreate, db: Session = Depends(get_db)):
         db_item = models.MonthlyBudget(**item.model_dump())
         db.add(db_item)
     db.commit(); db.refresh(db_item); return db_item
+
+@router.post("/monthly-budget/propagate")
+def propagate_budget(req: BudgetPropagateRequest, db: Session = Depends(get_db)):
+    """Apply a new amount to existing overrides from (from_mes, from_anio) onward.
+
+    Used by "este mes y siguientes": later-month overrides (copied months,
+    checklist rows) take precedence over the entry's price history, so they
+    would otherwise keep the old amount. Excluded months are left untouched.
+    """
+    rows = db.query(models.MonthlyBudget).filter(
+        models.MonthlyBudget.recurring_entry_id == req.recurring_entry_id,
+        models.MonthlyBudget.excluido.is_(False),
+        or_(
+            models.MonthlyBudget.anio > req.from_anio,
+            and_(models.MonthlyBudget.anio == req.from_anio, models.MonthlyBudget.mes >= req.from_mes),
+        ),
+    ).all()
+    for row in rows:
+        row.monto_real = req.monto_real
+    db.commit()
+    return {"updated": len(rows)}
 
 @router.post("/monthly-budget/copy")
 def copy_budget(req: BudgetCopyRequest, db: Session = Depends(get_db)):

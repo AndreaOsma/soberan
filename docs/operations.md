@@ -104,7 +104,7 @@ Endpoints para automatización:
 - `POST /api/agent/transaction`
 - `GET /api/agent/audit`
 
-Con `SOBERAN_API_KEY` definido, el feed iCal exige `?token=`; el resto de la API no usa esa clave.
+Con `SOBERAN_API_KEY` definido, el feed iCal exige `?token=` y todo `/agent/*` (incluido `/api/agent/*`) exige la misma clave, vía cabecera `X-Api-Key` o `?token=`. Sin `SOBERAN_API_KEY` definido, `/agent/*` sigue abierto (comportamiento por defecto sin cambios).
 
 ## PWA (móvil)
 
@@ -114,5 +114,5 @@ Con `SOBERAN_API_KEY` definido, el feed iCal exige `?token=`; el resto de la API
 
 ## Revertir cambios de configuración
 
-- iCal con token: vacía `SOBERAN_API_KEY` y reinicia backend (el feed deja de exigir `?token=`).
+- iCal/agente con token: vacía `SOBERAN_API_KEY` y reinicia backend (el feed y `/agent/*` dejan de exigir `?token=`).
 - Tema/densidad: Ajustes en la UI (persistido en `user_settings`).

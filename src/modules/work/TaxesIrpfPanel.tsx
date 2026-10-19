@@ -196,7 +196,8 @@ export function TaxesIrpfPanel({
               const irpfAmt = rentaForm.neto ? b - parseNum(rentaForm.neto) - b * ssPct / 100 : b * irpfPct / 100;
               const ssAmt = b * ssPct / 100;
               const neto = rentaForm.neto ? parseNum(rentaForm.neto) : b - irpfAmt - ssAmt;
-              const empresa = rentaForm.empresa || "knowmad mood";
+              const empresa = rentaForm.empresa.trim();
+              if (!empresa) throw new Error("Pon el nombre de la empresa.");
               const cfg = payrollCompanyConfig[empresa.toLowerCase()] as { account_id?: number } | undefined;
               const accountId = cfg?.account_id ?? accounts[0]?.id ?? null;
               await api.upsertSalaryBreakdown({
@@ -221,7 +222,7 @@ export function TaxesIrpfPanel({
               </select>
             </label>
             <label>Empresa
-              <input value={rentaForm.empresa} placeholder="knowmad mood" onChange={e => setRentaForm(p => ({ ...p, empresa: e.target.value }))} />
+              <input value={rentaForm.empresa} placeholder="Nombre de tu empresa" required autoComplete="organization" onChange={e => setRentaForm(p => ({ ...p, empresa: e.target.value }))} />
             </label>
             <label>Bruto (€)
               <input type="text" inputMode="decimal" value={rentaForm.bruto} onChange={e => setRentaForm(p => ({ ...p, bruto: e.target.value }))} required />

@@ -382,7 +382,7 @@ export function BudgetMonthPanel(props: Props) {
     </article>
 
     {excludedEntries.length > 0 && (
-      <article className="card budget-card--excluded">
+      <article className="card budget-card--excluded detail-only">
         <BudgetGroupHeader
           groupId="__excluded__"
           title={`Excluidas en ${MONTH_NAMES[month - 1]} ${year}`}
@@ -422,7 +422,7 @@ export function BudgetMonthPanel(props: Props) {
 
     {/* 50/30/20 gauges */}
     {hasBloqueEntries && totalIncomeReal > 0 && (
-      <article className="card" style={{ padding: "0.875rem 1rem" }}>
+      <article className="card detail-only" style={{ padding: "0.875rem 1rem" }}>
         <div className="budget-gauges-panel__title">Regla 50/30/20</div>
         <div className="budget-gauges-panel__grid">
           <BudgetGauge label="Necesidades" pct={bloqueNecesidades / totalIncomeReal * 100} target={50} targetLabel="≤50%" favorable={false} amount={bloqueNecesidades} />
@@ -563,7 +563,7 @@ export function BudgetMonthPanel(props: Props) {
               const goalBlock = entry.goal_id ? renderGoalProgress(entry.goal_id) : null;
               return (
                 <li key={entry.id} style={goalBlock ? { flexDirection: "column", alignItems: "stretch", gap: "0.4rem" } : undefined}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                  <div className="budget-list__row">
                   <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
                     <span>{entry.nombre}</span>
                     {entry.categoria && entry.categoria !== "General" && (
@@ -619,7 +619,7 @@ export function BudgetMonthPanel(props: Props) {
               const goalBlock = entry.goal_id ? renderGoalProgress(entry.goal_id) : null;
               return (
                 <li key={entry.id} style={goalBlock ? { flexDirection: "column", alignItems: "stretch", gap: "0.4rem" } : undefined}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                  <div className="budget-list__row">
                   <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
                     <span>{entry.nombre}</span>
                     {isLibrePlannedGasto(entry) ? (
@@ -740,7 +740,7 @@ export function BudgetMonthPanel(props: Props) {
               const showDebtProgress = !!debt && total > 0;
               return (
               <li key={item.id} style={showDebtProgress ? { flexDirection: "column", alignItems: "stretch", gap: "0.4rem" } : undefined}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                <div className="budget-list__row">
                 <div>
                   <span>{item.nombre}</span>
                   {item.numeroCuota > 0 && (
@@ -892,7 +892,7 @@ export function BudgetMonthPanel(props: Props) {
               const showGoalBlock = goalSnapshot !== null || hasSinkingGoal || showProj || Boolean(longRow);
               return (
                 <li key={entry.id} style={{ flexDirection: showGoalBlock ? "column" : undefined, alignItems: showGoalBlock ? "stretch" : undefined, gap: showGoalBlock ? "0.4rem" : undefined }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                  <div className="budget-list__row">
                     <div>
                       <span className="budget-destino-badge">{destino === "cuenta" ? "Cuenta" : "Cartera"}</span>
                       <span>{entry.nombre}</span>

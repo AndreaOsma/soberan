@@ -16,6 +16,8 @@ from . import (
     csv_io,
     debts,
     desktop_routes,
+    feedback_routes,
+    garaje,
     goals,
     imports_pdf,
     investments,
@@ -42,6 +44,7 @@ def include_routers(app: FastAPI) -> None:
     app.include_router(investments.router)
     app.include_router(debts.router)
     app.include_router(properties.router)
+    app.include_router(garaje.router)
     app.include_router(imports_pdf.router)
     app.include_router(money_owed.router)
     app.include_router(work_history.router)
@@ -61,3 +64,4 @@ def include_routers(app: FastAPI) -> None:
     app.include_router(alerts.router)
     app.include_router(chat.router)
     app.include_router(desktop_routes.router)
+    app.include_router(feedback_routes.router)

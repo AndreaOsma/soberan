@@ -112,6 +112,9 @@ export function AppShell({
       className={`app-shell ${effectiveDark ? "theme-dark" : "theme-light"} ${privacyMode ? "privacy-mode" : ""} density-${uiDensity}`}
       style={shellStyle}
     >
+      <a href="#contenido" className="skip-link">
+        Saltar al contenido
+      </a>
       <FloatingSidebar
         currentMenu={currentMenu}
         setCurrentMenu={setCurrentMenu}
@@ -212,7 +215,7 @@ export function AppShell({
         </div>
       </nav>
 
-      <section className="content">
+      <section id="contenido" className="content" tabIndex={-1}>
         {desktopMode && desktopUpdate?.update_available && (
           <DesktopUpdateBanner update={desktopUpdate} onDismiss={dismissDesktopUpdate} />
         )}

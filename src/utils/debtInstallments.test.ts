@@ -21,10 +21,10 @@ describe("isDebtArchived", () => {
   });
 });
 
-const ortodoncia: Debt = {
+const compraPlazos: Debt = {
   id: 1,
-  nombre: "Ortodoncia",
-  acreedor: "Clínica",
+  nombre: "Compra a plazos",
+  acreedor: "Tienda",
   monto_total: 5000,
   monto_pagado: 4787,
   cuota_mensual: 99,
@@ -89,10 +89,10 @@ function assignedFor(debts: Debt[], installments: DebtInstallment[], month: numb
 }
 
 describe("budgetDebtRows", () => {
-  it("Ortodoncia: jul 99, ago 114, sep vacío", () => {
-    expect(assignedFor([ortodoncia], [], 7, 2026)).toEqual([99]);
-    expect(assignedFor([ortodoncia], [], 8, 2026)).toEqual([114]);
-    expect(assignedFor([ortodoncia], [], 9, 2026)).toEqual([]);
+  it("Compra a plazos: jul 99, ago 114, sep vacío", () => {
+    expect(assignedFor([compraPlazos], [], 7, 2026)).toEqual([99]);
+    expect(assignedFor([compraPlazos], [], 8, 2026)).toEqual([114]);
+    expect(assignedFor([compraPlazos], [], 9, 2026)).toEqual([]);
   });
 
   it("Coche sin planilla: fallback cuota en julio", () => {
@@ -167,8 +167,8 @@ describe("budgetDebtRows", () => {
   it("cuota pagada del mes sigue en presupuesto y resta del sin asignar", () => {
     const debt: Debt = {
       id: 9,
-      nombre: "Ortodoncia",
-      acreedor: "Clínica",
+      nombre: "Compra a plazos",
+      acreedor: "Tienda",
       monto_total: 5000,
       monto_pagado: 4900,
       monto_pagado_registrado: 4900,
