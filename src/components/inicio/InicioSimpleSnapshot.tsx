@@ -2,6 +2,8 @@ import { InicioDonutChart } from "./InicioDonutChart";
 import type { TotalsSnapshot } from "./inicioTypes";
 
 export type InicioSimpleSnapshotProps = {
+  /** Modo simple: solo la gráfica de activos, sin tarjeta ni el resto de bloques. */
+  chartOnly?: boolean;
   totals: TotalsSnapshot;
   privacyMode: boolean;
   formatEUR: (v: number) => string;
@@ -27,6 +29,7 @@ const MES_COLORS = {
 } as const;
 
 export function InicioSimpleSnapshot({
+  chartOnly = false,
   totals,
   privacyMode,
   formatEUR,
@@ -37,7 +40,9 @@ export function InicioSimpleSnapshot({
   monthlyExpense,
   monthElapsedPct,
 }: InicioSimpleSnapshotProps) {
-  if (privacyMode) return null;
+  if (privacyMode) {
+    return chartOnly ? <p className="muted inicio-simple__private">Modo privacidad activo: la gráfica está oculta.</p> : null;
+  }
 
   const assetSlices = [
     { label: "Liquidez", value: Math.max(0, totals.totalCash), color: ASSET_COLORS.cash },
@@ -56,6 +61,22 @@ export function InicioSimpleSnapshot({
     { label: "Gastado", value: Math.max(0, monthSpent), color: spentColor },
     { label: "Queda", value: remaining, color: MES_COLORS.rest },
   ];
+
+  if (chartOnly) {
+    return (
+      <div className="inicio-simple inicio-simple--only">
+        <InicioDonutChart
+          slices={assetSlices}
+          centerLabel="Activos"
+          centerValue={assetTotal > 0 ? formatEUR(assetTotal) : "—"}
+          formatValue={formatEUR}
+          emptyText="Añade cuentas o activos"
+          size={280}
+          thickness={36}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="inicio-simple">

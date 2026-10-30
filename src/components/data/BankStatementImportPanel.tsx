@@ -3,6 +3,7 @@ import { api } from "../../services/api";
 import { useNotify } from "../../hooks/useNotify";
 import type { Account } from "../../types";
 import { buildRevolutImportPreview, type BankImportRow } from "../../utils/bankStatementImport";
+import { ChevronDown, ChevronUp, Icon } from "../../vendor/icons";
 
 type Props = {
   accounts: Account[];
@@ -26,7 +27,7 @@ export function BankStatementImportPanel({ accounts, formatEUR, addToast, loadAl
         aria-expanded={open}
       >
         <h2 style={{ margin: 0, fontSize: "1rem" }}>Importar extracto bancario</h2>
-        <span className="muted" style={{ fontSize: "0.8rem" }}>{open ? "▲" : "▼"}</span>
+        <Icon svg={open ? ChevronUp : ChevronDown} />
       </button>
       {open && (
         <div style={{ marginTop: "0.75rem" }}>

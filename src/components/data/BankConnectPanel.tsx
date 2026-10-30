@@ -3,6 +3,7 @@ import { api } from "../../services/api";
 import type { Account } from "../../types";
 import { useNotify } from "../../hooks/useNotify";
 import { bankAccountDisplayName, formatBankImportMessage } from "../../utils/bankSync";
+import { ChevronDown, ChevronUp, Icon, Trash2 } from "../../vendor/icons";
 
 type RemoteBank = {
   id: string;
@@ -292,7 +293,7 @@ export function BankConnectPanel({
         aria-expanded={open}
       >
         <h2 style={{ margin: 0, fontSize: "1rem" }}>Conectar banco (Open Banking)</h2>
-        <span className="muted" style={{ fontSize: "0.8rem" }}>{open ? "▲" : "▼"}</span>
+        <Icon svg={open ? ChevronUp : ChevronDown} />
       </button>
       {open && (
         <div style={{ marginTop: "0.75rem" }}>
@@ -405,7 +406,7 @@ export function BankConnectPanel({
                           if (selectedReq === req.requisition_id) setDetail(null);
                           await refreshRequisitions(true);
                         }, "Consentimiento eliminado.", "No se pudo eliminar el consentimiento.")}>
-                          🗑
+                          <Icon svg={Trash2} />
                         </button>
                       </div>
                     </div>

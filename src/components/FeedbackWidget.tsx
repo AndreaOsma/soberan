@@ -6,10 +6,10 @@ const MAX_IMAGES = 3;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const FEEDBACK_TYPES = [
-  { value: "bug", label: "🐛 Algo está roto" },
-  { value: "idea", label: "💡 Idea / sugerencia" },
-  { value: "ui", label: "🎨 Diseño / usabilidad" },
-  { value: "other", label: "💬 Otro" },
+  { value: "bug", label: "Algo está roto" },
+  { value: "idea", label: "Idea / sugerencia" },
+  { value: "ui", label: "Diseño / usabilidad" },
+  { value: "other", label: "Otro" },
 ];
 
 function readAsDataUrl(file: File): Promise<string> {

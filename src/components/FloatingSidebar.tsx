@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MENU_SECTIONS, SECTION_ICONS, SECTION_TABS, menuKeyToSection, sectionDefaultTab, type MenuKey, type MenuSection } from '../config/ui';
 import { useModalA11y } from '../hooks/useModalA11y';
+import { Icon, X } from "../vendor/icons";
 
 interface FloatingSidebarProps {
   currentMenu: MenuKey;
@@ -54,7 +55,7 @@ export const FloatingSidebar: React.FC<FloatingSidebarProps> = ({
       <div className="menu-panel" ref={panelRef}>
         <div className="menu-panel__head">
           <span className="menu-panel__title" id="menu-panel-title">Soberan</span>
-          <button className="button-secondary menu-panel__close" onClick={onClose} aria-label="Cerrar">✕</button>
+          <button className="button-secondary menu-panel__close" onClick={onClose} aria-label="Cerrar"><Icon svg={X} /></button>
         </div>
 
         <div className="menu-panel__search">
@@ -86,7 +87,7 @@ export const FloatingSidebar: React.FC<FloatingSidebarProps> = ({
                   onClose();
                 }}
               >
-                <span className="menu-link__icon">{SECTION_ICONS[section]}</span>
+                <span className="menu-link__icon"><Icon svg={SECTION_ICONS[section]} /></span>
                 {section}
               </button>
             );

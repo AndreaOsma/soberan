@@ -62,7 +62,10 @@ function totalInterest(schedule: readonly AmortizationScheduleRow[]): number {
 
 function nextChargeDate(row: AmortizationScheduleRow): string {
   const { year, month, day } = parseInstallmentDate(row.fecha_vencimiento);
-  return chargeIsoDate(year, month, day);
+  // `month` es 1–12; como mes JS (0–11) ya apunta al mes siguiente, pero diciembre daba «año-13-…»
+  // (el backend lo rechaza con 422 y el pago extra se quedaba a medias). Date normaliza el cambio de año.
+  const next = new Date(year, month, 1);
+  return chargeIsoDate(next.getFullYear(), next.getMonth(), day);
 }
 
 /**

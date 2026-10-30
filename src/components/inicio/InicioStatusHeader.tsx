@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { FinancialTrafficLight } from "./inicioTypes";
+import { Check, Icon, X } from "../../vendor/icons";
 
 export type StatusReason = {
   label: string;
@@ -80,7 +81,7 @@ export function InicioStatusHeader({
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem" }}>
                       <span className="muted">{r.label}</span>
                       <span className={r.ok ? "status-check--ok" : "status-check--fail"}>
-                        {r.ok ? "✓ " : "✗ "}{r.value}
+                        <Icon svg={r.ok ? Check : X} /> {r.value}
                       </span>
                     </div>
                     {r.detail && (

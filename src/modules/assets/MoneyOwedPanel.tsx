@@ -6,6 +6,7 @@ import type { MoneyOwed } from "../../types";
 import { parseNum } from "../../utils/format";
 import { useAsyncSubmit } from "../../hooks/useAsyncSubmit";
 import { ModalFormError } from "../../components/ModalFormError";
+import { Handshake, Icon, Pencil, Trash2 } from "../../vendor/icons";
 
 export type MoneyOwedPanelProps = {
   moneyOwed: MoneyOwed[];
@@ -42,7 +43,7 @@ export function MoneyOwedPanel({
           </div>
           {moneyOwed.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🤝</div>
+              <div className="empty-state-icon"><Icon svg={Handshake} /></div>
               <h3>Sin préstamos a terceros</h3>
               <p>Registra aquí el dinero que otros te deben para no perder el control.</p>
               <button onClick={() => setIsOwedFormOpen(true)}>+ Añadir registro</button>
@@ -72,11 +73,11 @@ export function MoneyOwedPanel({
                       </div>
                       <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
                         aria-label={`Editar préstamo ${item.deudor}`} title="Editar"
-                        onClick={() => setEditOwedModal(item)}>✎</button>
+                        onClick={() => setEditOwedModal(item)}><Icon svg={Pencil} /></button>
                       <button type="button" className="danger"
                         aria-label={`Eliminar préstamo ${item.deudor}`} title="Eliminar"
                         onClick={() => deleteWithUndo("Registro", () => api.deleteMoneyOwed(item.id).then(() => loadAll()))}>
-                        🗑
+                        <Icon svg={Trash2} />
                       </button>
                     </div>
                   </li>

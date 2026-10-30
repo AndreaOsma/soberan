@@ -51,38 +51,11 @@
   padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
 
-.content-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  padding: 0.65rem 1rem;
-  background: var(--surface);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-}
-.content-toolbar__actions {
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
 .content-toolbar__period {
   display: flex;
   gap: 0.45rem;
   align-items: center;
   flex-wrap: wrap;
-}
-.content-toolbar__period-nav {
-  padding: 0.25rem 0.5rem;
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1;
-  min-width: 2.2rem;
 }
 .content-toolbar__period select {
   width: auto;

@@ -37,12 +37,39 @@ from ..schemas import (
 logger = logging.getLogger("soberan")
 router = APIRouter()
 
+GC_TOKEN_SETTING = "_gocardless_token_cache"  # «_»: interno, no sale en Ajustes; cifrado (secrets_crypto)
+
+
+def _gc_token_load() -> dict | None:
+    from ..database import SessionLocal
+    from ..secrets_crypto import decrypt_setting
+    with SessionLocal() as db:
+        row = db.query(models.UserSettings).filter(models.UserSettings.key == GC_TOKEN_SETTING).first()
+        raw = decrypt_setting(GC_TOKEN_SETTING, row.value) if row else None
+    return json.loads(raw) if raw else None
+
+
+def _gc_token_save(tok: dict) -> None:
+    from ..database import SessionLocal
+    from ..secrets_crypto import encrypt_setting
+    value = encrypt_setting(GC_TOKEN_SETTING, json.dumps(tok))
+    with SessionLocal() as db:
+        row = db.query(models.UserSettings).filter(models.UserSettings.key == GC_TOKEN_SETTING).first()
+        if row:
+            row.value = value
+        else:
+            db.add(models.UserSettings(key=GC_TOKEN_SETTING, value=value))
+        db.commit()
+
+
 def _gc_client() -> GoCardlessBankAPI:
     secret_id = os.getenv("GOCARDLESS_SECRET_ID", "")
     secret_key = os.getenv("GOCARDLESS_SECRET_KEY", "")
     if not secret_id or not secret_key:
         raise HTTPException(status_code=503, detail="Credenciales de GoCardless no configuradas (GOCARDLESS_SECRET_ID / GOCARDLESS_SECRET_KEY).")
-    return GoCardlessBankAPI(secret_id=secret_id, secret_key=secret_key)
+    # El token se reutiliza (24 h, renovable 30 días) y sobrevive a reinicios: sin esto cada sincronización
+    # pedía uno nuevo y GoCardless acababa respondiendo 429 a todo.
+    return GoCardlessBankAPI(secret_id=secret_id, secret_key=secret_key, token_load=_gc_token_load, token_save=_gc_token_save)
 
 
 def _parse_requisition_status(raw_status) -> str:

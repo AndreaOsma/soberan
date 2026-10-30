@@ -2,13 +2,14 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { alertActionFor } from "../utils/alertActions";
 import { APP_VERSION, formatCopyrightYearRange } from "../utils/copyright";
 import { AppearanceToggle } from "./AppearanceToggle";
-import { DensityToggle } from "./DensityToggle";
 import { DesktopUpdateBanner, type DesktopUpdateInfo } from "./DesktopUpdateBanner";
 import { FloatingSidebar } from "./FloatingSidebar";
+import { HeaderMenu } from "./HeaderMenu";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { ViewSkeleton } from "./ViewSkeleton";
 import type { AlertItem } from "../types";
 import type { MenuKey } from "../config/ui";
+import { Check, CircleHelp, Coffee, Contrast, DensityDetailed, DensityMinimal, Ellipsis, Eye, EyeOff, Icon, Menu, Plus, TriangleAlert } from "../vendor/icons";
 
 type Props = {
   effectiveDark: boolean;
@@ -22,6 +23,8 @@ type Props = {
   dayNightMode: "day" | "night" | "auto";
   setDayNightMode: (mode: "day" | "night" | "auto") => void;
   setUiDensity: (density: "minimal" | "detailed") => void;
+  simpleMode: boolean;
+  setSimpleMode: (value: boolean) => void;
   setPrivacyMode: (value: boolean | ((prev: boolean) => boolean)) => void;
   setMethodGuideOpen: (open: boolean) => void;
   alerts: AlertItem[];
@@ -31,8 +34,6 @@ type Props = {
   desktopMode: boolean;
   desktopUpdate: DesktopUpdateInfo | null;
   dismissDesktopUpdate: () => void;
-  showContentToolbar: boolean;
-  showToolbarActions: boolean;
   showToolbarPeriod: boolean;
   monthRefreshing: boolean;
   month: number;
@@ -61,6 +62,8 @@ export function AppShell({
   dayNightMode,
   setDayNightMode,
   setUiDensity,
+  simpleMode,
+  setSimpleMode,
   setPrivacyMode,
   setMethodGuideOpen,
   alerts,
@@ -70,8 +73,6 @@ export function AppShell({
   desktopMode,
   desktopUpdate,
   dismissDesktopUpdate,
-  showContentToolbar,
-  showToolbarActions,
   showToolbarPeriod,
   monthRefreshing,
   month,
@@ -123,7 +124,7 @@ export function AppShell({
         focusSearch={isSidebarOpen}
       />
 
-      <nav className="topbar">
+      <nav className={`topbar${showToolbarPeriod ? " topbar--period" : ""}`}>
         <div className="topbar-start">
           <button
             className="topbar-menu-btn"
@@ -131,35 +132,82 @@ export function AppShell({
             aria-label="Abrir menú"
             title="Menú (⌘K)"
           >
-            ☰
+            <Icon svg={Menu} />
           </button>
-          <span className="topbar-brand">Soberan</span>
         </div>
         <div className="topbar-center">
           <h1 className="topbar-title">{currentMenu}</h1>
         </div>
+        {showToolbarPeriod && (
+          <div className="topbar-period">
+            <button
+              type="button"
+              className="button-secondary topbar-period__nav"
+              onClick={() => adjustMonth(-1)}
+              disabled={monthRefreshing}
+              aria-label="Mes anterior"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className={`period-label${monthRefreshing ? " period-label--refreshing" : ""}`}
+              onClick={() => {
+                const n = new Date();
+                setMonth(n.getMonth() + 1);
+                setYear(n.getFullYear());
+              }}
+              title="Volver al mes actual"
+              aria-busy={monthRefreshing}
+            >
+              {new Intl.DateTimeFormat("es", { month: "long" }).format(new Date(year, month - 1))} {year}
+              {(month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) && (
+                <span style={{ marginLeft: "0.4rem", fontSize: "0.7rem", opacity: 0.55 }}>· hoy</span>
+              )}
+            </button>
+            <button
+              type="button"
+              className="button-secondary topbar-period__nav"
+              onClick={() => adjustMonth(1)}
+              disabled={monthRefreshing}
+              aria-label="Mes siguiente"
+            >
+              ›
+            </button>
+          </div>
+        )}
         <div className="topbar-end">
-          {currentMenu === "Resumen Ejecutivo" && (
-            <DensityToggle value={uiDensity} onChange={setUiDensity} />
-          )}
-          <button
-            type="button"
-            className="topbar-icon-btn topbar-help-btn"
-            onClick={() => setMethodGuideOpen(true)}
-            title="Cómo funciona"
-            aria-label="Cómo funciona"
-          >
-            ?
-          </button>
-          <button
-            type="button"
-            className="topbar-icon-btn"
-            onClick={() => setPrivacyMode(!privacyMode)}
-            title={privacyMode ? "Desactivar privacidad" : "Activar privacidad"}
-            aria-label={privacyMode ? "Desactivar modo privacidad" : "Activar modo privacidad"}
-          >
-            {privacyMode ? "🕶️" : "👀"}
-          </button>
+          {/* Cabecera despejada (Andrea, 2026-10-29): fuera solo alertas, «+» (en el móvil, flotante abajo)
+              y «⋯» con lo que se usa de vez en cuando. */}
+          <HeaderMenu label="Más opciones" icon={<Icon svg={Ellipsis} />} className="header-menu--more">
+            {(close) => (
+              <>
+                <button type="button" role="menuitem" className="header-menu__item" onClick={() => { close(); setMethodGuideOpen(true); }}>
+                  <Icon svg={CircleHelp} /> Cómo funciona
+                </button>
+                <button type="button" role="menuitemcheckbox" aria-checked={privacyMode} className="header-menu__item"
+                  onClick={() => { setPrivacyMode(!privacyMode); close(); }}>
+                  <Icon svg={privacyMode ? Eye : EyeOff} /> {privacyMode ? "Mostrar cantidades" : "Ocultar cantidades"}
+                </button>
+                {currentMenu === "Resumen Ejecutivo" && (
+                  <>
+                    <button type="button" role="menuitemcheckbox" aria-checked={simpleMode} className="header-menu__item"
+                      onClick={() => { setSimpleMode(!simpleMode); close(); }}>
+                      <span aria-hidden="true"><Icon svg={Contrast} /></span> {simpleMode ? "Vista completa" : "Solo la gráfica"}
+                    </button>
+                    <button type="button" role="menuitemradio" aria-checked={uiDensity === "minimal"} className="header-menu__item"
+                      onClick={() => { setUiDensity("minimal"); close(); }}>
+                      <Icon svg={DensityMinimal} /> Vista mínima
+                    </button>
+                    <button type="button" role="menuitemradio" aria-checked={uiDensity === "detailed"} className="header-menu__item"
+                      onClick={() => { setUiDensity("detailed"); close(); }}>
+                      <Icon svg={DensityDetailed} /> Vista detallada
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </HeaderMenu>
           <div className="alerts-popover-wrap" ref={alertsPopoverRef}>
             <button
               type="button"
@@ -170,7 +218,7 @@ export function AppShell({
               aria-controls="alerts-popover"
               aria-haspopup="true"
             >
-              {highAlertsCount > 0 ? `⚠ ${highAlertsCount}` : "✓ OK"}
+              {highAlertsCount > 0 ? <><Icon svg={TriangleAlert} /> {highAlertsCount}</> : <><Icon svg={Check} /> OK</>}
             </button>
             {alertsPopoverOpen && alerts.length > 0 && (
               <div id="alerts-popover" className="alerts-popover" role="region" aria-label="Alertas activas">
@@ -207,11 +255,23 @@ export function AppShell({
             )}
             {alertsPopoverOpen && alerts.length === 0 && (
               <div id="alerts-popover" className="alerts-popover alerts-popover--empty" role="region" aria-label="Alertas activas">
-                <span className="positive">✓ Sin anomalías detectadas</span>
+                <span className="positive"><Icon svg={Check} /> Sin anomalías detectadas</span>
               </div>
             )}
           </div>
           <AppearanceToggle value={dayNightMode} onChange={setDayNightMode} />
+          <HeaderMenu label="Añadir" icon={<Icon svg={Plus} />} className="header-menu--add">
+            {(close) => (
+              <>
+                <button type="button" role="menuitem" className="header-menu__item" onClick={() => { close(); setIsTxModalOpen(true); }}>
+                  Movimiento
+                </button>
+                <button type="button" role="menuitem" className="header-menu__item" onClick={() => { close(); setIsAccountModalOpen(true); }}>
+                  Cuenta
+                </button>
+              </>
+            )}
+          </HeaderMenu>
         </div>
       </nav>
 
@@ -219,59 +279,6 @@ export function AppShell({
         {desktopMode && desktopUpdate?.update_available && (
           <DesktopUpdateBanner update={desktopUpdate} onDismiss={dismissDesktopUpdate} />
         )}
-        {showContentToolbar && (
-          <div className="content-toolbar">
-            {showToolbarActions && (
-              <div className="content-toolbar__actions">
-                <button onClick={() => setIsTxModalOpen(true)}>+ Movimiento</button>
-                {(["Cuentas"] as MenuKey[]).includes(currentMenu) && (
-                  <button className="button-secondary" onClick={() => setIsAccountModalOpen(true)}>
-                    + Cuenta
-                  </button>
-                )}
-              </div>
-            )}
-            {showToolbarPeriod && (
-              <div className="content-toolbar__period">
-                <button
-                  type="button"
-                  className="button-secondary content-toolbar__period-nav"
-                  onClick={() => adjustMonth(-1)}
-                  disabled={monthRefreshing}
-                  aria-label="Mes anterior"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  className={`period-label${monthRefreshing ? " period-label--refreshing" : ""}`}
-                  onClick={() => {
-                    const n = new Date();
-                    setMonth(n.getMonth() + 1);
-                    setYear(n.getFullYear());
-                  }}
-                  title="Volver al mes actual"
-                  aria-busy={monthRefreshing}
-                >
-                  {new Intl.DateTimeFormat("es", { month: "long" }).format(new Date(year, month - 1))} {year}
-                  {(month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) && (
-                    <span style={{ marginLeft: "0.4rem", fontSize: "0.7rem", opacity: 0.55 }}>· hoy</span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="button-secondary content-toolbar__period-nav"
-                  onClick={() => adjustMonth(1)}
-                  disabled={monthRefreshing}
-                  aria-label="Mes siguiente"
-                >
-                  ›
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
         {loading ? <ViewSkeleton rows={4} /> : null}
         {!loading && error ? <p className="error-banner">{error}</p> : null}
         {!loading && message ? <p className="success-banner">{message}</p> : null}
@@ -301,7 +308,7 @@ export function AppShell({
               target="_blank"
               rel="noopener noreferrer"
             >
-              ☕ Invítame a un café
+              <Icon svg={Coffee} /> Invítame a un café
             </a>
           </small>
         </footer>

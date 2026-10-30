@@ -17,6 +17,7 @@ import { SettingTextField } from "../../components/SettingFields";
 import { PayrollAccountCard } from "../../components/work/PayrollAccountCard";
 import type { MenuKey } from "../../config/ui";
 import type { Account, RecurringEntry, WorkHistory } from "../../types";
+import { Icon, Pencil, Trash2 } from "../../vendor/icons";
 
 type ActiveSalary = {
   empresa: string; bruto: number; irpf: number; ss: number;
@@ -249,11 +250,11 @@ export function WorkHistoryPanel({
                               )}
                               <button type="button" className="button-secondary" style={{ padding: "0.2rem 0.4rem" }}
                                 aria-label={`Editar etapa ${item.empresa}`} title="Editar"
-                                onClick={() => setEditWorkModal(item)}>✎</button>
+                                onClick={() => setEditWorkModal(item)}><Icon svg={Pencil} /></button>
                               <button type="button" className="danger"
                                 aria-label={`Eliminar etapa ${item.empresa}`} title="Eliminar"
                                 onClick={() => deleteWithUndo("Etapa", () => api.deleteWorkHistory(item.id).then(() => loadAll()))}>
-                                🗑
+                                <Icon svg={Trash2} />
                               </button>
                             </div>
                           </div>

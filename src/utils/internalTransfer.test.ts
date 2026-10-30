@@ -32,3 +32,17 @@ describe("omit from budget", () => {
     expect(isRealIncome(income)).toBe(true);
   });
 });
+
+describe("isRealIncome: solo lo ganado (2026-10-29)", () => {
+  const tx = (amount: number, category_anon: string) => ({ amount, category_anon, es_interna: false, es_pending: false, excluida_presupuesto: false });
+  it("nómina, freelance y «Otros ingresos» cuentan", () => {
+    expect(isRealIncome(tx(1800, "Nómina"))).toBe(true);
+    expect(isRealIncome(tx(300, "freelance"))).toBe(true);
+    expect(isRealIncome(tx(20, "Otros ingresos"))).toBe(true);
+  });
+  it("Bizum, traspasos y devoluciones no cuentan solos", () => {
+    expect(isRealIncome(tx(15, ""))).toBe(false);
+    expect(isRealIncome(tx(15, "Transferencia recibida"))).toBe(false);
+    expect(isRealIncome(tx(30, "Devolución"))).toBe(false);
+  });
+});

@@ -5,6 +5,7 @@ import { parseNum } from "../../utils/format";
 import { ModalFormError } from "../ModalFormError";
 import { EditModalShell } from "../EditModalShell";
 import { EmptyState } from "../EmptyState";
+import { Check, HandCoins, Icon, Trash2 } from "../../vendor/icons";
 
 const lbl = { display: "flex", flexDirection: "column" as const, gap: "0.25rem" };
 
@@ -151,7 +152,7 @@ export function DebtPaymentsModal({
         )}
         {remaining <= 0 && (
           <div className="status-banner--ok" style={{ marginBottom: "1rem" }}>
-            ✓ Deuda liquidada
+            <Icon svg={Check} /> Deuda liquidada
           </div>
         )}
 
@@ -178,14 +179,14 @@ export function DebtPaymentsModal({
                     aria-label={`Eliminar pago de ${formatEUR(p.monto)}`}
                     title="Eliminar"
                     disabled={deletingId === p.id}
-                    onClick={() => void handleDelete(p.id)}>{deletingId === p.id ? "…" : "🗑"}</button>
+                    onClick={() => void handleDelete(p.id)}>{deletingId === p.id ? "…" : <Icon svg={Trash2} />}</button>
                 </li>
               ))}
             </ul>
           </div>
         ) : (
           <EmptyState
-            icon="💸"
+            icon={HandCoins}
             title="Sin pagos registrados"
             description="Los abonos que registres aquí actualizan el saldo y el estado de la planilla."
           />

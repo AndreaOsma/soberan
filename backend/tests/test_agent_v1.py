@@ -46,6 +46,9 @@ def test_read_and_write(on):
     tools = {t["name"]: t["write"] for t in client.get("/agent/v1/manifest", headers=H).json()["tools"]}
     assert tools["anadir_movimiento"] and not tools["cuentas"]
     assert any(c["nombre"] == "Cuenta Agente" for c in call("cuentas").json()["result"]["cuentas"])
+    pv = client.post("/agent/v1/validate/anadir_movimiento", json={"cuenta": "cuenta agente", "importe": -1234.5, "categoria": "supermercado", "concepto": "Mercadona", "fecha": "2026-10-30"}, headers=H)
+    assert pv.status_code == 200, pv.text
+    assert pv.json()["preview"].startswith("Gasto de 1.234,50 € en ") and "30/10/2026: «Mercadona»" in pv.json()["preview"]
     r = call("anadir_movimiento", {"cuenta": "cuenta agente", "importe": -12.5, "categoria": "supermercado", "concepto": "Mercadona"})
     assert r.status_code == 200, r.text
     assert r.json()["result"]["categoria"] == "Alimentación"

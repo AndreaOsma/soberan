@@ -6,6 +6,7 @@ import { ModalFormError } from "../ModalFormError";
 import { EditModalShell } from "../EditModalShell";
 import { EmptyState } from "../EmptyState";
 import { parseNum } from "../../utils/format";
+import { ClipboardList, Icon, Trash2 } from "../../vendor/icons";
 import {
   defaultScheduleStartDate,
   enrichInstallmentRows,
@@ -211,7 +212,7 @@ export function DebtScheduleEditorModal({
 
       {rows.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon={ClipboardList}
           title="Planilla vacía"
           description="Elige la fecha de la primera cuota y pulsa Autocalcular."
           actionLabel="Autocalcular planilla"
@@ -270,7 +271,7 @@ export function DebtScheduleEditorModal({
                       <button type="button" className="danger" style={{ padding: "0.2rem 0.45rem", fontSize: "0.75rem" }}
                         aria-label={`Eliminar cuota ${row.numero_cuota}`}
                         title="Eliminar"
-                        onClick={() => setRows((prev) => prev.filter((r) => r.key !== row.key))}>🗑</button>
+                        onClick={() => setRows((prev) => prev.filter((r) => r.key !== row.key))}><Icon svg={Trash2} /></button>
                     </td>
                   </tr>
                 );

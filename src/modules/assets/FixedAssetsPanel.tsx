@@ -6,6 +6,7 @@ import type { Property } from "../../types";
 import { parseNum } from "../../utils/format";
 import { useAsyncSubmit } from "../../hooks/useAsyncSubmit";
 import { ModalFormError } from "../../components/ModalFormError";
+import { Car, House, Icon, Pencil, Trash2 } from "../../vendor/icons";
 
 export type FixedAssetsPanelProps = {
   properties: Property[];
@@ -78,7 +79,7 @@ export function FixedAssetsPanel({
           </div>
           {properties.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🏠</div>
+              <div className="empty-state-icon"><Icon svg={House} /></div>
               <h3>Sin activos fijos</h3>
               <p>Añade inmuebles o vehículos para incluirlos en tu cálculo de patrimonio neto.</p>
               <button onClick={() => setIsPropertyFormOpen(true)}>+ Añadir activo</button>
@@ -89,7 +90,7 @@ export function FixedAssetsPanel({
                 <li key={item.id} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.35rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                     <span>
-                      {item.tipo === "vehiculo" ? "🚗 " : item.tipo === "inmueble" ? "🏠 " : ""}
+                      {item.tipo === "vehiculo" ? <><Icon svg={Car} /> </> : item.tipo === "inmueble" ? <><Icon svg={House} /> </> : null}
                       {item.nombre}
                       {item.matricula && <span className="muted" style={{ fontSize: '0.75rem', marginLeft: '0.5rem' }}>{item.matricula}</span>}
                     </span>
@@ -145,11 +146,11 @@ export function FixedAssetsPanel({
                       )}
                       <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
                         aria-label={`Editar activo ${item.nombre}`} title="Editar"
-                        onClick={() => setEditPropertyModal(item)}>✎</button>
+                        onClick={() => setEditPropertyModal(item)}><Icon svg={Pencil} /></button>
                       <button type="button" className="danger"
                         aria-label={`Eliminar activo ${item.nombre}`} title="Eliminar"
                         onClick={() => deleteWithUndo("Activo", () => api.deleteProperty(item.id).then(() => loadAll()))}>
-                        🗑
+                        <Icon svg={Trash2} />
                       </button>
                     </div>
                   </div>

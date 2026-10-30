@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import type { ChatMessage, PendingWrite } from "../../hooks/useChat";
+import { Icon, X } from "../../vendor/icons";
 
 function renderRich(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
@@ -62,7 +63,7 @@ export function ChatPanel({
         title="Asistente financiero"
       >
         {chatOpen ? (
-          "✕"
+          <Icon svg={X} size={22} />
         ) : (
           <svg
             className="chat-fab__icon"

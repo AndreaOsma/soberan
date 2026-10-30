@@ -443,7 +443,12 @@ export function BudgetEntryModals({
                   </button>
                 </p>
               )}
-              {newEntry.tipo_partida !== "suscripcion" && !newEntry.es_fondo && (
+              {newEntry.tipo_partida === "gasto" && !newEntry.es_fondo && (
+                <p className="muted" style={{ gridColumn: "1/-1", margin: 0, fontSize: "0.85rem" }}>
+                  Solo {MONTH_NAMES[month - 1]} {year}. Si se repite cada mes, usa un Fondo o una Suscripción.
+                </p>
+              )}
+              {newEntry.tipo_partida === "ahorro_inversion" && (
                 <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem", gridColumn: "1/-1" }}>
                   Recurrencia
                   <select value={newEntry.es_puntual ? "puntual" : "recurrente"} onChange={e => setNewEntry(p => ({ ...p, es_puntual: e.target.value === "puntual" }))}>

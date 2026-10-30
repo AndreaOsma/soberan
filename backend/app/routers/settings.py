@@ -41,6 +41,7 @@ def list_settings(
     return {
         row.key: _mask_if_secret(row.key, decrypt_setting(row.key, row.value) or "")
         for row in rows
+        if not row.key.startswith("_")  # internos (p. ej. el token de GoCardless): no son ajustes
     }
 
 

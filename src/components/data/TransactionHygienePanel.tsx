@@ -4,6 +4,7 @@ import { parseJsonValue } from "../../utils/format";
 import { useNotify } from "../../hooks/useNotify";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, isLegacyCategory, normalizeCategory } from "../../utils/expenseCategories";
 import type { Transaction } from "../../types";
+import { ChevronDown, ChevronUp, Icon } from "../../vendor/icons";
 
 type Props = {
   settings: Record<string, string>;
@@ -52,7 +53,7 @@ export function TransactionHygienePanel({ settings, transactions, addToast, load
       >
         <h2 style={{ margin: 0, fontSize: "1rem" }}>Higiene y reglas de categoría</h2>
         <span className="muted" style={{ fontSize: "0.8rem" }}>
-          {weakCount > 0 ? `${weakCount} sin categoría` : "OK"} {open ? "▲" : "▼"}
+          {weakCount > 0 ? `${weakCount} sin categoría` : "OK"} <Icon svg={open ? ChevronUp : ChevronDown} />
         </span>
       </button>
       {open && (

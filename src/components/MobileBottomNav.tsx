@@ -1,4 +1,5 @@
 import { SECTION_ICONS, menuKeyToSection, sectionDefaultTab, type MenuKey, type MenuSection } from "../config/ui";
+import { Icon, Menu } from "../vendor/icons";
 
 const PRIMARY_TABS: { section: MenuSection; label: string }[] = [
   { section: "Inicio", label: "Inicio" },
@@ -29,7 +30,7 @@ export function MobileBottomNav({ currentMenu, onNavigate, onMore }: Props) {
             aria-current={active ? "page" : undefined}
             onClick={() => onNavigate(sectionDefaultTab(section))}
           >
-            <span className="mobile-tab__icon" aria-hidden="true">{SECTION_ICONS[section]}</span>
+            <span className="mobile-tab__icon" aria-hidden="true"><Icon svg={SECTION_ICONS[section]} /></span>
             <span className="mobile-tab__label">{label}</span>
           </button>
         );
@@ -40,7 +41,7 @@ export function MobileBottomNav({ currentMenu, onNavigate, onMore }: Props) {
         aria-label="Más secciones"
         onClick={onMore}
       >
-        <span className="mobile-tab__icon" aria-hidden="true">☰</span>
+        <span className="mobile-tab__icon" aria-hidden="true"><Icon svg={Menu} /></span>
         <span className="mobile-tab__label">Más</span>
       </button>
     </nav>

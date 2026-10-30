@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChevronDown, ChevronRight, Icon } from "../../vendor/icons";
 
 type Props = {
   groupId: string;
@@ -31,7 +32,7 @@ export function BudgetGroupHeader({
       >
         <Tag className="budget-group-header__title">
           <span className="budget-group-header__chevron" aria-hidden>
-            {expanded ? "▼" : "▶"}
+            <Icon svg={expanded ? ChevronDown : ChevronRight} />
           </span>
           {title}
         </Tag>

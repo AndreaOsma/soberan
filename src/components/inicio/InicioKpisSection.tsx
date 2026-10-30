@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { MenuKey, NextDebtPayment, TotalsSnapshot } from "./inicioTypes";
+import { ChevronDown, ChevronRight, Icon } from "../../vendor/icons";
 
 export type InicioKpisSectionProps = {
   totals: TotalsSnapshot;
@@ -105,7 +106,7 @@ export function InicioKpisSection({
             onClick={() => setBreakdownOpen((o) => !o)}
           >
             <span>De dónde salen estos números</span>
-            <span className="muted">{breakdownOpen ? "▾" : "▸"}</span>
+            <Icon svg={breakdownOpen ? ChevronDown : ChevronRight} />
           </button>
           {breakdownOpen && (
             <div className="inicio-panel__body inicio-breakdown-body">

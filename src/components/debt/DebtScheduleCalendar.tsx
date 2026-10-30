@@ -4,6 +4,7 @@ import { MonthCalendarGrid, type CalendarGridEvent } from "../calendar/MonthCale
 import { EmptyState } from "../EmptyState";
 import { DebtScheduleEditorModal } from "../modals/DebtScheduleEditorModal";
 import { installmentMatchesMonth, installmentStatus, debtHasPlanilla } from "../../utils/debtInstallments";
+import { Calendar, PartyPopper } from "../../vendor/icons";
 
 type Props = {
   debts: Debt[];
@@ -192,13 +193,13 @@ export function DebtScheduleCalendar({
 
       {activeDebts.length === 0 ? (
         <EmptyState
-          icon="🎉"
+          icon={PartyPopper}
           title="Sin deudas activas"
           description="Cuando registres una deuda podrás cargar su planilla de pagos aquí."
         />
       ) : gridEvents.length === 0 ? (
         <EmptyState
-          icon="📅"
+          icon={Calendar}
           title="Sin cuotas este mes"
           description="No hay cuotas de planilla en este mes. Genera la planilla o navega a otro mes."
           actionLabel={editorTarget && !editorTargetHasPlanilla ? "Generar planilla" : "Editar planilla"}

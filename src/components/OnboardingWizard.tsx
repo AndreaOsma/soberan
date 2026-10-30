@@ -9,6 +9,7 @@ import { AccentColorPicker } from "./AccentColorPicker";
 import { buildThemeFromAccent, resolveAccentFromSettings } from "../utils/accentTheme";
 import { toDateOnly } from "../utils/format";
 import { SyncOnboardingStep } from "../vendor/native-sync/SyncOnboardingStep";
+import { Icon, X } from "../vendor/icons";
 
 type Props = {
   onComplete: (settingsPatch: Record<string, string>) => void;
@@ -176,7 +177,7 @@ export function OnboardingWizard({
               title="Cerrar asistente"
               aria-label="Cerrar asistente"
             >
-              ✕
+              <Icon svg={X} />
             </button>
           )}
         </div>

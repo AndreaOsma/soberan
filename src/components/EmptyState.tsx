@@ -1,3 +1,4 @@
+import { Icon } from "../vendor/icons";
 type Props = {
   icon: string;
   title: string;
@@ -9,7 +10,7 @@ type Props = {
 export function EmptyState({ icon, title, description, actionLabel, onAction }: Props) {
   return (
     <div className="empty-state">
-      <div className="empty-state-icon" aria-hidden="true">{icon}</div>
+      <div className="empty-state-icon" aria-hidden="true"><Icon svg={icon} size={40} /></div>
       <h3>{title}</h3>
       <p>{description}</p>
       {actionLabel && onAction ? (

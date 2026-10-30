@@ -8,6 +8,7 @@ import { useNotify } from "../../hooks/useNotify";
 import { irpfForJobMonths, parseIrpfModelo145Store } from "../../utils/irpfModelo145History";
 import { calcIrpfWithholdingGap } from "../../utils/irpfWithholdingGap";
 import type { Account, SalaryBreakdown, WorkHistory } from "../../types";
+import { Briefcase, Icon } from "../../vendor/icons";
 
 type ActiveSalary = {
   empresa: string; bruto: number; irpf: number; ss: number;
@@ -379,7 +380,7 @@ export function TaxesIrpfPanel({
       {salaryEntries.length === 0 ? (
         <article className="card">
           <div className="empty-state">
-            <div className="empty-state-icon">💼</div>
+            <div className="empty-state-icon"><Icon svg={Briefcase} /></div>
             <h3>Sin datos salariales</h3>
             <p>Añade tus empleos con salario bruto e IRPF en Historial Laboral. Cada experiencia tiene su propio %.</p>
             <button onClick={onNavigateToHistorialLaboral}>Ir a Historial Laboral</button>

@@ -6,6 +6,7 @@ import { isWishlistActive, isWishlistArchived } from "../../utils/wishlist";
 import { buildGoalProgressSnapshot, goalProgressLabel } from "../../utils/goalProgress";
 import type { Account, Debt, Goal, Investment, MonthlyBudget, RecurringEntry, WishlistItem } from "../../types";
 import type { Dispatch, SetStateAction } from "react";
+import { Check, Icon, Pencil, Sparkles, Target, Trash2 } from "../../vendor/icons";
 
 const MONTH_NAMES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
@@ -56,7 +57,7 @@ export function GoalsWishlistPanel({
             </div>
             {goals.length === 0 ? (
               <EmptyState
-                icon="🎯"
+                icon={Target}
                 title="Sin objetivos definidos"
                 description="Define metas financieras para conectar tu ahorro con propósitos concretos."
                 actionLabel="+ Añadir objetivo"
@@ -97,7 +98,7 @@ export function GoalsWishlistPanel({
                           <div className="goal-header">
                             <div className="goal-header__title">
                               <span className="goal-header__name">
-                                {snapshot.isComplete ? "✓ " : ""}{goal.nombre}
+                                {snapshot.isComplete ? <><Icon svg={Check} label="Conseguido" /> </> : null}{goal.nombre}
                               </span>
                               {(linkedAccount || goal.cartera_destino) && (
                                 <small className="muted goal-header__meta">
@@ -110,11 +111,11 @@ export function GoalsWishlistPanel({
                             <div className="goal-header__actions">
                               <button type="button" className="button-secondary"
                                 aria-label={`Editar objetivo ${goal.nombre}`} title="Editar"
-                                onClick={() => setEditGoalModal(goal)}>✎</button>
+                                onClick={() => setEditGoalModal(goal)}><Icon svg={Pencil} /></button>
                               <button type="button" className="danger"
                                 aria-label={`Eliminar objetivo ${goal.nombre}`} title="Eliminar"
                                 onClick={() => deleteWithUndo("Meta", () => api.deleteGoal(goal.id).then(() => loadAll()))}>
-                                🗑
+                                <Icon svg={Trash2} />
                               </button>
                             </div>
                           </div>
@@ -161,7 +162,7 @@ export function GoalsWishlistPanel({
               if (wishlist.length === 0) {
                 return (
                   <EmptyState
-                    icon="✨"
+                    icon={Sparkles}
                     title="Sin deseos anotados"
                     description="Apunta cosas que quieres comprar algún día sin comprometerte todavía."
                     actionLabel="+ Añadir deseo"
@@ -224,14 +225,14 @@ export function GoalsWishlistPanel({
                                     style={{ padding: "0.2rem 0.4rem", fontSize: "0.75rem" }}
                                     className="button-secondary"
                                     onClick={() => setPurchaseModal(item)}>
-                                    ✓ comprado
+                                    <Icon svg={Check} /> comprado
                                   </button>
                                   <button type="button" className="button-secondary" style={{ padding: "0.2rem 0.4rem" }}
                                     aria-label={`Editar deseo ${item.nombre}`} title="Editar"
-                                    onClick={() => setEditWishlistModal(item)}>✎</button>
+                                    onClick={() => setEditWishlistModal(item)}><Icon svg={Pencil} /></button>
                                   <button type="button" className="danger"
                                     aria-label={`Eliminar deseo ${item.nombre}`} title="Eliminar"
-                                    onClick={() => deleteWithUndo("Deseo", () => api.deleteWishlistItem(item.id).then(() => loadAll()))}>🗑</button>
+                                    onClick={() => deleteWithUndo("Deseo", () => api.deleteWishlistItem(item.id).then(() => loadAll()))}><Icon svg={Trash2} /></button>
                                 </>
                               )}
                             </div>

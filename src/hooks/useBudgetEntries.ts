@@ -655,7 +655,9 @@ export function useBudgetEntries({
       rentabilidad_anual_pct: isAi && newEntry.rentabilidad_anual_pct !== "" ? Number(newEntry.rentabilidad_anual_pct) : null,
       mes_inicio: isSub ? newEntry.mes_inicio : month,
       anio_inicio: isSub ? newEntry.anio_inicio : year,
-      es_puntual: isSub ? false : isFondo ? false : newEntry.es_puntual,
+      // Un gasto planificado es siempre puntual: los recurrentes sin fondo son el modelo antiguo y la vista
+      // del mes no los muestra ni los suma (quedaban guardados pero invisibles).
+      es_puntual: isSub || isFondo ? false : newEntry.tipo_partida === "gasto" ? true : newEntry.es_puntual,
       es_fondo: isFondo,
       frecuencia: isSub ? newEntry.frecuencia : null,
       fecha_pago: isSub ? newEntry.fecha_pago : null,

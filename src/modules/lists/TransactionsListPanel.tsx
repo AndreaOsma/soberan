@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../../services/api";
 import { EmptyState } from "../../components/EmptyState";
 import { TransactionHygienePanel } from "../../components/data/TransactionHygienePanel";
@@ -14,6 +15,7 @@ import { learnableMerchantToken, maybeLearnMerchantName } from "../../utils/merc
 import { budgetExpenseAmount, hasExpenseSplits, unsettledOwedByPerson } from "../../utils/expenseSplits";
 import type { Account, Transaction } from "../../types";
 import type { Dispatch, SetStateAction } from "react";
+import { ChevronDown, ChevronUp, CreditCard, Icon, Pencil, Trash2 } from "../../vendor/icons";
 
 const TX_PAGE_SIZE = 20;
 
@@ -36,6 +38,20 @@ type Props = {
   setBulkRecatPending: Dispatch<SetStateAction<{ description: string; category: string; count: number } | null>>;
   setEditTxModal: (v: Transaction | null) => void;
 };
+
+const MOBILE_QUERY = "(max-width: 720px)";
+
+/** ¿Pantalla de móvil? (el mismo corte que mobile-nav.css). */
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const on = () => setMobile(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return mobile;
+}
 
 export function TransactionsListPanel({
   accounts, transactions, settings, formatEUR, addToast, loadAll, deleteWithUndo,
@@ -257,7 +273,7 @@ export function TransactionsListPanel({
             disabled={pending}
             onClick={() => setEditTxModal(tx)}
           >
-            ✎
+            <Icon svg={Pencil} />
           </button>
           {!isInternalTransfer(tx) && (
             <button
@@ -363,58 +379,65 @@ export function TransactionsListPanel({
             disabled={pending}
             onClick={() => requestDelete(tx)}
           >
-            🗑
+            <Icon svg={Trash2} />
           </button>
         </div>
       </li>
     );
   };
 
+
+  const isMobile = useIsMobile();
+  // Buscador y filtros: arriba en escritorio; en el móvil, barra fija a la pantalla sobre las pestañas
+  // (un sticky dentro de la lista bailaba en el iPhone con el scroll, 2026-10-29).
+  const txFilters = (
+        <div className="list-filters">
+      <input
+        type="search"
+        placeholder="Buscar descripción…"
+        aria-label="Buscar por descripción"
+        value={txSearch}
+        onChange={(e) => setTxSearch(e.target.value)}
+        style={{ flex: "1 1 160px", minWidth: 0 }}
+      />
+      <select aria-label="Filtrar por categoría" value={txFilterCat} onChange={(e) => setTxFilterCat(e.target.value)} style={{ flex: "0 1 160px" }}>
+        <option value="">Todas las categorías</option>
+        {allCats.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+      <select
+        aria-label="Filtrar por cuenta"
+        value={txFilterAccount}
+        onChange={(e) => setTxFilterAccount(e.target.value === "" ? "" : Number(e.target.value))}
+        style={{ flex: "0 1 140px" }}
+      >
+        <option value="">Todas las cuentas</option>
+        {accounts.map((a) => <option key={a.id} value={a.id}>{a.alias_real}</option>)}
+      </select>
+      {hasFilter && (
+        <button type="button" className="button-secondary" onClick={() => { setTxSearch(""); setTxFilterCat(""); setTxFilterAccount(""); }}>
+          Limpiar
+        </button>
+      )}
+    </div>
+  );
   return (
     <section className="grid one-col">
-      <article className="card">
+      <article className="card tx-card">
         <div className="tx-list-head">
           <h2>Historial de Transacciones</h2>
           <div className="inline-actions">
             <button type="button" onClick={onOpenTxModal}>+ Registro Manual</button>
           </div>
         </div>
-
-        <div className="list-filters">
-          <input
-            type="search"
-            placeholder="Buscar descripción…"
-            aria-label="Buscar por descripción"
-            value={txSearch}
-            onChange={(e) => setTxSearch(e.target.value)}
-            style={{ flex: "1 1 160px", minWidth: 0 }}
-          />
-          <select aria-label="Filtrar por categoría" value={txFilterCat} onChange={(e) => setTxFilterCat(e.target.value)} style={{ flex: "0 1 160px" }}>
-            <option value="">Todas las categorías</option>
-            {allCats.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select
-            aria-label="Filtrar por cuenta"
-            value={txFilterAccount}
-            onChange={(e) => setTxFilterAccount(e.target.value === "" ? "" : Number(e.target.value))}
-            style={{ flex: "0 1 140px" }}
-          >
-            <option value="">Todas las cuentas</option>
-            {accounts.map((a) => <option key={a.id} value={a.id}>{a.alias_real}</option>)}
-          </select>
-          {hasFilter && (
-            <button type="button" className="button-secondary" onClick={() => { setTxSearch(""); setTxFilterCat(""); setTxFilterAccount(""); }}>
-              Limpiar
-            </button>
-          )}
-        </div>
+        {!isMobile && txFilters}
         <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem" }} className="muted">
           {mainTotal} movimiento{mainTotal !== 1 ? "s" : ""}
           {omittedCount > 0 && ` · ${omittedCount} omitida${omittedCount !== 1 ? "s" : ""}`}
           {pageCount > 1 && ` · página ${currentPage}/${pageCount}`}
           <span> · ↔ traspaso interno · ⊘ omitir gasto o ingreso del presupuesto</span>
         </div>
-
+        {isMobile && createPortal(<div className="tx-filters-fixed" role="search" aria-label="Buscar en el historial">{txFilters}</div>,
+          document.querySelector(".app-shell") ?? document.body)}
         {bulkRecatPending && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.6rem 0.875rem", background: "var(--color-accent, #2563eb)22", border: "1px solid var(--color-accent, #2563eb)55", borderRadius: "0.5rem", marginBottom: "0.75rem", gap: "0.5rem", flexWrap: "wrap" }}>
             <span style={{ fontSize: "0.85rem" }}>
@@ -448,7 +471,7 @@ export function TransactionsListPanel({
 
         {transactions.length === 0 ? (
           <EmptyState
-            icon="💳"
+            icon={CreditCard}
             title="Sin movimientos registrados"
             description="Registra movimientos manualmente o importa un extracto desde Cuentas."
             actionLabel="+ Primer movimiento"
@@ -510,7 +533,7 @@ export function TransactionsListPanel({
                     Omitidas ({omittedCount})
                   </h3>
                   <span className="muted" style={{ fontSize: "0.8rem" }}>
-                    No cuentan en presupuesto {showOmitted ? "▲" : "▼"}
+                    No cuentan en presupuesto <Icon svg={showOmitted ? ChevronUp : ChevronDown} />
                   </span>
                 </button>
                 {showOmitted && (

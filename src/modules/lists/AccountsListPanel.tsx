@@ -14,6 +14,7 @@ import {
 import { hiddenAccounts, listVisibleAccounts } from "../../utils/payrollAccount";
 import type { Account } from "../../types";
 import type { Dispatch, SetStateAction } from "react";
+import { Eye, Icon, Landmark, Pencil, Trash2 } from "../../vendor/icons";
 
 type Props = {
   accounts: Account[];
@@ -212,7 +213,7 @@ export function AccountsListPanel({
             </p>
           ) : (
           <EmptyState
-            icon="🏦"
+            icon={Landmark}
             title="Sin cuentas registradas"
             description="Añade tus cuentas bancarias o conéctalas con Open Banking para sincronizar saldos y movimientos."
             actionLabel="+ Añadir cuenta"
@@ -282,7 +283,7 @@ export function AccountsListPanel({
                           {syncingAccountId === account.id ? "…" : "↻"}
                         </button>
                       )}
-                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }} aria-label={`Editar cuenta ${account.alias_real}`} title="Editar" onClick={() => setEditAccountModal(account)}>✎</button>
+                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }} aria-label={`Editar cuenta ${account.alias_real}`} title="Editar" onClick={() => setEditAccountModal(account)}><Icon svg={Pencil} /></button>
                       <button
                         type="button"
                         className="button-secondary"
@@ -295,7 +296,7 @@ export function AccountsListPanel({
                           "No se pudo ocultar la cuenta.",
                         )}
                       >
-                        👁
+                        <Icon svg={Eye} />
                       </button>
                       {!linked && (
                         <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
@@ -307,7 +308,7 @@ export function AccountsListPanel({
                       <button type="button" className="danger"
                         aria-label={`Eliminar cuenta ${account.alias_real}`} title="Eliminar"
                         onClick={() => deleteWithUndo("Cuenta", () => api.deleteAccount(account.id).then(() => loadAll()))}>
-                        🗑
+                        <Icon svg={Trash2} />
                       </button>
                     </>
                   )}
@@ -357,9 +358,9 @@ export function AccountsListPanel({
                           "No se pudo mostrar la cuenta.",
                         )}
                       >
-                        👁
+                        <Icon svg={Eye} />
                       </button>
-                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }} aria-label={`Editar cuenta ${account.alias_real}`} title="Editar" onClick={() => setEditAccountModal(account)}>✎</button>
+                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }} aria-label={`Editar cuenta ${account.alias_real}`} title="Editar" onClick={() => setEditAccountModal(account)}><Icon svg={Pencil} /></button>
                     </div>
                   </li>
                 ))}

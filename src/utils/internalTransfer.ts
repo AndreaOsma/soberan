@@ -1,4 +1,5 @@
 import type { Transaction } from "../types";
+import { EARNED_INCOME_CATEGORIES } from "./expenseCategories";
 
 export const INTERNAL_TRANSFER_CATEGORY = "Transferencia interna";
 
@@ -32,7 +33,12 @@ export function isRealExpense(tx: BudgetRelevantTx): boolean {
   return Number(tx.amount) < 0;
 }
 
+const EARNED = new Set(EARNED_INCOME_CATEGORIES.map((c) => c.toLowerCase()));
+
+/** Ingreso del presupuesto: positivo, no excluido y con categoría de ingreso ganado (nómina, freelance u
+ *  «Otros ingresos» puesto a mano). Traspasos entre tus cuentas y Bizum ya no cuentan solos. */
 export function isRealIncome(tx: BudgetRelevantTx): boolean {
   if (isExcludedFromBudget(tx)) return false;
-  return Number(tx.amount) > 0;
+  if (Number(tx.amount) <= 0) return false;
+  return EARNED.has((tx.category_anon || "").trim().toLowerCase());
 }

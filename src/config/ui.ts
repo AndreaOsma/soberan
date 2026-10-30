@@ -1,3 +1,4 @@
+import { ArrowUpDown, Briefcase, ChartColumn, House, Landmark, Settings, TrendingUp } from "../vendor/icons";
 export type MenuKey =
   | "Resumen Ejecutivo"
   | "Interés Compuesto"
@@ -41,14 +42,14 @@ export const MENU_SECTIONS: MenuSection[] = [
 ];
 
 export const SECTION_ICONS: Record<MenuSection, string> = {
-  "Inicio":         "🏠",
-  "Movimientos":    "↕️",
-  "Presupuesto":    "📊",
-  "Cuentas":        "🏦",
-  "Inversiones":    "📈",
-  "Propiedades":    "🏗️",
-  "Laboral":        "💼",
-  "Configuración":  "⚙️",
+  "Inicio":         House,
+  "Movimientos":    ArrowUpDown,
+  "Presupuesto":    ChartColumn,
+  "Cuentas":        Landmark,
+  "Inversiones":    TrendingUp,
+  "Propiedades":    House,
+  "Laboral":        Briefcase,
+  "Configuración":  Settings,
 };
 
 export const SECTION_BLURBS: Record<MenuSection, string> = {

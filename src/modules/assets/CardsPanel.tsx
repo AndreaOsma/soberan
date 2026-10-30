@@ -6,6 +6,7 @@ import type { Card } from "../../types";
 import { parseNum } from "../../utils/format";
 import { useAsyncSubmit } from "../../hooks/useAsyncSubmit";
 import { ModalFormError } from "../../components/ModalFormError";
+import { CreditCard, Icon, Pencil, Trash2 } from "../../vendor/icons";
 
 export type CardsPanelProps = {
   cards: Card[];
@@ -33,7 +34,7 @@ export function CardsPanel({
           </div>
           {cards.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">💳</div>
+              <div className="empty-state-icon"><Icon svg={CreditCard} /></div>
               <h3>Sin tarjetas registradas</h3>
               <p>Añade tus tarjetas de débito y crédito.</p>
               <button onClick={() => setIsCardFormOpen(true)}>+ Añadir tarjeta</button>
@@ -47,11 +48,11 @@ export function CardsPanel({
                     <strong>{item.tipo === "D" ? "Débito" : "Crédito"}{item.limite ? ` · ${formatEUR(item.limite)}` : ""}</strong>
                     <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
                       aria-label={`Editar tarjeta ${item.nombre}`} title="Editar"
-                      onClick={() => setEditCardModal(item)}>✎</button>
+                      onClick={() => setEditCardModal(item)}><Icon svg={Pencil} /></button>
                     <button type="button" className="danger"
                       aria-label={`Eliminar tarjeta ${item.nombre}`} title="Eliminar"
                       onClick={() => deleteWithUndo("Tarjeta", () => api.deleteCard(item.id).then(() => loadAll()))}>
-                      🗑
+                      <Icon svg={Trash2} />
                     </button>
                   </div>
                 </li>

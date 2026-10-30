@@ -1,4 +1,5 @@
 import type { GoalProgressSnapshot } from "../../utils/goalProgress";
+import { Check, Icon } from "../../vendor/icons";
 
 type Props = {
   snapshot: GoalProgressSnapshot;
@@ -22,7 +23,7 @@ export function GoalProgressBlock({ snapshot, formatEUR, compact }: Props) {
           <span className="sensitive">{formatEUR(current)}</span>
           {" "}({pct.toFixed(1)}%)
           {isComplete ? (
-            <span className="budget-goal-done"> · ✓ alcanzado</span>
+            <span className="budget-goal-done"> · <Icon svg={Check} /> alcanzado</span>
           ) : etaLabel ? (
             <span> · {etaLabel}</span>
           ) : monthlyContribution <= 0 ? (

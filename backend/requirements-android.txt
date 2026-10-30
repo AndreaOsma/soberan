@@ -12,5 +12,7 @@ icalendar==6.1.0
 requests==2.32.3
 pypdf==6.19.0
 beautifulsoup4==4.12.3
+# Chaquopy empaqueta Python 3.10 y soupsieve ≥2.11 exige ≥3.11.5 (el APK no compilaba, 2026-10-26).
+soupsieve==2.10
 platformdirs==4.3.6
 httpx==0.28.1

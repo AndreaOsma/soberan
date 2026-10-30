@@ -56,6 +56,26 @@
   flex-wrap: nowrap;
 }
 
+.topbar-period {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-self: center;
+}
+.topbar-period__nav {
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+}
+/* Con el período en la cabecera (Presupuesto) escritorio lo centra entre título y controles;
+   en móvil pasa a una segunda fila (mobile-nav.css). */
+.topbar--period {
+  grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+}
+
 .topbar-icon-btn {
   border: none;
   background: transparent;
@@ -95,6 +115,63 @@
   border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
   background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
   box-shadow: var(--focus-ring);
+}
+
+.topbar-simple-btn {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  padding: 0.3rem 0.7rem;
+  min-height: 44px;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  opacity: 0.95;
+}
+.topbar-simple-btn:hover,
+.topbar-simple-btn.is-active {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+}
+.topbar-simple-btn:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.topbar-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.topbar-add-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+}
+.topbar-add-btn:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .topbar-add-btn {
+    padding: 0.3rem;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .topbar-add-btn__label {
+    display: none;
+  }
 }
 
 .topbar-menu-btn {
@@ -249,3 +326,93 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent);
 }
 
+
+/* ── Menús de la cabecera («⋯» y «+»): cabecera despejada (2026-10-29) ── */
+.header-menu {
+  position: relative;
+  /* Opaco, en los dos temas: el cristal de la cabecera dejaba leer el contenido de detrás. */
+  --header-menu-bg: #f8fafc;
+}
+.app-shell.theme-dark .header-menu {
+  --header-menu-bg: #0b1322;
+}
+.header-menu__trigger {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+.header-menu__trigger:hover,
+.header-menu__trigger[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+  transform: none;
+}
+.header-menu--add .header-menu__trigger {
+  background: var(--primary);
+  border-color: transparent;
+  color: #fff;
+  font-size: 1.5rem;
+}
+.header-menu__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 90;
+  min-width: 13.5rem;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  /* Casi opaco: con el cristal de la cabecera se leía el contenido de detrás a través del menú. */
+  background: var(--header-menu-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-soft), 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.header-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+}
+.header-menu__item:hover,
+.header-menu__item:focus-visible {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  transform: none;
+}
+.header-menu__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0 0.4rem 0 0.8rem;
+  font-weight: 600;
+}
+
+/* Selector de tema: el menú con icono + texto y el elegido marcado (AGENTS.md → DesignUXParameters). */
+.appearance-toggle__menu { flex-direction: column; min-width: 11rem; }
+.appearance-toggle__btn { width: 100%; min-height: 44px; }
+.appearance-toggle__check { margin-left: auto; }

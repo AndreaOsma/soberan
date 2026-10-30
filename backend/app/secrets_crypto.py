@@ -26,7 +26,7 @@ from typing import Optional
 logger = logging.getLogger("soberan.secrets_crypto")
 
 # user_settings keys that must never be persisted as plaintext.
-ENCRYPTED_SETTING_KEYS = {"kraken_api_key", "kraken_api_secret"}
+ENCRYPTED_SETTING_KEYS = {"kraken_api_key", "kraken_api_secret", "_gocardless_token_cache"}
 
 _ENC_PREFIX = "enc:v1:"
 

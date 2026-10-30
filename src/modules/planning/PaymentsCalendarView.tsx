@@ -9,6 +9,7 @@ import { PeriodViewToggle } from "../../components/PeriodViewToggle";
 import type { MenuKey } from "../../config/ui";
 import { CAL_LEGEND_ITEMS } from "../../utils/statusColors";
 import { useIcalSubscribeLink } from "../../hooks/useIcalSubscribeLink";
+import { Calendar as CalendarIcon, Calendar, Icon, Settings } from "../../vendor/icons";
 
 type Props = {
   month: number;
@@ -185,7 +186,7 @@ export function PaymentsCalendarView({
               {...(icalLink.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               title="Suscribirse al calendario en iCal / Apple Calendar"
             >
-              📅 Suscribir iCal
+              <Icon svg={CalendarIcon} /> Suscribir iCal
             </a>
           ) : (
             <button type="button" className="cal-ical-btn" disabled={icalLoading} title="Preparando enlace de suscripción">
@@ -199,7 +200,7 @@ export function PaymentsCalendarView({
             title="Opciones del calendario"
             aria-expanded={optionsOpen}
           >
-            ⚙️
+            <Icon svg={Settings} />
           </button>
         </div>
       </div>
@@ -260,7 +261,7 @@ export function PaymentsCalendarView({
 
       {activeEvents.length === 0 && !yearLoading ? (
         <EmptyState
-          icon="📅"
+          icon={Calendar}
           title="Sin pagos programados"
           description={viewMode === "year"
             ? "No hay ingresos, suscripciones ni cuotas de deuda programados en este año."

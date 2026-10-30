@@ -11,6 +11,17 @@ import {
 const ref = new Date(2026, 0, 1); // 2026-01-01
 
 describe("simulateExtraPayment", () => {
+  it("un extra en diciembre sigue en enero del año siguiente (no en «mes 13»)", () => {
+    const debt = { monto_total: 2400, monto_pagado: 0, cuota_mensual: 100, tasa_anual: 0, dia_cargo_mensual: 1 };
+    for (const mode of ["term", "cuota"] as const) {
+      const impact = simulateExtraPayment(debt, 150, 12, 2026, ref, mode);
+      expect(impact.applicable).toBe(true);
+      expect(impact.newInstallmentRows[0]!.fecha_vencimiento).toBe("2026-12-01");
+      expect(impact.newInstallmentRows[1]!.fecha_vencimiento).toBe("2027-01-01");
+      for (const row of impact.newInstallmentRows) expect(row.fecha_vencimiento).toMatch(/^\d{4}-(0[1-9]|1[0-2])-\d{2}$/);
+    }
+  });
+
   it("acorta el plazo sin ahorro de intereses a tasa 0%", () => {
     const debt = {
       monto_total: 1200,

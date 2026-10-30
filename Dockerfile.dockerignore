@@ -1,0 +1,40 @@
+# Exclusiones del build con contexto dev/ (ver la cabecera del Dockerfile). BuildKit usa este
+# fichero en vez del .dockerignore de la raíz del contexto. Lista de permitidos: dev/ contiene
+# todas las apps del monorepo con sus node_modules y venvs (gigas en hera), y solo hace falta lo
+# que el Dockerfile copia de verdad.
+*
+!apps/soberan/package.json
+!apps/soberan/package-lock.json
+!apps/soberan/index.html
+!apps/soberan/vite.config.ts
+!apps/soberan/tsconfig.json
+!apps/soberan/tsconfig.app.json
+!apps/soberan/tsconfig.node.json
+!apps/soberan/eslint.config.js
+!apps/soberan/public
+!apps/soberan/src
+!apps/soberan/backend
+!apps/soberan/deploy/nginx.conf
+!lib/native-feel
+
+# Dentro de lo permitido, fuera lo que no es código (mismo criterio que .dockerignore).
+**/node_modules
+**/__pycache__
+**/.venv*
+**/venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.vite
+**/coverage
+**/*.db
+**/*.sqlite*
+**/*.log
+**/.env
+**/.env.*
+**/.DS_Store
+apps/soberan/backend/dist
+apps/soberan/backend/build
+apps/soberan/backend/desktop/static
+apps/soberan/backend/tests
+apps/soberan/backend/app/native_sync/build_config.py

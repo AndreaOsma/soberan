@@ -17,7 +17,7 @@ from . import models
 from .agent_api import AgentError, AgentRegistry
 from .expense_categories import EXPENSE_CATEGORIES, INCOME_CATEGORIES
 from .helpers import sanitize_string, validate_transaction_category
-from .transaction_splits import budget_expense_amount
+from .transaction_splits import budget_expense_amount, counts_as_income
 
 agent = AgentRegistry("soberan", "Soberan", "Finanzas personales: cuentas, movimientos, presupuesto, deudas, objetivos y patrimonio.",
                       token_env="SOBERAN_AGENT_TOKEN")
@@ -92,7 +92,7 @@ def gasto_del_mes(db: Session, p: Mes):
         if spent > 0:
             c = t.category_anon or "Sin categoría"
             gastos[c] = round(gastos.get(c, 0) + spent, 2)
-        elif (t.amount or 0) > 0 and not t.es_interna and not t.excluida_presupuesto:
+        elif counts_as_income(t):  # solo lo ganado: traspasos entre cuentas y Bizum no son ingresos
             ingresos += t.amount
     return {"mes": f"{mes:02d}/{anio}", "gastado": round(sum(gastos.values()), 2), "ingresos": round(ingresos, 2),
             "por_categoria": dict(sorted(gastos.items(), key=lambda kv: -kv[1]))}
@@ -158,7 +158,20 @@ class Movimiento(BaseModel):
     fecha: date = Field(default_factory=date.today)
 
 
-@agent.tool("anadir_movimiento", "Registra un gasto o ingreso a mano (no cambia el saldo: lo lleva el banco)", write=True)
+def _movimiento_preview(db: Session, p: Movimiento) -> str:
+    if p.importe == 0:
+        raise AgentError("El importe no puede ser 0.")
+    acc = _account(db, p.cuenta)
+    try:
+        cat = validate_transaction_category(p.categoria)
+    except HTTPException as e:
+        raise AgentError(f"{e.detail} Usa la herramienta categorias.", 400) from None
+    tipo = "Gasto" if p.importe < 0 else "Ingreso"
+    importe = f"{abs(p.importe):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{tipo} de {importe} € en {acc.alias_real} el {p.fecha.strftime('%d/%m/%Y')}: «{p.concepto.strip()}» ({cat})"
+
+
+@agent.tool("anadir_movimiento", "Registra un gasto o ingreso a mano (no cambia el saldo: lo lleva el banco)", write=True, preview=_movimiento_preview)
 def anadir_movimiento(db: Session, p: Movimiento):
     if p.importe == 0:
         raise AgentError("El importe no puede ser 0.")

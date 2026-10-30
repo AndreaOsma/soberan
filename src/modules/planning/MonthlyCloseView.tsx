@@ -6,6 +6,7 @@ import type { MenuKey } from "../../config/ui";
 import type { MonthlyBudgetTotals } from "../../utils/budgetTotals";
 import { parseJsonValue } from "../../utils/format";
 import { buildMonthlyCloseNarrative } from "../../utils/monthlyCloseNarrative";
+import { Icon, TriangleAlert } from "../../vendor/icons";
 
 type MatchResult = {
   entry: RecurringEntry;
@@ -334,7 +335,7 @@ export function MonthlyCloseView({
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {[
-              { key: "categorized", label: `Movimientos categorizados${uncategorized > 0 ? ` (quedan ${uncategorized})` : " ✓"}`, warn: uncategorized > 0 },
+              { key: "categorized", label: `Movimientos categorizados${uncategorized > 0 ? ` (quedan ${uncategorized})` : ": hecho"}`, warn: uncategorized > 0 },
               { key: "subscriptions_reviewed", label: "Suscripciones revisadas", warn: false },
               { key: "deviation_reviewed", label: "Desviaciones revisadas", warn: false },
               { key: "target_reviewed", label: `Objetivo de ahorro revisado (≥ ${targetSavingsPct}%)`, warn: savingsRate !== null && savingsRate < targetSavingsPct },
@@ -454,7 +455,7 @@ export function MonthlyCloseView({
                       </>
                     ) : (
                       <span className="muted" style={{ fontSize: "0.85rem" }}>
-                        ⚠ {formatEUR(entry.monto_estimado)} esperado
+                        <Icon svg={TriangleAlert} /> {formatEUR(entry.monto_estimado)} esperado
                       </span>
                     )}
                   </div>

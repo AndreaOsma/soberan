@@ -4,6 +4,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { EVOLUTION_PALETTE } from "../../utils/statusColors";
 import { MONTH_NAMES } from "../../hooks/useBudgetEntries";
 import { api } from "../../services/api";
+import { TrendingUp } from "../../vendor/icons";
 
 type Totals = {
   totalCash: number;
@@ -143,7 +144,7 @@ export function AnnualEvolutionView({ year: initialYear, patrimonioEvolution, in
           <p className="muted" style={{ fontSize: "0.85rem" }}>Cargando…</p>
         ) : rows.length === 0 ? (
           <EmptyState
-            icon="📈"
+            icon={TrendingUp}
             title="Sin datos en el período"
             description="Aún no hay evolución patrimonial registrada para este año."
           />

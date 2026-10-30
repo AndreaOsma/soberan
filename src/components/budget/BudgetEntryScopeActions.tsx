@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Icon, Trash2 } from "../../vendor/icons";
 
 type Props = {
   onThisMonth: () => void;
@@ -50,7 +51,7 @@ export function BudgetEntryScopeActions({
         title={`Borrar ${entryLabel}`}
         onClick={() => setOpen((v) => !v)}
       >
-        🗑
+        <Icon svg={Trash2} />
       </button>
       {open && (
         <div className="budget-sub-remove__menu" id={menuId} role="menu">

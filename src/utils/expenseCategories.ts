@@ -26,6 +26,11 @@ export const INCOME_CATEGORIES = [
   "Otros ingresos",
 ] as const;
 
+/** Lo único que cuenta solo como ingreso del presupuesto (Andrea, 2026-10-29): lo ganado. Un movimiento
+ *  positivo sin categoría, una «Transferencia recibida» (traspasos entre tus cuentas, Bizum que te
+ *  devuelven) o una «Devolución» no son ingresos; si alguno lo es, se le pone «Otros ingresos». */
+export const EARNED_INCOME_CATEGORIES = ["Nómina", "Freelance", "Otros ingresos"] as const;
+
 export const INTERNAL_TRANSFER_CATEGORY = "Transferencia interna";
 export const SUBSCRIPTION_CATEGORY = "Suscripciones";
 

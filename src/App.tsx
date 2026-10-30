@@ -47,6 +47,7 @@ import { useChat } from "./hooks/useChat";
 import { useDesktopUpdates } from "./hooks/useDesktopUpdates";
 import { persistOnboardingDoneLocal, useSoberanData } from "./hooks/useSoberanData";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { persistSimpleModeLocal, readSimpleModeLocal } from "./utils/simpleModeStorage";
 
 export default function App() {
   const [currentMenu, setCurrentMenuState] = useState<MenuKey>(() => {
@@ -171,6 +172,7 @@ export default function App() {
   const [uiDensity, setUiDensity] = useState<"minimal" | "detailed">(
     () => (localStorage.getItem("soberan-ui-density") as "minimal" | "detailed") || "minimal",
   );
+  const [simpleMode, setSimpleMode] = useState(readSimpleModeLocal);
   const [systemDark, setSystemDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
   // Same formula AppShell uses for effectiveDark (line ~679) — needed here too, earlier,
   // so the status bar can be kept in sync even during onboarding/loading screens that
@@ -304,6 +306,10 @@ export default function App() {
   }, [uiDensity]);
 
   useEffect(() => {
+    persistSimpleModeLocal(simpleMode);
+  }, [simpleMode]);
+
+  useEffect(() => {
     localStorage.setItem("soberan-budget-view-mode", budgetViewMode);
   }, [budgetViewMode]);
 
@@ -349,11 +355,7 @@ export default function App() {
   }, [allMenus, currentMenu, loadAll, setCurrentMenu]);
 
   const isBudgetYearToolbar = currentMenu === "Presupuesto" && budgetViewMode === "year";
-  const showToolbarActions = (
-    ["Resumen Ejecutivo", "Flujo de Efectivo", "Ingresos", "Presupuesto", "Transacciones", "Cuentas"] as MenuKey[]
-  ).includes(currentMenu);
   const showToolbarPeriod = currentMenu === "Presupuesto" && !isBudgetYearToolbar;
-  const showContentToolbar = showToolbarActions || showToolbarPeriod;
 
   function renderDashboard() {
     const monthSpent = monthlyTransactions
@@ -437,6 +439,7 @@ export default function App() {
         patrimonioEvolution={patrimonioEvolution}
         transactionCount={transactions.length}
         uiDensity={uiDensity}
+        simpleMode={simpleMode}
         nextDebtPayment={nextDebt}
         dtiPct={dtiPct}
         emergencyFund={emergencyFund}
@@ -799,6 +802,8 @@ export default function App() {
       dayNightMode={dayNightMode}
       setDayNightMode={setDayNightMode}
       setUiDensity={setUiDensity}
+      simpleMode={simpleMode}
+      setSimpleMode={setSimpleMode}
       setPrivacyMode={setPrivacyMode}
       setMethodGuideOpen={setMethodGuideOpen}
       alerts={alerts}
@@ -808,8 +813,6 @@ export default function App() {
       desktopMode={desktopMode}
       desktopUpdate={desktopUpdate}
       dismissDesktopUpdate={dismissDesktopUpdate}
-      showContentToolbar={showContentToolbar}
-      showToolbarActions={showToolbarActions}
       showToolbarPeriod={showToolbarPeriod}
       monthRefreshing={monthRefreshing}
       month={month}

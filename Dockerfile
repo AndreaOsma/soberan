@@ -55,15 +55,14 @@ FROM python:3.11-slim AS api
 WORKDIR /app
 
 # psycopg2-binary ships wheels — no build-essential/libpq-dev (avoids linux-libc-dev CVEs).
-# CACHEBUST forces apt to re-run when Debian publishes security updates that Trivy
+# SECURITY_REFRESH (CI passes today's date) forces apt to re-run when Debian publishes security updates that Trivy
 # would otherwise block on a stale buildx layer (seen 2026-10-01: openssl/pcre2).
-ARG APT_CACHEBUST=2026-10-01
+ARG SECURITY_REFRESH=0
 RUN apt-get update \
   && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --no-install-recommends --only-upgrade \
        libssl3t64 openssl openssl-provider-legacy libpcre2-8-0 \
-  && rm -rf /var/lib/apt/lists/* \
-  && echo "apt-cachebust=${APT_CACHEBUST}" >/dev/null
+  && rm -rf /var/lib/apt/lists/*
 
 COPY apps/soberan/backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip "setuptools>=83" "wheel>=0.46.2" \
@@ -85,7 +84,11 @@ COPY apps/soberan/backend/ .
 # no matchee exacto. Fuera de aquí; el target allinone monta su propio static aparte.
 RUN rm -rf desktop
 
-RUN chmod +x startup.sh
+RUN chmod +x startup.sh \
+  && useradd --system --uid 10001 --user-group --home /app app
+
+# Arranca como root solo para preparar /data (startup.sh) y baja a «app» (uid 10001) con setpriv.
+# En el homelab /data es el montaje FUSE de LiteFS (allow-other, carpeta 777): no hace falta chown.
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -102,7 +105,7 @@ FROM nginx:1.29-alpine AS frontend
 # apk upgrade picks up patched Alpine packages (e.g. libcrypto3/libssl3). The
 # registry buildcache (mode=max) would otherwise reuse a stale upgrade layer —
 # seen 2026-10-09: pcre2/tiff blocked Trivy. CI passes today's date.
-ARG APK_CACHEBUST=2026-10-09
+ARG SECURITY_REFRESH=0
 RUN apk update && apk upgrade --no-cache
 # Plantilla: el entrypoint de nginx sustituye ${FRAME_ANCESTORS} al arrancar (solo variables
 # definidas; $uri y compañía quedan intactas). Por defecto nadie puede incrustar Soberan; en el

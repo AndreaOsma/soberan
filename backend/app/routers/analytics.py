@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from .. import models
 from ..database import get_db
-from ..transaction_splits import budget_expense_amount, counts_in_budget
+from ..transaction_splits import budget_expense_amount, counts_as_income, counts_in_budget
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ def get_sankey_data(mes: int, anio: int, db: Session = Depends(get_db)):
     ).all()
 
     # Build aggregates for Sankey (omit internals, pending, and user-excluded txs)
-    ingresos = sum(t.amount for t in txs if counts_in_budget(t) and t.amount > 0)
+    ingresos = sum(t.amount for t in txs if counts_as_income(t))
     categorias = {}
     for t in txs:
         spent = budget_expense_amount(t)

@@ -76,3 +76,76 @@ def test_request_retries_on_429():
             data = client.get_account_transactions("acc-1")
     assert "transactions" in data
     assert calls["n"] >= 3
+
+
+# ── Token compartido, renovable y guardado (429 en /token/new/, 2026-10-29) ──
+
+def _resp(status, body=b"{}", headers=None):
+    r = requests.Response()
+    r.status_code = status
+    r._content = body
+    for k, v in (headers or {}).items():
+        r.headers[k] = v
+    return r
+
+
+@pytest.fixture()
+def gc_reset():
+    from app.gocardless_bank_api import reset_token_cache_for_tests
+    reset_token_cache_for_tests()
+    yield
+    reset_token_cache_for_tests()
+
+
+def test_token_is_reused_across_clients_and_persisted(gc_reset):
+    from app.gocardless_bank_api import GoCardlessBankAPI
+    calls, saved = [], {}
+
+    def fake(method, url, **kw):
+        calls.append(url.split("/api/v2")[1])
+        if url.endswith("/token/new/"):
+            return _resp(200, b'{"access":"A1","access_expires":86400,"refresh":"R1","refresh_expires":2592000}')
+        return _resp(200, b'{"ok":1}')
+
+    with patch("app.gocardless_bank_api.requests.request", side_effect=fake):
+        a = GoCardlessBankAPI("id", "key", token_save=lambda t: saved.update(t))
+        a._get("/accounts/x/details/")
+        b = GoCardlessBankAPI("id", "key")
+        b._get("/accounts/y/details/")
+    assert calls.count("/token/new/") == 1
+    assert saved["access"] == "A1" and saved["refresh"] == "R1"
+
+
+def test_expired_access_uses_refresh_not_new(gc_reset):
+    import time as _t
+    from app.gocardless_bank_api import GoCardlessBankAPI
+    calls = []
+    stored = {"access": "OLD", "access_until": _t.time() - 10, "refresh": "R1", "refresh_until": _t.time() + 10 * 86400}
+
+    def fake(method, url, **kw):
+        calls.append(url.split("/api/v2")[1])
+        if url.endswith("/token/refresh/"):
+            assert kw["json"] == {"refresh": "R1"}
+            return _resp(200, b'{"access":"A2","access_expires":86400}')
+        assert kw["headers"]["Authorization"] == "Bearer A2"
+        return _resp(200, b'{}')
+
+    with patch("app.gocardless_bank_api.requests.request", side_effect=fake):
+        GoCardlessBankAPI("id", "key", token_load=lambda: dict(stored))._get("/x/")
+    assert "/token/new/" not in calls and "/token/refresh/" in calls
+
+
+def test_token_429_blocks_without_hammering(gc_reset):
+    from app.gocardless_bank_api import GoCardlessBankAPI, GoCardlessRateLimited
+    calls = []
+
+    def fake(method, url, **kw):
+        calls.append(url)
+        return _resp(429, b'{"detail":"rate"}', {"Retry-After": "3600"})
+
+    with patch("app.gocardless_bank_api.requests.request", side_effect=fake):
+        for _ in range(5):  # cinco cuentas seguidas
+            with pytest.raises(GoCardlessRateLimited) as e:
+                GoCardlessBankAPI("id", "key")._get("/accounts/z/balances/")
+    assert len(calls) == 1, "tras el 429 no se vuelve a pedir token hasta que pase la espera"
+    assert "60 min" in str(e.value)

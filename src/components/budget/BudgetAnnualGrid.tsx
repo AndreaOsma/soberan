@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AnnualBudgetLineGroup, AnnualBudgetLineItem, AnnualBudgetSummary, AnnualNameTotal } from "../../utils/annualBudget";
 import { ANNUAL_BUDGET_LINE_GROUP_LABELS, sumAnnualLinesByName } from "../../utils/annualBudget";
+import { ChevronDown, ChevronRight, Icon, Pencil } from "../../vendor/icons";
 
 type Props = {
   year: number;
@@ -110,7 +111,7 @@ function AnnualTotalsBreakdown({
         onClick={() => setOpen((v) => !v)}
       >
         <span className="budget-annual__breakdown-toggle-label">
-          <span className="budget-annual__breakdown-chevron" aria-hidden>{open ? "▾" : "▸"}</span>
+          <span className="budget-annual__breakdown-chevron" aria-hidden><Icon svg={open ? ChevronDown : ChevronRight} /></span>
           <span className="muted">{label}</span>
         </span>
         <strong className="sensitive">{displayAmount(amount)}</strong>
@@ -420,7 +421,7 @@ export function BudgetAnnualGrid({
                     aria-expanded={open}
                     aria-label={`${open ? "Ocultar" : "Desplegar"} partidas de ${row.label}`}
                   >
-                    {open ? "▾" : "▸"}
+                    <Icon svg={open ? ChevronDown : ChevronRight} />
                   </button>
                   <button
                     type="button"
@@ -442,7 +443,7 @@ export function BudgetAnnualGrid({
                     aria-label={`Editar presupuesto de ${row.label} ${year}`}
                     title={`Editar presupuesto de ${row.label} ${year}`}
                   >
-                    ✎
+                    <Icon svg={Pencil} />
                   </button>
                   </span>
                 </span>

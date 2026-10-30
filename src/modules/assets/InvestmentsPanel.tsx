@@ -7,6 +7,7 @@ import { parseNum } from "../../utils/format";
 import { useAsyncSubmit } from "../../hooks/useAsyncSubmit";
 import { InvestmentsConnectPanel } from "../../components/data/InvestmentsConnectPanel";
 import { ModalFormError } from "../../components/ModalFormError";
+import { ChevronDown, ChevronRight, Icon, Pencil, Trash2, TrendingUp, TriangleAlert } from "../../vendor/icons";
 
 type KrakenBalance = { asset: string; amount: number; eur_value: number | null; eur_price: number | null; type: string };
 
@@ -101,7 +102,7 @@ export function InvestmentsPanel({
         {investments.length === 0 ? (
           <article className="card">
             <div className="empty-state">
-              <div className="empty-state-icon">📈</div>
+              <div className="empty-state-icon"><Icon svg={TrendingUp} /></div>
               <h3>Sin inversiones registradas</h3>
               <p>Registra tus fondos, acciones o criptomonedas para hacer seguimiento de tu patrimonio.</p>
             </div>
@@ -193,10 +194,10 @@ export function InvestmentsPanel({
                                   )}
                                 </div>
                                 <button type="button" className="button-secondary" style={{ flexShrink: 0, padding: "0.25rem 0.5rem" }}
-                                  onClick={() => setEditInvestmentModal(item)}>✎</button>
+                                  onClick={() => setEditInvestmentModal(item)}><Icon svg={Pencil} /></button>
                                 <button type="button" className="danger" style={{ flexShrink: 0 }}
                                   aria-label={`Eliminar inversión ${item.nombre}`} title="Eliminar"
-                                  onClick={() => deleteWithUndo("Inversión", () => api.deleteInvestment(item.id).then(() => loadAll()))}>🗑</button>
+                                  onClick={() => deleteWithUndo("Inversión", () => api.deleteInvestment(item.id).then(() => loadAll()))}><Icon svg={Trash2} /></button>
                               </div>
                             </li>
                           );
@@ -227,7 +228,7 @@ export function InvestmentsPanel({
                 onClick={() => setCryptoExpanded(p => !p)}
               >
                 <h2 style={{ margin: 0, flexShrink: 0 }}>
-                  <span style={{ opacity: 0.5, marginRight: "0.4rem" }}>{cryptoExpanded ? "▼" : "▶"}</span>
+                  <span style={{ opacity: 0.5, marginRight: "0.4rem" }}><Icon svg={cryptoExpanded ? ChevronDown : ChevronRight} /></span>
                   Criptomonedas
                 </h2>
                 <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
@@ -272,7 +273,7 @@ export function InvestmentsPanel({
                   )}
                   {hasKraken && cryptoInvestments.some(inv => !inv.nombre.startsWith("Kraken ")) && (
                     <div style={{ padding: "0.5rem 0.75rem", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "0.4rem", fontSize: "0.82rem", margin: "0.75rem 0" }}>
-                      ⚠ Hay posiciones manuales de tipo "crypto" y saldo Kraken activo — verifica que no estés contabilizando los mismos activos dos veces.
+                      <Icon svg={TriangleAlert} /> Hay posiciones manuales de tipo "crypto" y saldo Kraken activo — verifica que no estés contabilizando los mismos activos dos veces.
                     </div>
                   )}
                   {cryptoInvestments.length > 0 && (

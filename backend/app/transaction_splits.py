@@ -17,6 +17,15 @@ def counts_in_budget(tx: Any) -> bool:
     return True
 
 
+def counts_as_income(tx: Any) -> bool:
+    """Ingreso del presupuesto: positivo, no excluido y con categoría de ingreso ganado."""
+    from .expense_categories import EARNED_INCOME_CATEGORIES
+
+    if not counts_in_budget(tx) or float(getattr(tx, "amount", 0) or 0) <= 0:
+        return False
+    return (getattr(tx, "category_anon", "") or "").strip().lower() in {c.lower() for c in EARNED_INCOME_CATEGORIES}
+
+
 def budget_expense_amount(tx: Any) -> float:
     """Amount that counts toward budget spent (0 if not a real expense).
 

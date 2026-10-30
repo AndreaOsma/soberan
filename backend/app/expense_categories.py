@@ -27,6 +27,10 @@ INCOME_CATEGORIES: tuple[str, ...] = (
     "Otros ingresos",
 )
 
+# Lo único que cuenta solo como ingreso del presupuesto (Andrea, 2026-10-29): lo ganado. Positivos sin
+# categoría, «Transferencia recibida» (traspasos entre tus cuentas, Bizum) o «Devolución» no lo son.
+EARNED_INCOME_CATEGORIES: tuple[str, ...] = ("Nómina", "Freelance", "Otros ingresos")
+
 INTERNAL_TRANSFER_CATEGORY = "Transferencia interna"
 SUBSCRIPTION_CATEGORY = "Suscripciones"
 

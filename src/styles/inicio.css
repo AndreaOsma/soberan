@@ -370,6 +370,41 @@
   text-align: center;
 }
 
+.inicio-simple--only {
+  display: flex;
+  justify-content: center;
+}
+
+.inicio-simple--only .inicio-donut {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.inicio-simple--only .inicio-donut__visual {
+  max-width: 100%;
+}
+
+.inicio-simple--only .inicio-donut__svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.inicio-simple--only .inicio-donut__center-value {
+  font-size: 1.35rem;
+}
+
+.inicio-simple--only .inicio-donut__legend-item {
+  font-size: var(--text-sm);
+  min-height: 2rem;
+  align-items: center;
+}
+
+.inicio-simple__private {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
 .inicio-donut {
   display: flex;
   flex-direction: column;

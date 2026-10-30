@@ -5,6 +5,7 @@ import { monthlyDebtObligation, recurringExpenseNames } from "../../utils/debtIn
 import { subscriptionAppliesToMonth, subscriptionMonthlyAmount, isAnnualSubscription } from "../../utils/subscriptionBudget";
 import { isRealExpense, isRealIncome } from "../../utils/internalTransfer";
 import { budgetExpenseAmount } from "../../utils/expenseSplits";
+import { TrendingDown } from "../../vendor/icons";
 
 type Totals = {
   monthlyIncome: number;
@@ -180,7 +181,7 @@ export function CashFlowView({
           </p>
           {catEntries.length === 0 ? (
             <EmptyState
-              icon="📉"
+              icon={TrendingDown}
               title="Sin gastos categorizados"
               description="Asigna categorías a tus movimientos para ver el desglose por categoría."
               actionLabel="Ir a Transacciones"

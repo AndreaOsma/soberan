@@ -32,6 +32,7 @@ import { isWishlistActive } from "../../utils/wishlist";
 import { buildGoalProgressSnapshot, findGoalById, findGoalForEntry, formatMonthYear } from "../../utils/goalProgress";
 import { isLibrePlannedGasto, useBudgetMonth } from "../../hooks/useBudgetMonth";
 import { MONTH_NAMES } from "../../hooks/useBudgetEntries";
+import { Calendar, Check, CircleAlert, ClipboardList, Icon, Pencil, TriangleAlert } from "../../vendor/icons";
 
 type AsyncSubmit = {
   saving: boolean;
@@ -252,7 +253,7 @@ export function BudgetMonthPanel(props: Props) {
     <>
     {recurringEntries.length === 0 && monthlyBudgets.length === 0 ? (
       <EmptyState
-        icon="📋"
+        icon={ClipboardList}
         title="Presupuesto sin partidas"
         description="Añade ingresos recurrentes, suscripciones o gastos fijos para empezar a planificar el mes."
         actionLabel="Ir a Ingresos"
@@ -349,7 +350,7 @@ export function BudgetMonthPanel(props: Props) {
           </div>
           {Math.abs(availableToAssign) < 0.01 && (
             <div style={{ fontSize: "0.8rem", color: "var(--color-positive)", marginTop: "0.3rem" }}>
-              ✓ Presupuesto en cero — cada euro tiene destino
+              <Icon svg={Check} /> Presupuesto en cero — cada euro tiene destino
             </div>
           )}
           {budgetOverAssigned && (
@@ -491,7 +492,7 @@ export function BudgetMonthPanel(props: Props) {
                 <div className="inline-actions">
                   <span className="muted" style={{ fontSize: "0.78rem" }}>Real</span>
                   {renderIncomeRealBtn(key, real, (val) => saveAssigned(entry.id, val))}
-                  <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar fuente" onClick={() => setEditingIncomeSource(entry)}>✎</button>
+                  <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar fuente" onClick={() => setEditingIncomeSource(entry)}><Icon svg={Pencil} /></button>
                   {renderEntryScopeActions(entry)}
                 </div>
               </li>
@@ -576,7 +577,7 @@ export function BudgetMonthPanel(props: Props) {
                       <span className={balance >= 0 ? "budget-balance-positive" : "budget-balance-negative"}>{formatEUR(balance)} acum.</span>
                     )}
                     {renderEntryEditBtn(entry.id, assigned)}
-                    <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar" onClick={() => openEdit(entry)}>✎</button>
+                    <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar" onClick={() => openEdit(entry)}><Icon svg={Pencil} /></button>
                     {renderEntryScopeActions(entry)}
                   </div>
                   </div>
@@ -632,7 +633,7 @@ export function BudgetMonthPanel(props: Props) {
                     {spent > 0 && <span className="muted">Gast: {formatEUR(spent)}</span>}
                     {spent > 0 && <span className={available < 0 ? "negative" : ""}>{formatEUR(available)}</span>}
                     {renderEntryEditBtn(entry.id, assigned)}
-                    <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar" onClick={() => openEdit(entry)}>✎</button>
+                    <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar" onClick={() => openEdit(entry)}><Icon svg={Pencil} /></button>
                     {renderEntryScopeActions(entry)}
                   </div>
                   </div>
@@ -666,7 +667,7 @@ export function BudgetMonthPanel(props: Props) {
               {w.recurring_entry_id && (
                 <span className="muted" style={{ marginLeft: "0.35rem", fontSize: "0.72rem" }}>(en presupuesto)</span>
               )}
-              {w.prioridad === "alta" && <span className="budget-priority-dot">●</span>}
+              {w.prioridad === "alta" && <span className="budget-priority-dot"><Icon svg={CircleAlert} label="Prioridad alta" /></span>}
               {w.monto_estimado != null && (
                 <span className="muted" style={{ marginLeft: "0.4rem", fontSize: "0.8rem" }}>{formatEUR(w.monto_estimado)}</span>
               )}
@@ -718,7 +719,7 @@ export function BudgetMonthPanel(props: Props) {
           </p>
           {debtItems.length === 0 ? (
             <EmptyState
-              icon="📅"
+              icon={Calendar}
               title={`Sin cuotas en ${MONTH_NAMES[month - 1]} ${year}`}
               description="Cambia de mes o revisa la planilla en Pasivos."
               actionLabel="Ir a Pasivos"
@@ -790,7 +791,7 @@ export function BudgetMonthPanel(props: Props) {
                       <span>
                         <span className="sensitive">{debtPct.toFixed(1)}%</span>
                         {remaining <= 0.01 ? (
-                          <span className="budget-goal-done"> · ✓ saldada</span>
+                          <span className="budget-goal-done"> · <Icon svg={Check} /> saldada</span>
                         ) : (
                           <> · pendiente <span className="sensitive negative">{formatEUR(remaining)}</span></>
                         )}
@@ -912,7 +913,7 @@ export function BudgetMonthPanel(props: Props) {
                     </div>
                     <div className="inline-actions">
                       {renderEntryEditBtn(entry.id, assigned)}
-                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar partida" onClick={() => openEdit(entry)}>✎</button>
+                      <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.4rem" }} title="Editar partida" onClick={() => openEdit(entry)}><Icon svg={Pencil} /></button>
                       {renderEntryScopeActions(entry)}
                     </div>
                   </div>
@@ -951,7 +952,7 @@ export function BudgetMonthPanel(props: Props) {
                         {monthsToGoal !== null && monthsToGoal > 0 && (
                           <span>{monthsToGoal} meses restantes</span>
                         )}
-                        {pctAccum !== null && pctAccum >= 100 && <span className="budget-goal-done">✓ Objetivo alcanzado</span>}
+                        {pctAccum !== null && pctAccum >= 100 && <span className="budget-goal-done"><Icon svg={Check} /> Objetivo alcanzado</span>}
                       </div>
                       {pctAccum !== null && (
                         <div className="budget-goal-track">
@@ -1001,7 +1002,7 @@ export function BudgetMonthPanel(props: Props) {
             <>
               {duplicates.size > 0 && (
                 <div className="budget-dup-banner">
-                  ⚠ Posibles duplicados: {[...duplicates].join(", ")}. Verifica que no estés pagando dos veces.
+                  <Icon svg={TriangleAlert} /> Posibles duplicados: {[...duplicates].join(", ")}. Verifica que no estés pagando dos veces.
                 </div>
               )}
               {notStartedYet.length > 0 && (
@@ -1033,7 +1034,7 @@ export function BudgetMonthPanel(props: Props) {
                   <li key={sub.id}>
                     <span>
                       {sub.nombre}
-                      {isDupe && <span className="negative" style={{ marginLeft: "0.35rem", fontSize: "0.7rem" }}>⚠ duplicado</span>}
+                      {isDupe && <span className="negative" style={{ marginLeft: "0.35rem", fontSize: "0.7rem" }}><Icon svg={TriangleAlert} /> duplicado</span>}
                       {isAnnual && <small className="muted" style={{ marginLeft: "0.35rem" }}>anual</small>}
                     </span>
                     <div className="inline-actions" style={{ fontSize: "0.83rem" }}>
@@ -1042,7 +1043,7 @@ export function BudgetMonthPanel(props: Props) {
                         {isAnnual && <small className="muted"> ({formatEUR(monthly)}/mes)</small>}
                       </span>
                       <button type="button" className="button-secondary" style={{ padding: "0.2rem 0.4rem" }}
-                        onClick={() => openEdit(sub)}>✎</button>
+                        onClick={() => openEdit(sub)}><Icon svg={Pencil} /></button>
                       {renderEntryScopeActions(sub)}
                     </div>
                   </li>

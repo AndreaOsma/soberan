@@ -4,7 +4,8 @@ import type { RecurringEntry, Transaction } from "../../types";
 import { EmptyState } from "../../components/EmptyState";
 import { IncomeSourceModal } from "../../components/modals/IncomeSourceModal";
 import { incomeCatClass } from "../../utils/statusColors";
-import { isOmittedFromBudget, isRealIncome } from "../../utils/internalTransfer";
+import { isExcludedFromBudget, isOmittedFromBudget, isRealIncome } from "../../utils/internalTransfer";
+import { Icon, Pencil, PiggyBank, Trash2 } from "../../vendor/icons";
 
 type Props = {
   month: number;
@@ -37,6 +38,10 @@ export function IngresosView({
     [monthlyTransactions, localOmitIds],
   );
   const totalReal = realIncomeTx.reduce((s, tx) => s + tx.amount, 0);
+  // Entradas que ya no cuentan solas como ingreso (traspasos, Bizum, devoluciones): se dicen, no se esconden.
+  const uncounted = monthlyTransactions.filter((tx) =>
+    Number(tx.amount) > 0 && !isExcludedFromBudget(tx) && !localOmitIds.has(tx.id) && !isRealIncome(tx));
+  const uncountedTotal = uncounted.reduce((s, tx) => s + Number(tx.amount), 0);
 
   const realBySource: Record<string, number> = {};
   for (const tx of realIncomeTx) {
@@ -104,7 +109,7 @@ export function IngresosView({
 
             {incomeEntries.length === 0 ? (
               <EmptyState
-                icon="💰"
+                icon={PiggyBank}
                 title="Sin fuentes registradas"
                 description="Añade tus fuentes de ingreso recurrentes: nómina, alquiler, freelance, dividendos…"
                 actionLabel="+ Añadir fuente"
@@ -132,12 +137,12 @@ export function IngresosView({
                             <button type="button" className="button-secondary" style={{ padding: "0.2rem 0.4rem" }}
                               aria-label={`Editar ${e.nombre}`}
                               title="Editar"
-                              onClick={() => setEditItem(e)}>✎</button>
+                              onClick={() => setEditItem(e)}><Icon svg={Pencil} /></button>
                             <button type="button" className="danger"
                               aria-label={`Eliminar ${e.nombre}`}
                               title="Eliminar"
                               onClick={() => deleteWithUndo("Fuente de ingreso", () => api.deleteRecurringEntry(e.id).then(() => loadAll()))}>
-                              🗑
+                              <Icon svg={Trash2} />
                             </button>
                           </div>
                         </li>
@@ -205,6 +210,12 @@ export function IngresosView({
             )}
           </article>
         </div>
+        {uncounted.length > 0 && (
+          <p className="muted ingresos-uncounted" role="note">
+            {uncounted.length} entrada{uncounted.length === 1 ? "" : "s"} de este mes (<span className="sensitive">{formatEUR(uncountedTotal)}</span>) no cuenta{uncounted.length === 1 ? "" : "n"} como
+            ingreso: traspasos entre tus cuentas, Bizum o devoluciones. Si alguna es un ingreso, ponle la categoría «Otros ingresos» en Movimientos.
+          </p>
+        )}
       </section>
 
       {(isFormOpen || editItem) && (

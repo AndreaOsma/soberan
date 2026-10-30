@@ -1,3 +1,4 @@
+import { Icon, X } from "../vendor/icons";
 type DesktopUpdateInfo = {
   update_available: boolean;
   current_version?: string;
@@ -36,7 +37,7 @@ export function DesktopUpdateBanner({ update, onDismiss }: Props) {
           Descargar
         </a>
         <button type="button" className="desktop-update-banner__dismiss" onClick={onDismiss} aria-label="Ignorar esta versión">
-          ✕
+          <Icon svg={X} />
         </button>
       </div>
     </div>

@@ -205,3 +205,11 @@ body {
   --glass-panel-bg: rgba(8, 14, 26, 0.92);
 }
 
+
+/* Sin zoom en el móvil (Andrea, 2026-10-29): sin pellizcar en pantallas táctiles; Safari, que lo ignora,
+   lo corta public/no-zoom.js (dev/lib/design-system/native-web.mjs). */
+@media (pointer: coarse) {
+  html {
+    touch-action: pan-x pan-y;
+  }
+}

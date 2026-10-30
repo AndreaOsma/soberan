@@ -13,6 +13,7 @@ import {
 import type { Debt, DebtInstallment, RecurringEntry } from "../../types";
 import type { Dispatch, SetStateAction } from "react";
 import type { DebtFormState } from "./ListsEditModals";
+import { ChevronDown, ChevronRight, Icon, PartyPopper, Pencil, Trash2 } from "../../vendor/icons";
 
 type Props = {
   debts: Debt[];
@@ -182,7 +183,7 @@ export function DebtsPasivosPanel({
 
               {activeDebts.length === 0 && !showLiquidatedDebts ? (
                 <EmptyState
-                  icon="🎉"
+                  icon={PartyPopper}
                   title="Sin deudas activas"
                   description="No tienes pasivos registrados con saldo pendiente."
                   actionLabel="+ Añadir deuda"
@@ -235,11 +236,11 @@ export function DebtsPasivosPanel({
                             onClick={() => setDebtPaymentsModal({ debt })}>Pagos reales</button>
                           <button type="button" className="button-secondary" style={{ padding: "0.25rem 0.5rem" }}
                             aria-label={`Editar deuda ${debt.nombre || debt.acreedor}`} title="Editar"
-                            onClick={() => setEditDebtModal(debt)}>✎</button>
+                            onClick={() => setEditDebtModal(debt)}><Icon svg={Pencil} /></button>
                           <button type="button" className="danger"
                             aria-label={`Eliminar deuda ${debt.nombre || debt.acreedor}`} title="Eliminar"
                             onClick={() => deleteWithUndo("Deuda", () => api.deleteDebt(debt.id).then(() => loadAll()))}>
-                            🗑
+                            <Icon svg={Trash2} />
                           </button>
                         </div>
                       </li>
@@ -274,7 +275,7 @@ export function DebtsPasivosPanel({
                         : `Snowball prioriza saldos · interés ${formatEUR(snowball.totalInterest)}`}
                   </p>
                 </div>
-                <span className="debt-panel-head__chevron" aria-hidden>{showLiquidation ? "▾" : "▸"}</span>
+                <span className="debt-panel-head__chevron" aria-hidden><Icon svg={showLiquidation ? ChevronDown : ChevronRight} /></span>
               </button>
 
               {showLiquidation && (
@@ -416,7 +417,7 @@ export function DebtsPasivosPanel({
                   DTI actual {currentDtiPct.toFixed(1)}% · límite {debtCalc.dtiPct}%
                 </p>
               </div>
-              <span className="debt-panel-head__chevron" aria-hidden>{showDebtCapacity ? "▾" : "▸"}</span>
+              <span className="debt-panel-head__chevron" aria-hidden><Icon svg={showDebtCapacity ? ChevronDown : ChevronRight} /></span>
             </button>
             {showDebtCapacity && <>
             <p className="muted" style={{ fontSize: "0.82rem", marginBottom: "1rem", marginTop: "0.75rem" }}>

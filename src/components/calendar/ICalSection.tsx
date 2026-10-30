@@ -1,4 +1,5 @@
 import { useIcalSubscribeLink } from "../../hooks/useIcalSubscribeLink";
+import { Calendar, Icon } from "../../vendor/icons";
 
 type Props = {
   settings: Record<string, string>;
@@ -20,7 +21,7 @@ export function ICalSection({ settings }: Props) {
             className="button-secondary"
             style={{ fontSize: "0.8rem", textDecoration: "none", padding: "0.3rem 0.75rem", display: "inline-flex", alignItems: "center" }}
           >
-            📅 Suscribir iCal
+            <Icon svg={Calendar} /> Suscribir iCal
           </a>
         ) : (
           <button type="button" className="button-secondary" style={{ fontSize: "0.8rem" }} disabled>

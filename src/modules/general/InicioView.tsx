@@ -18,6 +18,7 @@ import { InicioPatrimonioChart } from "../../components/inicio/InicioPatrimonioC
 import { InicioShortcuts } from "../../components/inicio/InicioShortcuts";
 import { InicioSimpleSnapshot } from "../../components/inicio/InicioSimpleSnapshot";
 import { PayrollHintsBanner } from "../../components/data/PayrollHintsBanner";
+import { ChartColumn } from "../../vendor/icons";
 
 export type InicioViewProps = {
   month: number;
@@ -41,6 +42,7 @@ export type InicioViewProps = {
   patrimonioEvolution: Array<{ fecha: string; acumulado: number }>;
   transactionCount: number;
   uiDensity: "minimal" | "detailed";
+  simpleMode?: boolean;
   nextDebtPayment?: NextDebtPayment | null;
   dtiPct?: number;
   emergencyFund: EmergencyFundSnapshot;
@@ -73,6 +75,7 @@ export function InicioView({
   patrimonioEvolution,
   transactionCount,
   uiDensity,
+  simpleMode = false,
   nextDebtPayment = null,
   dtiPct = 0,
   emergencyFund,
@@ -168,6 +171,25 @@ export function InicioView({
     budgetSpentPct > monthElapsedPct ? "warn" : "ok";
   const showMesWidget = isCurrentMonth && !privacyMode && budgetSpentPct !== null;
 
+  if (simpleMode) {
+    return (
+      <div className="inicio-root">
+        <InicioSimpleSnapshot
+          chartOnly
+          totals={totals}
+          privacyMode={privacyMode}
+          formatEUR={formatEUR}
+          showMesWidget={false}
+          mesStatus={mesStatus}
+          budgetSpentPct={budgetSpentPct}
+          monthSpent={monthSpent}
+          monthlyExpense={totals.monthlyExpense}
+          monthElapsedPct={monthElapsedPct}
+        />
+      </div>
+    );
+  }
+
   const today = new Date();
   const in14 = new Date(today.getTime() + 14 * 86_400_000);
   const upcoming = calendarEvents
@@ -206,7 +228,7 @@ export function InicioView({
     <div className="inicio-root">
       {accounts.length === 0 && transactionCount === 0 ? (
         <EmptyState
-          icon="📊"
+          icon={ChartColumn}
           title="Tu panel financiero está vacío"
           description="Añade una cuenta o importa movimientos para ver tu resumen ejecutivo."
           actionLabel="+ Ir a Cuentas"

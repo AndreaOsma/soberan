@@ -75,6 +75,35 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  /* Período en una segunda fila bajo título y controles; ux-baseline.css añade su alto al hueco de .content. */
+  .topbar--period {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .topbar-period {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .topbar-period .period-label {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .topbar--period .topbar-center {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .topbar--period .topbar-end {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
   .topbar-end {
     gap: 0.35rem;
   }
@@ -88,34 +117,10 @@
       max(0.65rem, env(safe-area-inset-left, 0px));
   }
 
-  .content-toolbar {
-    position: sticky;
-    top: calc(0.3rem + env(safe-area-inset-top, 0px));
-    z-index: 35;
-    border-radius: 0.85rem;
-    padding: 0.55rem 0.65rem;
-    gap: 0.5rem;
-  }
-
-  .content-toolbar__actions,
   .content-toolbar__period {
     width: 100%;
-  }
-
-  .content-toolbar__actions > button,
-  .content-toolbar__period > .period-label {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .content-toolbar__period {
     justify-content: space-between;
     flex-wrap: nowrap;
-  }
-
-  .content-toolbar__period-nav {
-    min-width: 2.5rem;
-    min-height: 2.35rem;
   }
 
   input,

@@ -5,6 +5,7 @@ import { api } from "../../services/api";
 import { parseNum } from "../../utils/format";
 import { useAsyncSubmit } from "../../hooks/useAsyncSubmit";
 import { calculateIrpfRetencion } from "../../utils/irpfRetencion";
+import { Icon, Trash2 } from "../../vendor/icons";
 import {
   IRPF_MODELO145_SETTINGS_KEY,
   latestIrpfVersion,
@@ -301,7 +302,7 @@ export function IrpfModelo145Modal({
                         title="Eliminar"
                         onClick={() => deleteVersion(ver.id)}
                       >
-                        🗑
+                        <Icon svg={Trash2} />
                       </button>
                     </div>
                   </div>
@@ -423,7 +424,7 @@ export function IrpfModelo145Modal({
                       title="Eliminar"
                       onClick={() => set("dependents", form.dependents.filter((_, i) => i !== idx))}
                     >
-                      🗑
+                      <Icon svg={Trash2} />
                     </button>
                   </div>
                 </li>

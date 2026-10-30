@@ -307,6 +307,36 @@ pre {
   flex-wrap: wrap;
 }
 
+/* Buscador y filtros del historial en el móvil: barra fija a la pantalla, justo encima de las pestañas
+   (como .mobile-tab-bar). Un sticky dentro de la lista «bailaba» en el iPhone con el scroll; fijo a la
+   pantalla no depende del scroll. Va en un portal a .app-shell (TransactionsListPanel.tsx): dentro de la
+   tarjeta, su backdrop-filter lo convertiría en el marco del fixed; en .app-shell hereda el tema. */
+.tx-filters-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(3.85rem + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  padding: 0.5rem max(0.75rem, env(safe-area-inset-right, 0px)) 0.5rem max(0.75rem, env(safe-area-inset-left, 0px));
+  background: #f1f6fb;
+  border-top: 1px solid var(--border-soft);
+  box-shadow: 0 -6px 18px rgba(15, 23, 42, 0.08);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+.theme-dark .tx-filters-fixed {
+  background: #0e1626;
+}
+.tx-filters-fixed .list-filters {
+  margin: 0;
+}
+@media (max-width: 720px) {
+  /* Que lo último de la lista no quede debajo de la barra de filtros. */
+  .card.tx-card {
+    padding-bottom: 7.5rem;
+  }
+}
+
 .tx-list-group {
   margin-bottom: 0.35rem;
 }
@@ -781,19 +811,6 @@ progress {
   .topbar-title {
     font-size: 0.9rem;
   }
-  .content-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-  .content-toolbar__actions {
-    justify-content: stretch;
-  }
-  .content-toolbar__actions button {
-    flex: 1;
-    padding: 0.5rem;
-    font-size: 0.85rem;
-  }
   .grid.two-col, .grid.three-col, .kpi-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -827,3 +844,24 @@ progress {
   }
 }
 
+
+@media (max-width: 720px) {
+  /* Filtros en dos filas cortas: el buscador entero y los dos desplegables a medias. */
+  .tx-filters-fixed .list-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+  .tx-filters-fixed .list-filters input[type="search"] {
+    grid-column: 1 / -1;
+  }
+  .tx-filters-fixed .list-filters > * {
+    min-width: 0;
+    width: 100%;
+  }
+  /* Con la barra de filtros a la vista, los botones flotantes (opiniones y chat) suben por encima. */
+  .app-shell:has(.tx-filters-fixed) .feedback-fab,
+  .app-shell:has(.tx-filters-fixed) .chat-fab {
+    bottom: calc(3.85rem + env(safe-area-inset-bottom, 0px) + 7.5rem) !important;
+  }
+}

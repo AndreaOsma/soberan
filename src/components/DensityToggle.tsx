@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DensityDetailed, DensityMinimal, Icon } from "../vendor/icons";
 
 type UiDensity = "minimal" | "detailed";
 
@@ -10,13 +11,13 @@ type Props = {
 const OPTIONS: Array<{ id: UiDensity; icon: string; label: string; hint: string }> = [
   {
     id: "minimal",
-    icon: "◫",
+    icon: DensityMinimal,
     label: "Simple",
     hint: "Lo esencial",
   },
   {
     id: "detailed",
-    icon: "▦",
+    icon: DensityDetailed,
     label: "Detalle",
     hint: "Todo visible",
   },
@@ -58,7 +59,7 @@ export function DensityToggle({ value, onChange }: Props) {
         aria-label={`Densidad actual: ${active.label}. Abrir opciones`}
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden>{active.icon}</span>
+        <Icon svg={active.icon} size={20} />
       </button>
       <div
         id="density-toggle-menu"
@@ -79,7 +80,7 @@ export function DensityToggle({ value, onChange }: Props) {
               setOpen(false);
             }}
           >
-            <span className="density-toggle__option-icon" aria-hidden>{opt.icon}</span>
+            <span className="density-toggle__option-icon"><Icon svg={opt.icon} size={20} /></span>
             <span className="density-toggle__option-text">
               <span className="density-toggle__option-label">{opt.label}</span>
               <span className="muted density-toggle__option-hint">{opt.hint}</span>
